@@ -1,21 +1,20 @@
 import React from 'react';
 import { Stack } from 'expo-router';
-import { ApplicationProvider, IconRegistry } from '@ui-kitten/components';
-import * as eva from '@eva-design/eva';
-import { EvaIconsPack } from '@ui-kitten/eva-icons';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { MD3LightTheme as DefaultTheme, PaperProvider } from 'react-native-paper';
+import "../global.css";
+
+const theme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    primary: 'tomato',
+  },
+};
 
 export default function RootLayout() {
   return (
-    <>
-      <IconRegistry icons={EvaIconsPack}/>
-      <ApplicationProvider {...eva} theme={eva.light}>
-        <SafeAreaProvider>
-          <Stack screenOptions={{headerShown: true, animation: 'slide_from_right'}}>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          </Stack>
-        </SafeAreaProvider>
-      </ApplicationProvider>
-    </>
+    <PaperProvider theme={theme}>
+      <Stack screenOptions={{ headerShown: false }} />
+    </PaperProvider>
   );
 }
