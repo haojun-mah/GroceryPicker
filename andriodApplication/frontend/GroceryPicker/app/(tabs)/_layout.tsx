@@ -7,7 +7,7 @@ export default function TabsLayout() {
   return (
     <Tabs>
       <Tabs.Screen name='index'></Tabs.Screen>
-      <Tabs.Screen name='groceryInput' options={{title:"Build Your Grocery Lista"}}></Tabs.Screen>
+      <Tabs.Screen name='groceryInput' options={{headerShown: false}}></Tabs.Screen>
     </Tabs>
   );
 }

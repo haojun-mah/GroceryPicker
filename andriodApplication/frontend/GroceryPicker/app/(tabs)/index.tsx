@@ -11,7 +11,7 @@ export default function HomePage() {
         <Text className='text-cyan-500'>
           hello
         </Text>
-        <Button mode='elevated' onPress={() => router.push("./groceryInput")}>To Grocery Input</Button>
+        <Button onPress={() => router.push("./groceryInput")}>To Grocery Input</Button>
       </View>
     </ScrollView>
  );
