@@ -1,11 +1,13 @@
 import React from 'react';
-import { Slot } from 'expo-router';
+import { Slot, Tabs } from 'expo-router';
 import { View } from 'react-native';
+import { BottomNavigation } from 'react-native-paper';
 
 export default function TabsLayout() {
   return (
-    <View>
-      <Slot/>
-    </View>
+    <Tabs>
+      <Tabs.Screen name='index'></Tabs.Screen>
+      <Tabs.Screen name='groceryInput' options={{title:"Build Your Grocery Lista"}}></Tabs.Screen>
+    </Tabs>
   );
 }
