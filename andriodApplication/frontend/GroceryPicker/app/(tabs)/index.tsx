@@ -1,18 +1,19 @@
-import { router } from 'expo-router';
-import React from 'react';
-import { View, Text, ScrollView } from 'react-native';
-import { Button } from 'react-native-paper';
-
+import { Button, ButtonGroup, ButtonText } from '@/components/ui/button';
+import { ScrollView, Text, View } from 'react-native';
 
 export default function HomePage() {
   return (
     <ScrollView>
-      <View>
-        <Text className='text-cyan-500'>
-          hello
-        </Text>
-        <Button onPress={() => router.push("./groceryInput")}>To Grocery Input</Button>
+      <View className='items-center m-2 flex gap-4'>
+        <Text className='text-2xl'>Welcome to Grocery Picker</Text>
+        <ButtonGroup>
+          <Button className='bg-amber-50 hover:bg-black' size='md' variant='outline' action='primary'>
+            <ButtonText>
+              Go to Grocery List Generator
+            </ButtonText>
+          </Button>
+        </ButtonGroup>
       </View>
     </ScrollView>
- );
+  );
 }
