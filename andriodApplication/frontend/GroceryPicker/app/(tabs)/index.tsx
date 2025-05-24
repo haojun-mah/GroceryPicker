@@ -1,4 +1,5 @@
 import { Button, ButtonGroup, ButtonText } from '@/components/ui/button';
+import { router } from 'expo-router';
 import { ScrollView, Text, View } from 'react-native';
 
 export default function HomePage() {
@@ -7,7 +8,7 @@ export default function HomePage() {
       <View className='items-center m-2 flex gap-4'>
         <Text className='text-2xl'>Welcome to Grocery Picker</Text>
         <ButtonGroup>
-          <Button className='bg-amber-50 hover:bg-black' size='md' variant='outline' action='primary'>
+          <Button onPress={() => router.push("./groceryInput")} className='bg-amber-50 hover:bg-black' size='md' variant='outline' action='primary'>
             <ButtonText>
               Go to Grocery List Generator
             </ButtonText>
