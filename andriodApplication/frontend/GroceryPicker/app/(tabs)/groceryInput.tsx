@@ -26,20 +26,18 @@ const groceryInput = () => {
       }
     } catch (error) {
       console.error(error);
-      alert(
-        'Error with grocery list generation request. failed to connect to api. Have not even send yet',
-      );
+      alert('Error with grocery list generation request. failed to connect to api. Have not even send yet');
     }
   };
 
   return (
     <View className="flex items-center mt-10 gap-2">
-      <Text className='font-bold font-roboto text-2xl'>Create Grocery List!</Text>
-      <Textarea size='md' className='w-72'>
-        <TextareaInput placeholder='Insert your Groceries!'/>
+      <Text className="font-bold font-roboto text-2xl">Create Grocery List!</Text>
+      <Textarea size="md" className="w-72">
+        <TextareaInput placeholder="Insert your Groceries!" />
       </Textarea>
-      <ButtonGroup >
-        <Button className='bg-amber-50 hover:bg-black w-72' size='xl' variant='outline' action='primary'>
+      <ButtonGroup>
+        <Button className="bg-amber-50 hover:bg-black w-72" size="xl" variant="outline" action="primary">
           <ButtonText>Generate List!</ButtonText>
         </Button>
       </ButtonGroup>

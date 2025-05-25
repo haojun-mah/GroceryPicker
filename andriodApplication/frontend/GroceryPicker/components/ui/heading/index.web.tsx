@@ -8,18 +8,7 @@ type IHeadingProps = VariantProps<typeof headingStyle> &
 
 const MappedHeading = memo(
   forwardRef<HTMLHeadingElement, IHeadingProps>(function MappedHeading(
-    {
-      size,
-      className,
-      isTruncated,
-      bold,
-      underline,
-      strikeThrough,
-      sub,
-      italic,
-      highlight,
-      ...props
-    },
+    { size, className, isTruncated, bold, underline, strikeThrough, sub, italic, highlight, ...props },
     ref
   ) {
     switch (size) {
@@ -161,15 +150,7 @@ const Heading = memo(
     { className, size = 'lg', as: AsComp, ...props },
     ref
   ) {
-    const {
-      isTruncated,
-      bold,
-      underline,
-      strikeThrough,
-      sub,
-      italic,
-      highlight,
-    } = props;
+    const { isTruncated, bold, underline, strikeThrough, sub, italic, highlight } = props;
 
     if (AsComp) {
       return (
@@ -191,9 +172,7 @@ const Heading = memo(
       );
     }
 
-    return (
-      <MappedHeading className={className} size={size} ref={ref} {...props} />
-    );
+    return <MappedHeading className={className} size={size} ref={ref} {...props} />;
   })
 );
 
