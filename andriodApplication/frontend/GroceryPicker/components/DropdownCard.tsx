@@ -6,7 +6,7 @@ import { Heading } from "./ui/heading";
 import { ChevronDownIcon } from "./ui/icon";
 import { Text } from "./ui/text";
 
-const DropdownCard = () => {
+const DropdownCard = ({ outsideText, insideText }: { outsideText: string, insideText: [] }) => {
     const [expanded, setExpanded] = useState(false);
     const animation = useRef(new Animated.Value(0)).current;
 
@@ -53,7 +53,7 @@ const DropdownCard = () => {
             <View>
            <Animated.View style={{ opacity: metadataInterpolation }}>
                 <Text size="xs" numberOfLines={1} isTruncated={true} className="">
-                Include Metadata on GroceryList 
+                {outsideText}
                 </Text>
             </Animated.View>
 
@@ -65,9 +65,9 @@ const DropdownCard = () => {
                 }}
             >
                 <View className="mt-2">
-                    <Text size="xs">Eggs</Text>
-                    <Text size="xs">Milk</Text>
-                    <Text size="xs">Bread</Text>
+                  {insideText.map((item, index) => {
+                    return <Text key={index} size="xs">{item}</Text>
+                  })}
                 </View>
             </Animated.View>
             </View>
