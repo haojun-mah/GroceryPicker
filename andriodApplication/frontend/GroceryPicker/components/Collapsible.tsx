@@ -16,11 +16,15 @@ export function Collapsible({
 
   return (
     <ThemedView>
+<<<<<<< HEAD
       <TouchableOpacity
         style={styles.heading}
         onPress={() => setIsOpen((value) => !value)}
         activeOpacity={0.8}
       >
+=======
+      <TouchableOpacity style={styles.heading} onPress={() => setIsOpen((value) => !value)} activeOpacity={0.8}>
+>>>>>>> frontend
         <IconSymbol
           name="chevron.right"
           size={18}

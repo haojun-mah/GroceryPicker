@@ -1,5 +1,12 @@
+<<<<<<< HEAD
 import React from 'react';
 import { View } from 'react-native';
+=======
+import { Button, ButtonGroup, ButtonText } from '@/components/ui/button';
+import { Textarea, TextareaInput } from '@/components/ui/textarea';
+import React from 'react';
+import { Text, View } from 'react-native';
+>>>>>>> frontend
 
 const groceryInput = () => {
   const [data, setData] = React.useState('');
@@ -24,14 +31,31 @@ const groceryInput = () => {
       }
     } catch (error) {
       console.error(error);
+<<<<<<< HEAD
       alert(
         'Error with grocery list generation request. failed to connect to api. Have not even send yet',
       );
+=======
+      alert('Error with grocery list generation request. failed to connect to api. Have not even send yet');
+>>>>>>> frontend
     }
   };
 
   return (
+<<<<<<< HEAD
     <View className="flex pt-24 pl-4 pr-4">
+=======
+    <View className="flex items-center mt-10 gap-2">
+      <Text className="font-bold font-roboto text-2xl">Create Grocery List!</Text>
+      <Textarea size="md" className="w-72">
+        <TextareaInput placeholder="Insert your Groceries!" />
+      </Textarea>
+      <ButtonGroup>
+        <Button className="bg-amber-50 hover:bg-black w-72" size="xl" variant="outline" action="primary">
+          <ButtonText>Generate List!</ButtonText>
+        </Button>
+      </ButtonGroup>
+>>>>>>> frontend
     </View>
   );
 };

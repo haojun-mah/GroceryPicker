@@ -23,6 +23,7 @@ export function GluestackUIProvider({
   }, [mode]);
 
   return (
+<<<<<<< HEAD
     <View
       style={[
         config[colorScheme!],
@@ -30,6 +31,9 @@ export function GluestackUIProvider({
         props.style,
       ]}
     >
+=======
+    <View style={[config[colorScheme!], { flex: 1, height: '100%', width: '100%' }, props.style]}>
+>>>>>>> frontend
       <OverlayProvider>
         <ToastProvider>{props.children}</ToastProvider>
       </OverlayProvider>

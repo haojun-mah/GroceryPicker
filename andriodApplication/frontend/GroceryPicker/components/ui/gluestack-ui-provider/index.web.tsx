@@ -16,6 +16,7 @@ const createStyle = (styleTagId: string) => {
   return style;
 };
 
+<<<<<<< HEAD
 export const useSafeLayoutEffect =
   typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -33,6 +34,15 @@ export function GluestackUIProvider({
     const cssVariables = Object.keys(
       config[configKey as keyof typeof config]
     ).reduce((acc: string, curr: string) => {
+=======
+export const useSafeLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+
+export function GluestackUIProvider({ mode = 'light', ...props }: { mode?: ModeType; children?: React.ReactNode }) {
+  let cssVariablesWithMode = ``;
+  Object.keys(config).forEach((configKey) => {
+    cssVariablesWithMode += configKey === 'dark' ? `\n .dark {\n ` : `\n:root {\n`;
+    const cssVariables = Object.keys(config[configKey as keyof typeof config]).reduce((acc: string, curr: string) => {
+>>>>>>> frontend
       acc += `${curr}:${config[configKey as keyof typeof config][curr]}; `;
       return acc;
     }, '');

@@ -2,9 +2,13 @@ export const script = (mode: string) => {
   const documentElement = document.documentElement;
 
   function getSystemColorMode() {
+<<<<<<< HEAD
     return window.matchMedia('(prefers-color-scheme: dark)').matches
       ? 'dark'
       : 'light';
+=======
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+>>>>>>> frontend
   }
 
   try {
