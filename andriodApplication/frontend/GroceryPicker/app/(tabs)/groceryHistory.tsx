@@ -5,7 +5,7 @@ const groceryHistory = () => {
   return (
     <View className="flex items-center mt-10 gap-2">
         <Text className="font-bold font-roboto text-2xl">Grocery History</Text>
-        <DropdownCard></DropdownCard>        
+        <DropdownCard outsideText="test" insideText={["Egg", "Chicken"]}></DropdownCard>        
     </View>
   );
 
