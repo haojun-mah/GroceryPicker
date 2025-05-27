@@ -3,7 +3,6 @@ import { ScrollView, Text, View } from 'react-native';
 import { Button } from 'react-native-paper';
 
 export default function HomePage() {
-
   // likewise have no idea why setting w-max is not working. unable to
   // standardise button width
 
@@ -22,7 +21,7 @@ export default function HomePage() {
             <ButtonText>Go to Grocery List Generator</ButtonText>
           </Button>
         </ButtonGroup>
-       <ButtonGroup>
+        <ButtonGroup>
           <Button
             onPress={() => router.push('./groceryHistory')}
             className="bg-amber-50 hover:bg-black"

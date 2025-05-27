@@ -1,12 +1,10 @@
 module.exports = function (api) {
   api.cache(true);
   return {
-<<<<<<< HEAD
     presets: [
       ['babel-preset-expo', { jsxImportSource: 'nativewind' }],
       'nativewind/babel',
-=======
-    presets: [['babel-preset-expo', { jsxImportSource: 'nativewind' }], 'nativewind/babel'],
+    ],
 
     plugins: [
       [
@@ -20,18 +18,20 @@ module.exports = function (api) {
           },
         },
       ],
->>>>>>> frontend
     ],
 
     plugins: [
-      
-      ["module-resolver", {
-      root: ["./"],
+      [
+        'module-resolver',
+        {
+          root: ['./'],
 
-      alias: {
-        "@": "./",
-        "tailwind.config": "./tailwind.config.js"
-      }
-    }]]
+          alias: {
+            '@': './',
+            'tailwind.config': './tailwind.config.js',
+          },
+        },
+      ],
+    ],
   };
 };

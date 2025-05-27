@@ -7,8 +7,4 @@
     "entry": "app/_layout.tsx",
     "components": "components/ui"
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> frontend

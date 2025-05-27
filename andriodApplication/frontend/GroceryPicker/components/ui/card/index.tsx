@@ -9,7 +9,7 @@ type ICardProps = ViewProps &
 const Card = React.forwardRef<React.ComponentRef<typeof View>, ICardProps>(
   function Card(
     { className, size = 'md', variant = 'elevated', ...props },
-    ref
+    ref,
   ) {
     return (
       <View
@@ -18,7 +18,7 @@ const Card = React.forwardRef<React.ComponentRef<typeof View>, ICardProps>(
         ref={ref}
       />
     );
-  }
+  },
 );
 
 Card.displayName = 'Card';
