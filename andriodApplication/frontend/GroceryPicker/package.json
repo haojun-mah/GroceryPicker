@@ -13,10 +13,7 @@
   "dependencies": {
     "@devcycle/react-native-expo-client-sdk": "^2.14.0",
     "@expo-google-fonts/roboto": "^0.3.0",
-    "@expo/config-plugins": "~10.0.0",
     "@expo/html-elements": "^0.4.2",
-    "@expo/metro-config": "^0.20.14",
-    "@expo/prebuild-config": "~9.0.0",
     "@expo/vector-icons": "^14.1.0",
     "@gluestack-style/react": "^1.0.57",
     "@gluestack-ui/button": "^1.0.14",
@@ -54,15 +51,17 @@
     "react-native-gesture-handler": "~2.24.0",
     "react-native-paper": "^5.14.5",
     "react-native-reanimated": "~3.17.4",
-    "react-native-safe-area-context": "^5.4.0",
+    "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.10.0",
-    "react-native-svg": "^15.11.2",
+    "react-native-svg": "15.11.2",
     "react-native-web": "^0.20.0",
     "react-native-webview": "13.13.5"
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",
-    "@react-native-community/cli": "latest",
+    "@expo/config-plugins": "~10.0.0",
+    "@expo/metro-config": "^0.20.14",
+    "@expo/prebuild-config": "~9.0.0",
     "@types/react": "~19.0.10",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~9.2.0",
@@ -72,10 +71,10 @@
   },
   "private": true,
   "expo": {
-  "doctor": {
-    "reactNativeDirectoryCheck": {
-      "listUnknownPackages": false
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "listUnknownPackages": false
+      }
     }
   }
-}
 }

@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { ScrollView, Text, View } from 'react-native';
-import { Button } from 'react-native-paper';
+import { Button, ButtonGroup, ButtonText } from '@/components/ui/button';
 
 export default function HomePage() {
   // likewise have no idea why setting w-max is not working. unable to

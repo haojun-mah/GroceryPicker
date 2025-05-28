@@ -11,7 +11,7 @@ const DropdownCard = ({
   insideText,
 }: {
   outsideText: string;
-  insideText: [];
+  insideText: string[];
 }) => {
   const [expanded, setExpanded] = useState(false);
   const animation = useRef(new Animated.Value(0)).current;
