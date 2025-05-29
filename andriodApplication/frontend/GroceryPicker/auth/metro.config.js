@@ -1,5 +1,4 @@
 const { getDefaultConfig } = require('expo/metro-config');
-const { withNativeWind } = require('nativewind/metro');
 
 const config = getDefaultConfig(__dirname);
 
@@ -18,6 +17,8 @@ config.resolver.extraNodeModules = {
   zlib: require.resolve('browserify-zlib'), 
 };
 
+// Add the 'browser' field to the mainFields to help resolution
+// For packages that provide different code for browser vs Node environments
 config.resolver.resolverMainFields = ['browser', 'main', 'module'];
 
-module.exports = withNativeWind(config, { input: './global.css' });
+module.exports = config;
