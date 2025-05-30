@@ -1,5 +1,6 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import { createClient } from '@supabase/supabase-js'
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import 'react-native-url-polyfill/auto'
 
 // Variables are safe to expose in Expo app since Supabase has 
 // Row Level Security enabled on Database.

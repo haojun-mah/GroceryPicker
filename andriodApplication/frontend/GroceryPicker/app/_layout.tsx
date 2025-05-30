@@ -1,14 +1,22 @@
 import { Stack } from 'expo-router';
-import { SplashScreenController } from './(auth)/splash';
 import React from 'react';
 import '../global.css';
+import { SessionProvider, useSession } from '@/lib/session';
+import 'cross-fetch/polyfill';
 
-function RootNavigator() {
-  return <Stack screenOptions={{ headerShown: false }} />;
-}
 
 export default function RootLayout() {
+  const session = useSession();
+
   return (
-    <SessionP
+    <SessionProvider>
+      <Stack>
+        {session ? (
+          <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
+        ) : (
+          <Stack.Screen name='(auth)' options={{ headerShown: false }}/>
+        )}
+      </Stack>
+    </SessionProvider>
   );
 }
