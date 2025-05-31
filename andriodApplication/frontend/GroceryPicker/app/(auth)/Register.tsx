@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Pressable } from 'react-native'
 import { Text } from '@/components/ui/text'
 import { Button, ButtonGroup, ButtonText } from '@/components/ui/button'
-import { Input, InputField } from '@/components/ui/input'
+import { Input, InputIcon, InputField } from '@/components/ui/input'
 import { Heading } from '@/components/ui/heading'
 import { VStack } from '@/components/ui/vstack'
 import { HStack } from '@/components/ui/hstack'
@@ -14,7 +14,10 @@ import { RootStackParamList } from '@/lib/RootStackParamList'
 import { supabase } from '@/lib/supabase'
 import { Alert } from 'react-native'
 import { Image } from '@/components/ui/image'
-import Logo from "../../assets/images/icon.png"
+import { Box } from '@/components/ui/box'
+import { EyeIcon, EyeOffIcon, MailIcon, LockIcon } from '@/components/ui/icon'
+import { UserPen } from 'lucide-react';
+
 
 
 export default function Register() {
@@ -51,61 +54,66 @@ export default function Register() {
   return (
     <Background>
       <BackButton goBack={navigation.goBack} />
-      <Image source={Logo} size='2xl' />
-      <Heading>Create Account</Heading>
+      <Box className='gap-12 items-center'>
+        <Heading size='4xl'>Create Account</Heading>
 
-      <VStack space="md" className="w-full px-6">
-        <Input isInvalid={!!name.error}>
-            <InputField
-            variant="outline"
-            placeholder="Name"
-            value={name.value}
-            onChangeText={(text) => setName({ value: text, error: '' })}
-            />
-        </Input>
-        {name.error ? (
-        <Text className="text-red-500 text-xs">{name.error}</Text>
-        ) : null}
-
-        <Input isInvalid={!!email.error}>
-            <InputField
-            variant="outline"
-            placeholder="Email"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            value={email.value}
-            onChangeText={(text) => setEmail({ value: text, error: '' })}
-            />
-        </Input>
-        {email.error ? (
-        <Text className="text-red-500 text-xs">{email.error}</Text>
-        ) : null}
-
-        <Input isInvalid={!!password.error}>
-            <InputField
-            variant="outline"
-            placeholder="Password"
-            secureTextEntry
-            value={password.value}
-            onChangeText={(text) => setPassword({ value: text, error: '' })}
-            />
-        </Input>
-            {password.error ? (
-            <Text className="text-red-500 text-xs">{password.error}</Text>
+        <VStack space="md" className="w-full">
+            {/* there seems to be an issue with lucide
+            <InputIcon as={UserPen} className='w-6 h-6'/> */} 
+            <Input className='p-2 h-16 w-full' isInvalid={!!name.error}>
+                <InputField
+                variant="outline"
+                placeholder="Name"
+                value={name.value}
+                onChangeText={(text) => setName({ value: text, error: '' })}
+                />
+            </Input>
+            {name.error ? (
+            <Text className="text-red-500 text-xs">{name.error}</Text>
             ) : null}
 
-        <ButtonGroup>
-            <Button onPress={() => signUpWithEmail()} className="mt-6">
-                <ButtonText className='text-black'>Sign Up</ButtonText>
-            </Button>
-        </ButtonGroup>
-        <HStack className="mt-4 justify-center">
-          <Text>Already have an account? </Text>
-          <Pressable onPress={() => navigation.replace('Login')}>
-            <Text className="text-blue-500 font-bold">Login</Text>
-          </Pressable>
-        </HStack>
-      </VStack>
+            <Input className='p-2 h-16 w-full' isInvalid={!!email.error}>
+               <InputIcon as={MailIcon} className='w-6 h-6'/>
+                <InputField
+                variant="outline"
+                placeholder="Email"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                value={email.value}
+                onChangeText={(text) => setEmail({ value: text, error: '' })}
+                />
+            </Input>
+            {email.error ? (
+            <Text className="text-red-500 text-xs">{email.error}</Text>
+            ) : null}
+
+            <Input className='p-2 h-16 w-full' isInvalid={!!password.error}>
+                <InputIcon as={LockIcon} className='w-6 h-6'/>
+                <InputField
+                variant="outline"
+                placeholder="Password"
+                secureTextEntry
+                value={password.value}
+                onChangeText={(text) => setPassword({ value: text, error: '' })}
+                />
+            </Input>
+                {password.error ? (
+                <Text className="text-red-500 text-xs">{password.error}</Text>
+                ) : null}
+
+            <ButtonGroup>
+                <Button onPress={() => signUpWithEmail()} className="bg-blue-500 mt-2">
+                    <ButtonText className='text-black'>Sign Up</ButtonText>
+                </Button>
+            </ButtonGroup>
+            <HStack className="mt-4 justify-center">
+            <Text>Already have an account? </Text>
+            <Pressable onPress={() => navigation.replace('Login')}>
+                <Text className="text-blue-500 font-bold">Login</Text>
+            </Pressable>
+            </HStack>
+        </VStack>
+      </Box>
     </Background>
   )
 }

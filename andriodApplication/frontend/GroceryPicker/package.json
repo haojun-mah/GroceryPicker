@@ -48,6 +48,7 @@
     "expo-system-ui": "~5.0.7",
     "expo-web-browser": "~14.1.6",
     "https-browserify": "^1.0.0",
+    "lucide-react-native": "^0.511.0",
     "nativewind": "^4.1.23",
     "nodemon": "^3.1.10",
     "path-browserify": "^1.0.1",
