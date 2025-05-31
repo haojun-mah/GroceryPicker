@@ -4,7 +4,7 @@ import { ImageBackground, KeyboardAvoidingView, Platform } from 'react-native'
 export default function Background({ children }: { children: React.ReactNode }) {
   return (
     <ImageBackground
-      source={require('@/assets/images/background_dot.png')}
+      source={require('../assets/images/background_dot.png')}
       resizeMode="repeat"
       className="flex-1 w-full bg-white dark:bg-gray-900"
     >
