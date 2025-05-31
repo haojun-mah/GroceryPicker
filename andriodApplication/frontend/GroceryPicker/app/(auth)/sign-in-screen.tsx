@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
 import { Alert, StyleSheet, View, AppState } from 'react-native'
 import { supabase } from '../../lib/supabase'
-import { Button, Input } from '@rneui/themed'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Text } from '@/components/ui/text'
 
 // Tells Supabase Auth to continuously refresh the session automatically if
 // the app is in the foreground. When this is added, you will continue to receive
@@ -16,18 +18,19 @@ AppState.addEventListener('change', (state) => {
 })
 
 export default function Auth() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(false)
 
   async function signInWithEmail() {
     setLoading(true)
+
     const { error } = await supabase.auth.signInWithPassword({
       email: email,
       password: password,
     })
 
-    if (error) Alert.alert(error.message)
+    if (error) {
+      Alert.alert(error.message)
+    }
     setLoading(false)
   }
 
@@ -49,8 +52,8 @@ export default function Auth() {
   return (
     <View style={styles.container}>
       <View style={[styles.verticallySpaced, styles.mt20]}>
+        <Text>Email</Text>
         <Input
-          label="Email"
           leftIcon={{ type: 'font-awesome', name: 'envelope' }}
           onChangeText={(text) => setEmail(text)}
           value={email}
