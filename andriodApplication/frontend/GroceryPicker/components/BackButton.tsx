@@ -7,7 +7,7 @@ export default function BackButton({ goBack }: { goBack: () => void }) {
   return (
     <Pressable
       onPress={goBack}
-      className="absolute left-1"
+      className={`absolute left-4 top-[${getStatusBarHeight() + 10}px] z-50`}
       style={{ top: 10 + getStatusBarHeight() }}
     >
       <Image

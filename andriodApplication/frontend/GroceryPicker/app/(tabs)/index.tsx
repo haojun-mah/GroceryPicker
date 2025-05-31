@@ -7,14 +7,14 @@ export default function HomePage() {
   // standardise button width
 
   return (
-    <ScrollView>
-      <View className="items-center m-2 flex gap-4">
+    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+      <View className="flex-1 justify-center items-center gap-6 p-6">
         <Text className="text-2xl">Welcome to Grocery Picker</Text>
         <ButtonGroup>
           <Button
             onPress={() => router.push('./groceryInput')}
             className="bg-amber-50 hover:bg-black"
-            size="sm"
+            size="xl"
             variant="outline"
             action="primary"
           >
@@ -25,7 +25,7 @@ export default function HomePage() {
           <Button
             onPress={() => router.push('./groceryHistory')}
             className="bg-amber-50 hover:bg-black"
-            size="sm"
+            size="xl"
             variant="outline"
             action="primary"
           >

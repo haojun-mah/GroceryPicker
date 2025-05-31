@@ -13,10 +13,11 @@ import { EyeIcon, EyeOffIcon, MailIcon, LockIcon } from '@/components/ui/icon'
 import { useNavigation } from 'expo-router'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { RootStackParamList } from '@/lib/RootStackParamList'
+import { useRouter } from 'expo-router'
 import Logo from "../../assets/images/icon.png"
 
 export default function Login() {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const router = useRouter();
   const [email, setEmail] = useState({ value: '', error: '' })
   const [password, setPassword] = useState({ value: '', error: '' })
   const [loading, setLoading] = useState(false) // archive, set splash screen when loading
@@ -33,18 +34,16 @@ export default function Login() {
     if (error) {
       Alert.alert(error.message)
     } else {
-        navigation.reset({
-            index: 0,
-            routes: [{ name: '(tabs)'}]
-        })
+      router.replace('../(tabs)');
     }
+      
     setLoading(false)
   }
 
   return (
     <Box className="flex-1 px-6 bg-white dark:bg-gray-900 justify-center">
       <Box className='items-center mb-16'>
-        <Image source={Logo} size='2xl' />
+        <Image source={Logo} size='2xl' alt="Logo"/>
       </Box>
       <VStack space='md'>
         <Heading size="4xl" className="text-center mb-8">GroceryPicker</Heading>
@@ -78,19 +77,19 @@ export default function Login() {
           {password.error ? <Text className="text-red-500 text-xs mt-1">{password.error}</Text> : null}
         </Box>
 
-        <Pressable onPress={() => null}>
+        <Pressable onPress={() => router.push('/ResetPassword')}>
           <Text className="text-right text-sm text-blue-600 dark:text-blue-400">
             Forgot your password?
           </Text>
         </Pressable>
         <ButtonGroup>
-          <Button className='bg-blue-500 h-16' onPress={() => signInWithEmail}>
+          <Button className='bg-blue-500 h-16' onPress={() => signInWithEmail()}>
             <ButtonText className="text-white text-base font-semibold">Login</ButtonText>
           </Button>
         </ButtonGroup>
         <Box className="flex-row justify-center mt-4">
           <Text className="text-sm">Don’t have an account? </Text>
-          <Pressable onPress={() => navigation.replace('Register')}>
+          <Pressable onPress={() => router.push('/Register')}>
             <Text className="text-sm text-blue-600 font-bold">Sign up</Text>
           </Pressable>
         </Box>

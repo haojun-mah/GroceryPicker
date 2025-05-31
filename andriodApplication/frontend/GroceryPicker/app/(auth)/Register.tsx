@@ -8,20 +8,18 @@ import { VStack } from '@/components/ui/vstack'
 import { HStack } from '@/components/ui/hstack'
 import BackButton from '@/components/BackButton'
 import Background from '@/components/Background'
-import { useNavigation } from 'expo-router'
+import { useNavigation, useRouter } from 'expo-router'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { RootStackParamList } from '@/lib/RootStackParamList'
 import { supabase } from '@/lib/supabase'
 import { Alert } from 'react-native'
-import { Image } from '@/components/ui/image'
 import { Box } from '@/components/ui/box'
-import { EyeIcon, EyeOffIcon, MailIcon, LockIcon } from '@/components/ui/icon'
-import { UserPen } from 'lucide-react';
-
+import { EyeIcon, EyeOffIcon, MailIcon, LockIcon } from '@/components/ui/icon' // to add password reveal feature
+import { UserPen } from "lucide-react-native"
 
 
 export default function Register() {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const router = useRouter();
   const [name, setName] = useState({ value: '', error: '' })
   const [email, setEmail] = useState({ value: '', error: '' })
   const [password, setPassword] = useState({ value: '', error: '' })
@@ -38,14 +36,14 @@ export default function Register() {
       password: password.value,
     })
 
-    if (error) Alert.alert(error.message)
-    if (!session) {
+    if (error) {
+        Alert.alert(error.message) 
+    } else {
         Alert.alert('Sign up successful')
-        navigation.reset({
-            index: 0,
-            routes: [{ name: 'Login'}]
-        })
+        router.replace('/Login');
+
     }
+
     setLoading(false)
   }
 
@@ -53,13 +51,13 @@ export default function Register() {
 
   return (
     <Background>
-      <BackButton goBack={navigation.goBack} />
+      <BackButton goBack={() => router.back()} />
       <Box className='gap-12 items-center'>
         <Heading size='4xl'>Create Account</Heading>
 
         <VStack space="md" className="w-full">
-            {/* there seems to be an issue with lucide
-            <InputIcon as={UserPen} className='w-6 h-6'/> */} 
+            {/* lucide icon library error. i really like the library thou. consider solutions further down the line
+            <InputIcon as={UserPen} className='w-6 h-6'/> */}
             <Input className='p-2 h-16 w-full' isInvalid={!!name.error}>
                 <InputField
                 variant="outline"
@@ -108,7 +106,7 @@ export default function Register() {
             </ButtonGroup>
             <HStack className="mt-4 justify-center">
             <Text>Already have an account? </Text>
-            <Pressable onPress={() => navigation.replace('Login')}>
+            <Pressable onPress={() => router.replace('/Login')}>
                 <Text className="text-blue-500 font-bold">Login</Text>
             </Pressable>
             </HStack>
