@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 import express, { Express, Request, Response } from 'express';
-import groceryRoutes from './routes/grocerylist'; 
+import groceryRoutes from './routes/fetchPrice'; 
 
 const app: Express = express(); 
 const port = process.env.PORT || 3000;
