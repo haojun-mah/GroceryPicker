@@ -8,14 +8,17 @@ config.resolver.extraNodeModules = {
   stream: require.resolve('stream-browserify'),
   util: require.resolve('util'),
   buffer: require.resolve('browserify-buffer'),
-  crypto: require.resolve('react-native-crypto'),
-  net: require.resolve('react-native-tcp'), 
-  tls: require.resolve('react-native-tcp'), 
-  url: require.resolve('react-native-url-polyfill'), 
-  path: require.resolve('path-browserify'), 
-  http: require.resolve('stream-http'), 
-  https: require.resolve('https-browserify'), 
-  zlib: require.resolve('browserify-zlib'), 
+  url: require.resolve('react-native-url-polyfill'),
+  path: require.resolve('path-browserify'),
+  crypto: require.resolve('crypto-browserify'),
+  assert: require.resolve('assert'),
+  process: require.resolve('process/browser'),
+  vm: require.resolve('vm-browserify'),
+  https: require.resolve('https-browserify'),
+  http: require.resolve('stream-http'),
+  net: require.resolve('stream-browserify'), 
+  tls: require.resolve('stream-browserify'),
+  zlib: require.resolve('browserify-zlib')
 };
 
 config.resolver.resolverMainFields = ['browser', 'main', 'module'];
