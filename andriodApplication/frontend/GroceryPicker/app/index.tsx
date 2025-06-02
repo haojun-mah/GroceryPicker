@@ -8,7 +8,7 @@ export default function Index() {
   const router = useRouter();
 
   useEffect(() => {
-    if (true) { // loading check logic supposed to be here, to replace with a splash pageii
+    if (!isLoading) { // loading check logic supposed to be here, to replace with a splash page
       if (session) {
         router.replace('/(tabs)/Home');
       } else {

@@ -1,10 +1,21 @@
 import { router } from 'expo-router';
 import { ScrollView, Text, View } from 'react-native';
 import { Button, ButtonGroup, ButtonText } from '@/components/ui/button';
+import { supabase } from '@/lib/supabase';
 
 export default function HomePage() {
   // likewise have no idea why setting w-max is not working. unable to
   // standardise button width
+  
+  async function signOut() {
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      console.error('Error signing out:', error.message);
+    } else {
+      router.replace("/(auth)/Login")
+    }
+  }
 
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
@@ -34,7 +45,7 @@ export default function HomePage() {
         </ButtonGroup>
         <ButtonGroup>
           <Button
-            onPress={() => router.push('../(auth)/Login')}
+            onPress={() => signOut()}
             className="bg-amber-50 hover:bg-black"
             size="xl"
             variant="outline"
