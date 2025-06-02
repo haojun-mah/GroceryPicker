@@ -6,5 +6,6 @@ export type RootStackParamList = {
   'Register': undefined;
   'ResetPassword': undefined;
   '(tabs)': undefined; 
+  '(auth)': undefined;
   '(tabs)/index': undefined;
 };

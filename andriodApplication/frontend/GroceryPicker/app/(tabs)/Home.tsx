@@ -32,6 +32,19 @@ export default function HomePage() {
             <ButtonText>Go to Grocery List History</ButtonText>
           </Button>
         </ButtonGroup>
+        <ButtonGroup>
+          <Button
+            onPress={() => router.push('../(auth)/Login')}
+            className="bg-amber-50 hover:bg-black"
+            size="xl"
+            variant="outline"
+            action="primary"
+          >
+            <ButtonText>Sign Out</ButtonText>
+          </Button>
+        </ButtonGroup>
+
+
       </View>
     </ScrollView>
   );

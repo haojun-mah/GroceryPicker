@@ -4,7 +4,7 @@ export default function TabsLayout() {
   return (
     <Tabs screenOptions={{ headerShown: false, tabBarActiveTintColor: 'blue' }}>
       <Tabs.Screen
-        name="index"
+        name="Home"
         options={{
           headerShown: false,
           headerTitle: 'Main Page',

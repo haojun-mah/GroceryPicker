@@ -1,5 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createClient, SupabaseClientOptions } from '@supabase/supabase-js'
 import 'react-native-url-polyfill/auto'
 
 // Variables are safe to expose in Expo app since Supabase has 
@@ -7,11 +6,15 @@ import 'react-native-url-polyfill/auto'
 const supabaseUrl = 'https://lmvwvcopakqxbwqsdtwk.supabase.co'
 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxtdnd2Y29wYWtxeGJ3cXNkdHdrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc5MTk5NTEsImV4cCI6MjA2MzQ5NTk1MX0.I_2ql0XL7WSHWZ8kdXt9ZJjtgKCVbJR1dG21NWt9GDo'
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+const options: SupabaseClientOptions<'public'> = {
   auth: {
-    storage: AsyncStorage,
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,
   },
-})
+}
+
+if (typeof window !== 'undefined') {
+  options.auth!.storage = require('@react-native-async-storage/async-storage').default;}
+
+export const supabase = createClient(supabaseUrl!, supabaseAnonKey!, options);
