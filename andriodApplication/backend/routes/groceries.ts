@@ -1,22 +1,14 @@
-// backend/routes/grocery.ts
 import { Router, Request, Response, NextFunction, RequestHandler } from 'express';
-import supabase from '../services/supabase';
+import supabase from '../config/supabase';
 import { PostgrestError } from '@supabase/supabase-js';
-import { FetchPricesRequestBody, FetchedItemResponse, ErrorResponse, ProductRow } from '../services/interface';
-import dotenv from "dotenv"
+import { FetchPricesRequestBody, FetchedItemResponse, ErrorResponse, ProductRow } from '../config/interface';
 
-dotenv.config({ path: '../.env'});
 
 const router = Router();
 
-const fetchPricesHandler: RequestHandler<
-  {},
-  FetchedItemResponse[] | ErrorResponse,
-  FetchPricesRequestBody,
-  {}
-> = async (req, res, _next) => {
-
-  const requestBody = req.body as FetchPricesRequestBody;
+// HONESTLY, i do not understand what is request doing here 
+router.post('/prices', async (req: Request<{}, FetchedItemResponse[] | ErrorResponse, FetchPricesRequestBody, {}>, res: Response<FetchedItemResponse[] | ErrorResponse>) => {
+  const requestBody = req.body; // Type is already inferred from RequestHandler's ReqBody generic
   const { items } = requestBody;
 
   // Validate input
@@ -57,7 +49,8 @@ const fetchPricesHandler: RequestHandler<
       } else {
         return {
           name: itemName,
-          found: false
+          found: false,
+          message: `Item "${itemName}" not found in the database.` // Added message for not found
         };
       }
     });
@@ -73,8 +66,6 @@ const fetchPricesHandler: RequestHandler<
     res.status(500).json({ error: 'Internal server error: ' + errorMessage } as ErrorResponse);
     return;
   }
-};
-
-router.post('/prices', fetchPricesHandler);
+});
 
 export default router;
