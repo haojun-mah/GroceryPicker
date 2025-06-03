@@ -1,9 +1,8 @@
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv"
-
-dotenv.config({ path: '../.env' });
-
 const ai = new GoogleGenAI({ apiKey: process.env.LLM_KEY });
+
+dotenv.config({ path: '../.env'});
 
 async function generate(prompt) {
   const response = await ai.models.generateContent({

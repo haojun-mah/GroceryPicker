@@ -2,27 +2,10 @@
 import { Router, Request, Response, NextFunction, RequestHandler } from 'express';
 import supabase from '../services/supabase';
 import { PostgrestError } from '@supabase/supabase-js';
+import { FetchPricesRequestBody, FetchedItemResponse, ErrorResponse, ProductRow } from '../services/interface';
+import dotenv from "dotenv"
 
-interface FetchPricesRequestBody {
-  items: string[];
-}
-
-interface FetchedItemResponse {
-  name: string;
-  price?: number;
-  supermarket?: string;
-  found: boolean;
-}
-
-interface ErrorResponse {
-  error: string;
-}
-
-interface ProductRow {
-  name: string;
-  price: number | null;
-  supermarket: string | null;
-}
+dotenv.config({ path: '../.env'});
 
 const router = Router();
 
@@ -92,8 +75,6 @@ const fetchPricesHandler: RequestHandler<
   }
 };
 
-// Define the POST /prices endpoint
 router.post('/prices', fetchPricesHandler);
 
-// Export the router
 export default router;
