@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { FetchPricesRequestBody, FetchedItemResponse, ErrorResponse, ProductRow } from '../interfaces/fetchPricesInterface'
-import { getProductsByNames } from '../models/fetchPricesController'
+import { getProductsByNames } from '../models/grocerypricemodel'
 
 export async function fetchPricesController(req: Request<{}, FetchedItemResponse[] | ErrorResponse, FetchPricesRequestBody, {}>, res: Response<FetchedItemResponse[] | ErrorResponse>): Promise<void> {
   const { items } = req.body;
