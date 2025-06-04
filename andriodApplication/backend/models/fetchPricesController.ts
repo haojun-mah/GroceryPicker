@@ -1,6 +1,6 @@
 import supabase from '../config/supabase'
 import { PostgrestError } from '@supabase/supabase-js';
-import { ProductRow, FetchedItemResponse, ControllerError } from '../interfaces/grocerypricesinterface'
+import { ProductRow, FetchedItemResponse, ControllerError } from '../interfaces/fetchPricesInterface'
 
 export async function getProductsByNames(itemNames: string[]): Promise<ProductRow[] | ControllerError> {
   try {
