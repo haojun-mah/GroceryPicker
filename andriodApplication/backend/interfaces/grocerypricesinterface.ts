@@ -1,3 +1,8 @@
+/*
+ *  This file includes the interface type definitions for groceryprices files.
+ */
+
+
 export interface FetchPricesRequestBody {
   items: string[];
 }
@@ -9,12 +14,17 @@ export interface FetchedItemResponse {
   found: boolean;
 }
 
-export interface ErrorResponse {
-  error: string;
-}
 
 export interface ProductRow {
   name: string;
   price: number | null;
   supermarket: string | null;
 }
+
+export interface ControllerError {
+  statusCode: number;
+  message: string;
+  details?: string;
+}
+
+export type ErrorResponse = ControllerError;
