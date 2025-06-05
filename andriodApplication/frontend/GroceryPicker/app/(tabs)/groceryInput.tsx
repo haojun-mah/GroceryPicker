@@ -12,15 +12,18 @@ const groceryInput = () => {
 
   const postData = async () => {
     try {
+      if (groceryTextArea.length === 0) {
+        return;
+      }
       setIsLoading(true);
       setError(null);
       setGrocery(null); // clears previous grocery context. to change in the future. this is just to experiment with context
-      const response = await fetch(`${backend_url}/grocery/generate`, {
+      const response = await fetch(`http://localhost:3000/grocery/generate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: groceryTextArea}),
+        body: JSON.stringify({ message: groceryTextArea }),
       });
 
       const output = await response.json();
@@ -33,9 +36,7 @@ const groceryInput = () => {
       }
     } catch (error) {
       console.error(error);
-      alert(
-        'Error with grocery list generation request. failed to connect to api. Have not even send yet',
-      );
+      alert(error);
     }
   };
 
