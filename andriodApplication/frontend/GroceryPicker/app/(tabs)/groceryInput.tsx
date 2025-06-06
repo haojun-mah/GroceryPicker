@@ -18,7 +18,7 @@ const groceryInput = () => {
       setIsLoading(true);
       setError(null);
       setGrocery(null); // clears previous grocery context. to change in the future. this is just to experiment with context
-      const response = await fetch(`http://localhost:3000/grocery/generate`, {
+      const response = await fetch(`${backend_url}/grocery/generate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
