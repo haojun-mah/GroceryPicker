@@ -14,6 +14,7 @@ export interface GeneratedGroceryItem {
   unit: string;
 }
 
+
 export type GeneratedGroceryListResponse = GeneratedGroceryItem[];
 
 export interface ErrorResponse {

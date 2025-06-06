@@ -18,14 +18,17 @@ const groceryHistory = () => {
     )
   }
 
-  const formatGroceryList: string[] = grocery?.map((item: GroceryItem) => { // currently mapping item into array of strings. to map array of items into array of array of strings in the future
-    return `${item.name} - ${item.quantity}${item.unit}`
+  const dropDownPopulatedWithInfo = grocery.map((array) => {
+      const groceryConcat = array.map((grocery: GroceryItem) => {
+        return `${grocery.name} - ${grocery.quantity}${grocery.unit}`
+    })
+      return (<DropdownCard outsideText="metadata" insideText={groceryConcat}/>);
   });
 
   return (
     <View className="flex items-center mt-20 p-4 gap-2">
       <Text className="font-bold font-roboto text-2xl">Grocery History</Text>
-      <DropdownCard outsideText="Metadata in here" insideText={formatGroceryList}/> 
+      {dropDownPopulatedWithInfo}
     </View>
   );
 };

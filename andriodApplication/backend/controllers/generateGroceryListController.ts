@@ -1,4 +1,3 @@
-import { Request, Response } from "express";
 import generate from "../services/llm";
 import { RequestHandler } from "express-serve-static-core";
 import { AiPromptRequestBody, ErrorResponse, GeneratedGroceryItem } from "../interfaces/generateGroceryListInterface";
@@ -25,7 +24,7 @@ export const generateGroceryList: RequestHandler<{}, GeneratedGroceryItem[] | Er
     if (typeof input !== 'string' || input.trim().length === 0) {
         res.status(400).json({
             statusCode: 400,
-            message: 'Request body is empty'
+            message: 'Request body is empty or not a string'
         });
         return;
     }
