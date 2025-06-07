@@ -1,18 +1,24 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, Dispatch, SetStateAction } from "react";
 
-interface ErrorResponse {
+export interface ErrorResponse {
   statusCode: number;
   message: string;
   details?: string; 
 }
 
 interface GroceryContextType {
-  grocery: GroceryItem[][] | null;
-  setGrocery: (grocery: GroceryItem[][] | null) => void; // defining types for parameter and return
+  grocery: GroceryMetadataTitleOutput[] | null;
+  setGrocery: Dispatch<SetStateAction<GroceryMetadataTitleOutput[] | null>>;
   isLoading: boolean;
   error: ErrorResponse | null;
   setIsLoading: (loading: boolean) => void;
   setError: (error: ErrorResponse | null) => void;
+}
+
+export interface GroceryMetadataTitleOutput {
+    "title" : string;
+    "metadata" : string;
+    "items" : GroceryItem[]; 
 }
 
 export interface GroceryItem {
@@ -24,10 +30,9 @@ export interface GroceryItem {
 const GroceryContext = React.createContext<GroceryContextType | undefined>(undefined); // necessary to pass types to createcontext so that the handler of context can know what to expect
 
 export const GroceryContextProvider: any = ({children}: any) => {
-    const [grocery, setGrocery] = useState<GroceryItem[][] | null>([]);
+    const [grocery, setGrocery] = useState<GroceryMetadataTitleOutput[] | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<ErrorResponse | null>(null);
-
 
     const value: GroceryContextType = {
         grocery,
