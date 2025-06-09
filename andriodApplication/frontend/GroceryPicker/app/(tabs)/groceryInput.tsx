@@ -5,6 +5,7 @@ import { Text, View } from 'react-native';
 import { backend_url } from '../../config/api';
 import { useGroceryContext } from '@/context/groceryContext';
 import { GroceryMetadataTitleOutput, ErrorResponse } from '@/context/groceryContext';
+import { router } from 'expo-router';
 
 const groceryInput = () => {
   const [groceryTextArea, setGroceryTextArea] = useState<string>("");
@@ -28,14 +29,16 @@ const groceryInput = () => {
 
       const output : GroceryMetadataTitleOutput = await response.json();
       if (response.ok) { // nested if-else ugly but intuitive when reading. consider refactoring if necessary
-        if (output.title = '!@#$%^') {
+        if (output.title === '!@#$%^') {
           alert('Invalid Grocery List Input!'); // very very weird and deterministic way to check for invalid grocery input
+          return;
         }
         else if (grocery === null) {
           setGrocery([ output ]);
         } else {
           setGrocery([ output, ...grocery]);
         }
+        router.push('/groceryHistory?openLatest=true');
       } else {
         alert('Invalid Grocery List Input!');
       }
@@ -51,7 +54,11 @@ const groceryInput = () => {
         Create Grocery List!
       </Text>
       <Textarea size="md" className="w-72">
-        <TextareaInput value={groceryTextArea} onChangeText={(value) => setGroceryTextArea(value)} placeholder="Insert your Groceries!" />
+        <TextareaInput 
+          value={groceryTextArea} 
+          onChangeText={(value) => setGroceryTextArea(value)} 
+          placeholder="Insert your Groceries!" 
+          onSubmitEditing={() => postData()}/>
       </Textarea>
       <ButtonGroup>
         <Button

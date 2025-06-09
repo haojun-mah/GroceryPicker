@@ -15,14 +15,17 @@ const DropdownCard = ({
   outsideText,
   insideText,
   title,
+  defaultOpen,
 }: {
   outsideText: string;
   insideText: string[];
-  title: string
+  title: string;
+  defaultOpen: boolean;
 }) => {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(defaultOpen);
   const animation = useRef(new Animated.Value(0)).current;
 
+  
   useEffect(() => {
     // Optional: smooth layout changes for height
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);

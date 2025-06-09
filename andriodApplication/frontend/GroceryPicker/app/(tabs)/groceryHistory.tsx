@@ -3,9 +3,11 @@ import { GroceryMetadataTitleOutput, useGroceryContext } from '@/context/grocery
 import { Text, View } from 'react-native';
 import { GroceryItem } from '@/context/groceryContext';
 import { ScrollView } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
 
 const groceryHistory = () => {
   const { grocery , isLoading, error } = useGroceryContext();
+  const { openLatest } = useLocalSearchParams();
 
   if (error) {
     console.log("Front end handling error from grocerycontext. Receiving at groceryHistory");
@@ -28,7 +30,6 @@ const groceryHistory = () => {
         .map((item: GroceryItem) => {
           return `${item.name} - ${item.quantity} ${item.unit}`;
         });
-      console.log(groceryConcat);
 
       return (
         <DropdownCard
@@ -36,6 +37,7 @@ const groceryHistory = () => {
           title={title} // Title for card
           outsideText={metadata} // Metadata (time and date)
           insideText={groceryConcat} // This array contains the formatted strings for this group
+          defaultOpen={groupIndex === 0 && openLatest === 'true'}
         />);
       });
 

@@ -12,15 +12,17 @@ export const generateGroceryList: RequestHandler<{}, GroceryMetadataTitleOutput 
     any request outside of groceries.
 
     Return the grocery list as a plain string, where each line represents a grocery item.
-    Each item should have the format: "name,quantity,unit"
+    Each item should have the format: "name/quantity/unit"
     Do NOT include any markdown (like \`\`\`json\` or \`\`\`),
     or any headers like "Name, Quantity, Unit".
-    On top of the grocery list, summarise the entire grocery list with maximum of 10 word.
-    That will be the title describing grocery list.  
-    Just return the comma-separated values for each item, one item per line.
+    On top of the grocery list, summarise the entire grocery list with maximum of 10 words.
     If there is any error, return !@#$%^. Always try to answer the
     question to the best of the ability and return the answer in example output
-    form. Must be in example output form.
+    form. Must be in example output form. If asked for suggestions of what to
+    eat and what to buy, just return the suggestion with the ingredients.
+    The summarised title must always be there regardless of what.
+    The title MUST BE A SUMMARY OF GROCERY ITEMS. DO NOT GIVE "TITLE".
+    Groceries MUST BE SEPERATED BY /
 
     Example output:
     Title
