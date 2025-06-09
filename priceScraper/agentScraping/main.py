@@ -23,7 +23,7 @@ from crawl4ai.extraction_strategy import LLMExtractionStrategy
 
 # ── 1. load keys ─────────────────────────────────────────────────────────
 load_dotenv()                                    # puts keys in env vars
-URL_TO_SCRAPE = "https://www.fairprice.com.sg/"
+URL_TO_SCRAPE = "https://www.fairprice.com.sg/category/international-selections"
 
 # ── 2. declare a schema that matches the *instruction* ───────────────────
 class Model(BaseModel):
@@ -53,7 +53,7 @@ If information not available, return null.
 
 # ── 3. DeepSeek is OpenAI-compatible, so pass base_url + model name ──────
 llm_cfg = LLMConfig(
-    provider="groq/meta-llama/llama-4-scout-17b-16e-instruct",        
+    provider="groq/gemma2-9b-it",        
     api_token=os.getenv('GROQ_APIKEY'),
 )
 
@@ -69,15 +69,17 @@ llm_strategy = LLMExtractionStrategy(
 )
 
 filter_chain = FilterChain([
-    URLPatternFilter(patterns=["*product*", "*categories*", "*category*"]),
+    URLPatternFilter(patterns=["*product*"]),
 ])
 
 crawl_cfg = CrawlerRunConfig(
     deep_crawl_strategy=BFSDeepCrawlStrategy(
-        max_depth=2,
+        max_depth=1,
         include_external=True,
         filter_chain=filter_chain,
     ),
+    scan_full_page=True,
+    scroll_delay=0.5,
     scraping_strategy=LXMLWebScrapingStrategy(),
     extraction_strategy=llm_strategy,
     verbose=True,
@@ -89,7 +91,7 @@ browser_cfg = BrowserConfig(headless=True, verbose=True, text_mode=True)
 # CSV
 
 csv_file = "products.csv"
-fieldnames = ['productName', 'productPrice', 'productUnit', 'productPromotion', 'productPromotionDuration', 'productPromotionGroup']
+fieldnames = ['productName', 'productPrice', 'productUnit', 'productPromotion', 'productPromotionDuration', 'productPromotionGroup', 'url', 'error']
 
 # ── 5. run the crawl ─────────────────────────────────────────────────────
 async def main():
@@ -108,9 +110,9 @@ async def main():
     with open(csv_file, mode='w', newline='', encoding='utf-8') as f:
         writer = csv.DictWriter(f, fieldnames)
         writer.writeheader()
-        for name in all_products:
-            print(name)
-            writer.writerow(item)
+        for product in all_products:
+            print(product)
+            writer.writerow(product)
     llm_strategy.show_usage()
 
 
