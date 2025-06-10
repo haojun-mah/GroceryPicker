@@ -84,7 +84,7 @@ css_schema = {
 crawl_cfg = CrawlerRunConfig(
     deep_crawl_strategy=BFSDeepCrawlStrategy(
         max_depth=1, # Enters maximum (its own page) + 1 pages
-        # include_external=True, # Enters other pages
+        include_external=True, # Enters other pages
         filter_chain=filter_chain, # Filter; Params set above
     ),
     scan_full_page=True, # Fairprice page is dynamic and requires scrolling all the way down to load all products
@@ -92,6 +92,7 @@ crawl_cfg = CrawlerRunConfig(
     extraction_strategy=JsonCssExtractionStrategy(css_schema, verbose=True),
     verbose=True,
     remove_overlay_elements=True,
+    page_timeout=180000,
 )
 
 # Browser settings. Headless hence kinda irrelevant
