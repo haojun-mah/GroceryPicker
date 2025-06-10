@@ -21,6 +21,26 @@ from crawl4ai.extraction_strategy import LLMExtractionStrategy
 
 load_dotenv()                                    # puts keys in env vars
 URL_TO_SCRAPE = "https://www.fairprice.com.sg/category/international-selections"
+LIST_URL_TO_SCRAPE = ["https://www.fairprice.com.sg/category/electronics-5",
+                      "https://www.fairprice.com.sg/category/baby-child-toys",
+                      "https://www.fairprice.com.sg/category/bakery",
+                      "https://www.fairprice.com.sg/category/beauty--personal-care",
+                      "https://www.fairprice.com.sg/category/dairy-chilled-eggs",
+                      "https://www.fairprice.com.sg/category/drinks",
+                      "https://www.fairprice.com.sg/category/beer-wine-spirits",
+                      "https://www.fairprice.com.sg/category/food-cupboard-6",
+                      "https://www.fairprice.com.sg/category/frozen",
+                      "https://www.fairprice.com.sg/category/fruits-vegetables",
+                      "https://www.fairprice.com.sg/category/health--wellness",
+                      "https://www.fairprice.com.sg/category/housebrand-1",
+                      "https://www.fairprice.com.sg/category/household",
+                      "https://www.fairprice.com.sg/category/meat-seafood",
+                      "https://www.fairprice.com.sg/category/pet-supplies",
+                      "https://www.fairprice.com.sg/category/rice-noodles-cooking-ingredients",
+                      "https://www.fairprice.com.sg/category/snacks--confectionery",
+                      "https://www.fairprice.com.sg/category/electrical--lifestyle",
+                      "https://www.fairprice.com.sg/category/electronics-5"]
+
 
 # Only allows crawling into URL with product in it
 filter_chain = FilterChain([
@@ -64,7 +84,7 @@ css_schema = {
 crawl_cfg = CrawlerRunConfig(
     deep_crawl_strategy=BFSDeepCrawlStrategy(
         max_depth=1, # Enters maximum (its own page) + 1 pages
-        include_external=True, # Enters other pages
+        # include_external=True, # Enters other pages
         filter_chain=filter_chain, # Filter; Params set above
     ),
     scan_full_page=True, # Fairprice page is dynamic and requires scrolling all the way down to load all products
@@ -86,19 +106,39 @@ csvCol = ['productName', 'productQuantity', 'productPrice', 'productPromotion', 
 async def main():
     all_products = []
     async with AsyncWebCrawler(config=browser_cfg) as crawler:
-        results = await crawler.arun(URL_TO_SCRAPE, config=crawl_cfg)
-        for i, result in enumerate(results):
-            try:
-                if hasattr(result, "success") and result.success:
-                    data = json.loads(result.extracted_content)
-                    if isinstance(data, list):
-                        all_products.extend(data)
-                    elif isinstance(data, dict):
-                        all_products.append(data)
-                    else:
-                        print(f"⚠️ [{i}] Unexpected data format: {type(data)}")
-            except Exception as e:
-                print(f"⚠️ [{i}] JSON decode failed: {e}")
+        # Scrap single page
+        # results = await crawler.arun(URL_TO_SCRAPE, config=crawl_cfg)
+        # for i, result in enumerate(results):
+        #     try:
+        #         if hasattr(result, "success") and result.success:
+        #             data = json.loads(result.extracted_content)
+        #             if isinstance(data, list):
+        #                 all_products.extend(data)
+        #             elif isinstance(data, dict):
+        #                 all_products.append(data)
+        #             else:
+        #                 print(f"⚠️ [{i}] Unexpected data format: {type(data)}")
+        #     except Exception as e:
+        #         print(f"⚠️ [{i}] JSON decode failed: {e}")
+
+        # Scrap list of pages on parallel 
+        results = await crawler.arun_many(LIST_URL_TO_SCRAPE, config=crawl_cfg)
+        for resultList in enumerate(results):
+            for i, result in enumerate(resultList):
+                try:
+                    if hasattr(result, "success") and result.success:
+                        data = json.loads(result.extracted_content)
+                        if isinstance(data, list):
+                            all_products.extend(data)
+                        elif isinstance(data, dict):
+                            all_products.append(data)
+                        else:
+                            print(f"⚠️ [{i}] Unexpected data format: {type(data)}")
+                except Exception as e:
+                    print(f"⚠️ [{i}] JSON decode failed: {e}")
+        
+
+
 
     # Save to CSV
     if all_products:
