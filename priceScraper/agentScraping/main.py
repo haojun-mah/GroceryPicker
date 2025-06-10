@@ -6,115 +6,110 @@ import os, json, asyncio, csv
 from crawl4ai.deep_crawling import BFSDeepCrawlStrategy
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
-from crawl4ai.content_scraping_strategy import LXMLWebScrapingStrategy
+from crawl4ai.content_scraping_strategy import LXMLWebScrapingStrategy, WebScrapingStrategy, ContentScrapingStrategy
+from crawl4ai.extraction_strategy import JsonCssExtractionStrategy
 from crawl4ai import (
     AsyncWebCrawler,
     BrowserConfig,
     CrawlerRunConfig,
-    LLMConfig
 )
 from crawl4ai.deep_crawling.filters import (
     FilterChain,
     URLPatternFilter,
-    ContentTypeFilter
 )
-
 from crawl4ai.extraction_strategy import LLMExtractionStrategy
 
-# ── 1. load keys ─────────────────────────────────────────────────────────
 load_dotenv()                                    # puts keys in env vars
 URL_TO_SCRAPE = "https://www.fairprice.com.sg/category/international-selections"
 
-# ── 2. declare a schema that matches the *instruction* ───────────────────
-class Model(BaseModel):
-    productName: str
-    productPrice: str
-    productUnit: str
-    productPromotion: str
-    productPromotionDuration: str
-    productPromotionGroup: str
-    url: str
-    
-   
-
-INSTRUCTION_TO_LLM = """
-You are given a grocery page. 
-You are to go to all product links, collect the name of product, price of product, promotions, promotion duration and what products are in the same promotion group.
-productName is the name of the product and only the name
-productUnit is the unit of the product. e.g. 250g
-productPromotion should only be if there is a buy X at $XX e.g. Buy 3 At $7.50
-productPromotionGroup should be products which the current products is having promotion with e.g. 'Dyanmo Green, Dynamo Blue' as Dynamo Green and Dynamo Blue have a Buy 2 for $7.50 offer.
-productPromotionDuration should only be the time left before promotion ends.
-url should be the url containing the image of the product.
-If information not available, return null.
-
-"""
-
-
-# ── 3. DeepSeek is OpenAI-compatible, so pass base_url + model name ──────
-llm_cfg = LLMConfig(
-    provider="groq/gemma2-9b-it",        
-    api_token=os.getenv('GROQ_APIKEY'),
-)
-
-# ── 4. attach the extraction strategy ────────────────────────────────────
-llm_strategy = LLMExtractionStrategy(
-    llm_config=llm_cfg,
-    schema=Model.model_json_schema(),      
-    extraction_type="schema",
-    instruction=INSTRUCTION_TO_LLM,
-    chunk_token_threshold=1000,
-    apply_chunking=True, overlap_rate=0.0,
-    input_format="markdown",
-)
-
+# Only allows crawling into URL with product in it
 filter_chain = FilterChain([
     URLPatternFilter(patterns=["*product*"]),
 ])
 
+# Defining the output
+css_schema = {
+    "name": "base",
+    "baseSelector": "div.sc-747538d2-0",
+    "fields": [
+        {
+            "name": "productName",
+            "selector": "div.sc-747538d2-6 span.sc-747538d2-3", 
+            "type": "text",
+        },
+        {
+            "name": "productQuantity",
+            "selector": "div.sc-747538d2-6 span.sc-e94e62e6-2",
+            "type": "text",
+        },
+        {
+            "name": "productPrice",
+            "selector": "div.sc-747538d2-2 span.sc-747538d2-3",
+            "type": "text",
+        },
+        {   
+            "name": "productPromotion",
+            "selector": "div.sc-747538d2-8 span.sc-ab6170a9-1",
+            "type": "text",
+        },
+        {
+            "name": "productPromotionDuration",
+            "selector": "div.sc-747538d2-8 span.sc-747538d2-11",
+            "type": "text",
+        },
+    ]
+}
+
+# Crawler settings
 crawl_cfg = CrawlerRunConfig(
     deep_crawl_strategy=BFSDeepCrawlStrategy(
-        max_depth=1,
-        include_external=True,
-        filter_chain=filter_chain,
+        max_depth=1, # Enters maximum (its own page) + 1 pages
+        include_external=True, # Enters other pages
+        filter_chain=filter_chain, # Filter; Params set above
     ),
-    scan_full_page=True,
+    scan_full_page=True, # Fairprice page is dynamic and requires scrolling all the way down to load all products
     scroll_delay=0.5,
-    scraping_strategy=LXMLWebScrapingStrategy(),
-    extraction_strategy=llm_strategy,
+    extraction_strategy=JsonCssExtractionStrategy(css_schema, verbose=True),
     verbose=True,
     remove_overlay_elements=True,
 )
 
+# Browser settings. Headless hence kinda irrelevant
 browser_cfg = BrowserConfig(headless=True, verbose=True, text_mode=True)
 
-# CSV
-
+# CSV settings
 csv_file = "products.csv"
-fieldnames = ['productName', 'productPrice', 'productUnit', 'productPromotion', 'productPromotionDuration', 'productPromotionGroup', 'url', 'error']
+csvCol = ['productName', 'productQuantity', 'productPrice', 'productPromotion', 'productPromotionDuration']
 
-# ── 5. run the crawl ─────────────────────────────────────────────────────
+
+
 async def main():
+    all_products = []
     async with AsyncWebCrawler(config=browser_cfg) as crawler:
         results = await crawler.arun(URL_TO_SCRAPE, config=crawl_cfg)
-        all_products = []
         for i, result in enumerate(results):
-            if hasattr(result, "success") and result.success:
-                try:
+            try:
+                if hasattr(result, "success") and result.success:
                     data = json.loads(result.extracted_content)
-                    for item in data:
-                        if isinstance(item, dict) and not item.get("error", False):
-                                all_products.append(item)
-                except Exception as e:
-                    print(f"⚠️ [{i}] JSON decode failed: {e}")
-    with open(csv_file, mode='w', newline='', encoding='utf-8') as f:
-        writer = csv.DictWriter(f, fieldnames)
-        writer.writeheader()
-        for product in all_products:
-            print(product)
-            writer.writerow(product)
-    llm_strategy.show_usage()
+                    if isinstance(data, list):
+                        all_products.extend(data)
+                    elif isinstance(data, dict):
+                        all_products.append(data)
+                    else:
+                        print(f"⚠️ [{i}] Unexpected data format: {type(data)}")
+            except Exception as e:
+                print(f"⚠️ [{i}] JSON decode failed: {e}")
 
-
+    # Save to CSV
+    if all_products:
+        with open(csv_file, mode='w', newline='', encoding='utf-8') as f:
+            writer = csv.DictWriter(f, fieldnames=csvCol)
+            writer.writeheader()
+            for product in all_products:
+                print(product)  # For debugging
+                writer.writerow(product)
+    else:
+        print("⚠️ No products found.")
+   
 if __name__ == "__main__":
     asyncio.run(main())
