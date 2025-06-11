@@ -14,13 +14,18 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 const DropdownCard = ({
   outsideText,
   insideText,
+  title,
+  defaultOpen,
 }: {
   outsideText: string;
   insideText: string[];
+  title: string;
+  defaultOpen: boolean;
 }) => {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(defaultOpen);
   const animation = useRef(new Animated.Value(0)).current;
 
+  
   useEffect(() => {
     // Optional: smooth layout changes for height
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -45,7 +50,7 @@ const DropdownCard = ({
   return (
     <Card className="w-full max-w-[95%] self-center rounded-xl p-4" variant="outline">
       <View className="flex-row items-center justify-between mb-2">
-        <Heading size="md">Grocery List Title</Heading>
+        <Heading size="md">{title}</Heading>
         <ButtonGroup>
           <Button onPress={() => setExpanded(!expanded)} variant="link">
             <ButtonIcon

@@ -4,10 +4,12 @@ import React, { useState } from 'react';
 import { Text, View } from 'react-native';
 import { backend_url } from '../../config/api';
 import { useGroceryContext } from '@/context/groceryContext';
+import { GroceryMetadataTitleOutput, ErrorResponse } from '@/context/groceryContext';
+import { router } from 'expo-router';
 
 const groceryInput = () => {
   const [groceryTextArea, setGroceryTextArea] = useState<string>("");
-  const { setGrocery, setIsLoading, setError } = useGroceryContext();
+  const { grocery, setGrocery, setIsLoading, setError } = useGroceryContext();
 
 
   const postData = async () => {
@@ -17,7 +19,6 @@ const groceryInput = () => {
       }
       setIsLoading(true);
       setError(null);
-      setGrocery(null); // clears previous grocery context. to change in the future. this is just to experiment with context
       const response = await fetch(`${backend_url}/grocery/generate`, {
         method: 'POST',
         headers: {
@@ -26,13 +27,20 @@ const groceryInput = () => {
         body: JSON.stringify({ message: groceryTextArea }),
       });
 
-      const output = await response.json();
-      if (response.ok) {
-        console.log(output); // build back end, test data generation works. When response.ok, trigger output page and display list
-        setGrocery(output)
+      const output : GroceryMetadataTitleOutput = await response.json();
+      if (response.ok) { // nested if-else ugly but intuitive when reading. consider refactoring if necessary
+        if (output.title === '!@#$%^') {
+          alert('Invalid Grocery List Input!'); // very very weird and deterministic way to check for invalid grocery input
+          return;
+        }
+        else if (grocery === null) {
+          setGrocery([ output ]);
+        } else {
+          setGrocery([ output, ...grocery]);
+        }
+        router.push('/groceryHistory?openLatest=true');
       } else {
-        alert('Error with receiving response');
-        setError(output);
+        alert('Invalid Grocery List Input!');
       }
     } catch (error) {
       console.error(error);
@@ -46,7 +54,11 @@ const groceryInput = () => {
         Create Grocery List!
       </Text>
       <Textarea size="md" className="w-72">
-        <TextareaInput value={groceryTextArea} onChangeText={(value) => setGroceryTextArea(value)} placeholder="Insert your Groceries!" />
+        <TextareaInput 
+          value={groceryTextArea} 
+          onChangeText={(value) => setGroceryTextArea(value)} 
+          placeholder="Insert your Groceries!" 
+          onSubmitEditing={() => postData()}/>
       </Textarea>
       <ButtonGroup>
         <Button

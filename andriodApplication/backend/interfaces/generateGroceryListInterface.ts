@@ -14,6 +14,11 @@ export interface GeneratedGroceryItem {
   unit: string;
 }
 
+export interface GroceryMetadataTitleOutput {
+    "title" : string;
+    "metadata" : string;
+    "items" : GeneratedGroceryItem[]; 
+}
 
 export type GeneratedGroceryListResponse = GeneratedGroceryItem[];
 
