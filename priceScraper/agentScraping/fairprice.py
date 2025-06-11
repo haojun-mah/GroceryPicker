@@ -38,8 +38,8 @@ LIST_URL_TO_SCRAPE = ["https://www.fairprice.com.sg/category/electronics-5",
                       "https://www.fairprice.com.sg/category/pet-supplies",
                       "https://www.fairprice.com.sg/category/rice-noodles-cooking-ingredients",
                       "https://www.fairprice.com.sg/category/snacks--confectionery",
-                      "https://www.fairprice.com.sg/category/electrical--lifestyle",
-                      "https://www.fairprice.com.sg/category/electronics-5"]
+                      "https://www.fairprice.com.sg/category/electrical--lifestyle",]
+                     
 
 
 # Only allows crawling into URL with product in it
@@ -87,8 +87,8 @@ crawl_cfg = CrawlerRunConfig(
         include_external=True, # Enters other pages
         filter_chain=filter_chain, # Filter; Params set above
     ),
-    scan_full_page=True, # Fairprice page is dynamic and requires scrolling all the way down to load all products
-    scroll_delay=0.5,
+    # scan_full_page=True, # Fairprice page is dynamic and requires scrolling all the way down to load all products
+    # scroll_delay=0.5,
     extraction_strategy=JsonCssExtractionStrategy(css_schema, verbose=True),
     verbose=True,
     remove_overlay_elements=True,
@@ -122,10 +122,10 @@ async def main():
         #     except Exception as e:
         #         print(f"⚠️ [{i}] JSON decode failed: {e}")
 
-        # Scrap list of pages on parallel 
-        results = await crawler.arun_many(LIST_URL_TO_SCRAPE, config=crawl_cfg)
-        for resultList in enumerate(results):
-            for i, result in enumerate(resultList):
+        # Scraping multiple pages in concurrency. Do not know why parallel does not work
+        for target_url in LIST_URL_TO_SCRAPE:
+            results = await crawler.arun(target_url, config=crawl_cfg)
+            for i, result in enumerate(results):
                 try:
                     if hasattr(result, "success") and result.success:
                         data = json.loads(result.extracted_content)
@@ -137,6 +137,18 @@ async def main():
                             print(f"⚠️ [{i}] Unexpected data format: {type(data)}")
                 except Exception as e:
                     print(f"⚠️ [{i}] JSON decode failed: {e}")
+
+
+        # Scrap list of pages on parallel. I do not know why i cannot.
+        # results = await crawler.arun_many(LIST_URL_TO_SCRAPE, config=crawl_cfg)
+        # for result in results:
+        #     if hasattr(result, "success") and result.success:
+        #         data = json.loads(result.extracted_content)
+        #         if isinstance(data, list):
+        #             all_products.extend(data)
+        #         elif isinstance(data, dict):
+        #             all_products.append(data)
+                
         
 
 
