@@ -1,34 +1,42 @@
 import { Button, ButtonGroup, ButtonText } from '@/components/ui/button';
 import { Textarea, TextareaInput } from '@/components/ui/textarea';
-import React from 'react';
+import React, { useState } from 'react';
 import { Text, View } from 'react-native';
+import { backend_url } from '../../config/api';
+import { useGroceryContext } from '@/context/groceryContext';
 
 const groceryInput = () => {
-  const [data, setData] = React.useState('');
+  const [groceryTextArea, setGroceryTextArea] = useState<string>("");
+  const { setGrocery, setIsLoading, setError } = useGroceryContext();
+
 
   const postData = async () => {
     try {
-      const response = await fetch('', {
-        // insert API link
+      if (groceryTextArea.length === 0) {
+        return;
+      }
+      setIsLoading(true);
+      setError(null);
+      setGrocery(null); // clears previous grocery context. to change in the future. this is just to experiment with context
+      const response = await fetch(`${backend_url}/grocery/generate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': '', // understand what this api key thing is for
         },
-        body: JSON.stringify({ postMessage: data }),
+        body: JSON.stringify({ message: groceryTextArea }),
       });
 
       const output = await response.json();
       if (response.ok) {
-        console.log(data); // build back end, test data generation works. When response.ok, trigger output page and display list
+        console.log(output); // build back end, test data generation works. When response.ok, trigger output page and display list
+        setGrocery(output)
       } else {
         alert('Error with receiving response');
+        setError(output);
       }
     } catch (error) {
       console.error(error);
-      alert(
-        'Error with grocery list generation request. failed to connect to api. Have not even send yet',
-      );
+      alert(error);
     }
   };
 
@@ -38,7 +46,7 @@ const groceryInput = () => {
         Create Grocery List!
       </Text>
       <Textarea size="md" className="w-72">
-        <TextareaInput placeholder="Insert your Groceries!" />
+        <TextareaInput value={groceryTextArea} onChangeText={(value) => setGroceryTextArea(value)} placeholder="Insert your Groceries!" />
       </Textarea>
       <ButtonGroup>
         <Button
@@ -46,6 +54,7 @@ const groceryInput = () => {
           size="xl"
           variant="outline"
           action="primary"
+          onPress={() => postData()}
         >
           <ButtonText>Generate List!</ButtonText>
         </Button>

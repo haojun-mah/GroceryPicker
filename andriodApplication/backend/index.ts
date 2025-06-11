@@ -1,13 +1,16 @@
-require('dotenv').config();
+import dotenv from "dotenv"
+import express, { Request, Response } from 'express';
+import groceryRoute from './routes/groceries'
+import cors from "cors"
 
-import express, { Express, Request, Response } from 'express';
-import groceryRoutes from './routes/fetchPrice'; 
-
-const app: Express = express(); 
+dotenv.config();
+console.log(process.env.LLM_KEY)
+const app = express();
 const port = process.env.PORT || 3000;
 
+app.use(cors()); // for dev all origins allowed. before pushing to prod, modify to allow certain origins only
 app.use(express.json());
-app.use('/api/shopping-list', groceryRoutes);
+app.use('/grocery', groceryRoute);
 
 app.get('/', (req: Request, res: Response) => { 
   res.send('Backend server is running.');

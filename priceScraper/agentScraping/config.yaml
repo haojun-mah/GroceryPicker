@@ -1,0 +1,7 @@
+model_list:
+  - model_name: deepseek-r1-distill-llama-70b # Model Alias to use for requests
+    litellm_params:
+      model: deepseek-r1-distill-llama-70b
+      api_key: "os.environ/GROQ_APIKEY" # ensure you have `GROQ_API_KEY` in your .env
+
+# need to install pip install 'litellm[proxy]'
