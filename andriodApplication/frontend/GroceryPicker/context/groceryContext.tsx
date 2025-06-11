@@ -1,9 +1,9 @@
-import React, { useContext, useState, Dispatch, SetStateAction } from "react";
+import React, { useContext, useState, Dispatch, SetStateAction } from 'react';
 
 export interface ErrorResponse {
   statusCode: number;
   message: string;
-  details?: string; 
+  details?: string;
 }
 
 interface GroceryContextType {
@@ -16,48 +16,46 @@ interface GroceryContextType {
 }
 
 export interface GroceryMetadataTitleOutput {
-    "title" : string;
-    "metadata" : string;
-    "items" : GroceryItem[]; 
+  title: string;
+  metadata: string;
+  items: GroceryItem[];
 }
 
 export interface GroceryItem {
-    "name" : string;
-    "quantity" : number;
-    "unit" : string;
+  name: string;
+  quantity: number;
+  unit: string;
 }
 
-const GroceryContext = React.createContext<GroceryContextType | undefined>(undefined); // necessary to pass types to createcontext so that the handler of context can know what to expect
+const GroceryContext = React.createContext<GroceryContextType | undefined>(
+  undefined,
+); // necessary to pass types to createcontext so that the handler of context can know what to expect
 
-export const GroceryContextProvider: any = ({children}: any) => {
-    const [grocery, setGrocery] = useState<GroceryMetadataTitleOutput[] | null>(null);
-    const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [error, setError] = useState<ErrorResponse | null>(null);
+export const GroceryContextProvider: any = ({ children }: any) => {
+  const [grocery, setGrocery] = useState<GroceryMetadataTitleOutput[] | null>(
+    null,
+  );
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<ErrorResponse | null>(null);
 
-    const value: GroceryContextType = {
-        grocery,
-        setGrocery,
-        isLoading,
-        setIsLoading,
-        error,
-        setError,
-    }
+  const value: GroceryContextType = {
+    grocery,
+    setGrocery,
+    isLoading,
+    setIsLoading,
+    error,
+    setError,
+  };
 
-    return (
-        <GroceryContext.Provider value={value}>
-            {children}
-        </GroceryContext.Provider>
-    );
-}
+  return (
+    <GroceryContext.Provider value={value}>{children}</GroceryContext.Provider>
+  );
+};
 
 export const useGroceryContext = () => {
-    const context = useContext(GroceryContext);
-    if (context === undefined) {
-        throw new Error('useGrocerycontext error. Not used in a grocery provider');
-    }
-    return context;
-}
-
-
-
-
+  const context = useContext(GroceryContext);
+  if (context === undefined) {
+    throw new Error('useGrocerycontext error. Not used in a grocery provider');
+  }
+  return context;
+};

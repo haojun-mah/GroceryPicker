@@ -1,7 +1,11 @@
-import React from 'react'
-import { ImageBackground, KeyboardAvoidingView, Platform } from 'react-native'
+import React from 'react';
+import { ImageBackground, KeyboardAvoidingView, Platform } from 'react-native';
 
-export default function Background({ children }: { children: React.ReactNode }) {
+export default function Background({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <ImageBackground
       source={require('../assets/images/background_dot.png')}
@@ -15,5 +19,5 @@ export default function Background({ children }: { children: React.ReactNode }) 
         {children}
       </KeyboardAvoidingView>
     </ImageBackground>
-  )
+  );
 }

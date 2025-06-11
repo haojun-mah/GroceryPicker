@@ -1,22 +1,22 @@
-import React, { useState } from 'react'
-import { Alert } from 'react-native'
-import { VStack } from '@/components/ui/vstack'
-import { Box } from '@/components/ui/box'
-import { Heading } from '@/components/ui/heading'
-import { Text } from '@/components/ui/text'
-import { Input, InputField } from '@/components/ui/input'
-import { Button, ButtonText } from '@/components/ui/button'
-import { useNavigation } from '@react-navigation/native'
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { RootStackParamList } from '@/lib/RootStackParamList'
-import Background from '@/components/Background'
-import BackButton from '@/components/BackButton'
-import { supabase } from '@/lib/supabase'
-import { router, useRouter } from 'expo-router'
+import React, { useState } from 'react';
+import { Alert } from 'react-native';
+import { VStack } from '@/components/ui/vstack';
+import { Box } from '@/components/ui/box';
+import { Heading } from '@/components/ui/heading';
+import { Text } from '@/components/ui/text';
+import { Input, InputField } from '@/components/ui/input';
+import { Button, ButtonText } from '@/components/ui/button';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '@/lib/RootStackParamList';
+import Background from '@/components/Background';
+import BackButton from '@/components/BackButton';
+import { supabase } from '@/lib/supabase';
+import { router, useRouter } from 'expo-router';
 
 export default function ResetPasswordScreen() {
   const router = useRouter();
-  const [email, setEmail] = useState({ value: '', error: '' })
+  const [email, setEmail] = useState({ value: '', error: '' });
   const [loading, setLoading] = useState(false);
 
   async function sendResetPasswordEmail() {
@@ -28,19 +28,21 @@ export default function ResetPasswordScreen() {
     setLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(email.value);
     if (error) {
-        Alert.alert('Error', error.message)
+      Alert.alert('Error', error.message);
     } else {
-        Alert.alert("Password has been reset. Check email.")
-        router.replace('/Login')
+      Alert.alert('Password has been reset. Check email.');
+      router.replace('/Login');
     }
-    }
+  }
 
   return (
     <Background>
       <BackButton goBack={() => router.back()} />
-      
+
       <Box className="items-center gap-6 px-6 w-full">
-        <Heading size="3xl" className="text-center">Restore Password</Heading>
+        <Heading size="3xl" className="text-center">
+          Restore Password
+        </Heading>
         <VStack space="md" className="w-full">
           <Input isInvalid={!!email.error} size="xl">
             <InputField
@@ -65,6 +67,5 @@ export default function ResetPasswordScreen() {
         </VStack>
       </Box>
     </Background>
-  )
+  );
 }
-

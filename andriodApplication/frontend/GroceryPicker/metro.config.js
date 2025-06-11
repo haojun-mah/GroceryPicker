@@ -16,9 +16,9 @@ config.resolver.extraNodeModules = {
   vm: require.resolve('vm-browserify'),
   https: require.resolve('https-browserify'),
   http: require.resolve('stream-http'),
-  net: require.resolve('stream-browserify'), 
+  net: require.resolve('stream-browserify'),
   tls: require.resolve('stream-browserify'),
-  zlib: require.resolve('browserify-zlib')
+  zlib: require.resolve('browserify-zlib'),
 };
 
 config.resolver.resolverMainFields = ['browser', 'main', 'module'];

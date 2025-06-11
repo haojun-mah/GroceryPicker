@@ -4,13 +4,18 @@ import React, { useState } from 'react';
 import { Text, View } from 'react-native';
 import { backend_url } from '../../config/api';
 import { useGroceryContext } from '@/context/groceryContext';
-import { GroceryMetadataTitleOutput, ErrorResponse } from '@/context/groceryContext';
+import {
+  GroceryMetadataTitleOutput,
+  ErrorResponse,
+} from '@/context/groceryContext';
+import { useSession } from '@/context/authContext';
 import { router } from 'expo-router';
 
 const groceryInput = () => {
-  const [groceryTextArea, setGroceryTextArea] = useState<string>("");
+  const [groceryTextArea, setGroceryTextArea] = useState<string>('');
   const { grocery, setGrocery, setIsLoading, setError } = useGroceryContext();
 
+  const { session } = useSession(); // obtain jwt from session context
 
   const postData = async () => {
     try {
@@ -19,28 +24,32 @@ const groceryInput = () => {
       }
       setIsLoading(true);
       setError(null);
+
       const response = await fetch(`${backend_url}/grocery/generate`, {
         method: 'POST',
         headers: {
+          Authorization: `${session}`, // send jwt token to backend
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ message: groceryTextArea }),
       });
 
-      const output : GroceryMetadataTitleOutput = await response.json();
-      if (response.ok) { // nested if-else ugly but intuitive when reading. consider refactoring if necessary
+      const output: GroceryMetadataTitleOutput = await response.json();
+
+      // refactoring is necessary here
+      if (response.ok) {
+        // nested if-else ugly but intuitive when reading. consider refactoring if necessary
         if (output.title === '!@#$%^') {
           alert('Invalid Grocery List Input!'); // very very weird and deterministic way to check for invalid grocery input
           return;
-        }
-        else if (grocery === null) {
-          setGrocery([ output ]);
+        } else if (grocery === null) {
+          setGrocery([output]);
         } else {
-          setGrocery([ output, ...grocery]);
+          setGrocery([output, ...grocery]);
         }
         router.push('/groceryHistory?openLatest=true');
       } else {
-        alert('Invalid Grocery List Input!');
+        alert(response.body);
       }
     } catch (error) {
       console.error(error);
@@ -54,11 +63,12 @@ const groceryInput = () => {
         Create Grocery List!
       </Text>
       <Textarea size="md" className="w-72">
-        <TextareaInput 
-          value={groceryTextArea} 
-          onChangeText={(value) => setGroceryTextArea(value)} 
-          placeholder="Insert your Groceries!" 
-          onSubmitEditing={() => postData()}/>
+        <TextareaInput
+          value={groceryTextArea}
+          onChangeText={(value) => setGroceryTextArea(value)}
+          placeholder="Insert your Groceries!"
+          onSubmitEditing={() => postData()}
+        />
       </Textarea>
       <ButtonGroup>
         <Button

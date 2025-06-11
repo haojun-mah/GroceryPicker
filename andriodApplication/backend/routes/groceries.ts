@@ -1,6 +1,7 @@
 import { Router } from 'express';
-import { fetchPricesController } from '../controllers/fetchPricesController'
+import { fetchPricesController } from '../controllers/fetchPricesController';
 import { generateGroceryList } from '../controllers/generateGroceryListController';
+import verifyToken from '../middleware/auth';
 const router = Router();
 
 // to change naming and route conventions if necessary.
@@ -9,8 +10,6 @@ const router = Router();
 router.post('/prices', fetchPricesController);
 
 // generates structured grocerylist from unstructured grocery input.
-router.post('/generate', generateGroceryList);
-
-
+router.post('/generate', verifyToken, generateGroceryList);
 
 export default router;

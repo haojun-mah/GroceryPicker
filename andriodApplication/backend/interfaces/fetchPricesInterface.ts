@@ -2,7 +2,6 @@
  *  This file includes the interface type definitions for groceryprices files.
  */
 
-
 export interface FetchPricesRequestBody {
   items: string[];
 }
@@ -13,7 +12,6 @@ export interface FetchedItemResponse {
   supermarket?: string;
   found: boolean;
 }
-
 
 export interface ProductRow {
   name: string;

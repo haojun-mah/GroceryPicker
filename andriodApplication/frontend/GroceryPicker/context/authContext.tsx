@@ -5,7 +5,7 @@ import React, {
   useContext,
   ReactNode,
 } from 'react';
-import { supabase } from './supabase';
+import { supabase } from '../lib/supabase';
 import { Session } from '@supabase/supabase-js';
 import { View, ActivityIndicator } from 'react-native';
 
@@ -32,9 +32,10 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const { data: listener } = supabase.auth.onAuthStateChange(
+      // listens if jwt session token is created. do not need to manually stash jwt
       (_event, session) => {
         setSession(session ?? null);
-      }
+      },
     );
 
     init();

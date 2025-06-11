@@ -15,9 +15,9 @@ export interface GeneratedGroceryItem {
 }
 
 export interface GroceryMetadataTitleOutput {
-    "title" : string;
-    "metadata" : string;
-    "items" : GeneratedGroceryItem[]; 
+  title: string;
+  metadata: string;
+  items: GeneratedGroceryItem[];
 }
 
 export type GeneratedGroceryListResponse = GeneratedGroceryItem[];
@@ -25,7 +25,7 @@ export type GeneratedGroceryListResponse = GeneratedGroceryItem[];
 export interface ErrorResponse {
   statusCode: number;
   message: string;
-  details?: string; 
+  details?: string;
 }
 
 export type ControllerError = ErrorResponse;

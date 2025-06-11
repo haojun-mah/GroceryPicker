@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { Animated, View, LayoutAnimation, Platform, UIManager } from 'react-native';
+import {
+  Animated,
+  View,
+  LayoutAnimation,
+  Platform,
+  UIManager,
+} from 'react-native';
 import { Button, ButtonGroup, ButtonIcon } from './ui/button';
 import { Card } from './ui/card';
 import { Heading } from './ui/heading';
@@ -7,7 +13,10 @@ import { ChevronDownIcon } from './ui/icon';
 import { Text } from './ui/text';
 
 // Enable LayoutAnimation for Android
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+if (
+  Platform.OS === 'android' &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
@@ -25,7 +34,6 @@ const DropdownCard = ({
   const [expanded, setExpanded] = useState(defaultOpen);
   const animation = useRef(new Animated.Value(0)).current;
 
-  
   useEffect(() => {
     // Optional: smooth layout changes for height
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -48,7 +56,10 @@ const DropdownCard = ({
   });
 
   return (
-    <Card className="w-full max-w-[95%] self-center rounded-xl p-4" variant="outline">
+    <Card
+      className="w-full max-w-[95%] self-center rounded-xl p-4"
+      variant="outline"
+    >
       <View className="flex-row items-center justify-between mb-2">
         <Heading size="md">{title}</Heading>
         <ButtonGroup>
@@ -85,6 +96,5 @@ const DropdownCard = ({
     </Card>
   );
 };
-
 
 export default DropdownCard;

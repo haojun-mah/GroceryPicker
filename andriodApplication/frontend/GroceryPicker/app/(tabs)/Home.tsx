@@ -6,14 +6,14 @@ import { supabase } from '@/lib/supabase';
 export default function HomePage() {
   // likewise have no idea why setting w-max is not working. unable to
   // standardise button width
-  
+
   async function signOut() {
     const { error } = await supabase.auth.signOut();
 
     if (error) {
       console.error('Error signing out:', error.message);
     } else {
-      router.replace("/(auth)/Login")
+      router.replace('/(auth)/Login');
     }
   }
 
@@ -54,8 +54,6 @@ export default function HomePage() {
             <ButtonText>Sign Out</ButtonText>
           </Button>
         </ButtonGroup>
-
-
       </View>
     </ScrollView>
   );

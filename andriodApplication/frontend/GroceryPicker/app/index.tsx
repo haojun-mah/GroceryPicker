@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'expo-router';
-import { useSession } from "../lib/session"
+import { useSession } from '../context/authContext';
 import { View, ActivityIndicator } from 'react-native';
 
 export default function Index() {
@@ -8,7 +8,8 @@ export default function Index() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading) { // loading check logic supposed to be here, to replace with a splash page
+    if (!isLoading) {
+      // loading check logic supposed to be here, to replace with a splash page
       if (session) {
         router.replace('/(tabs)/Home');
       } else {
