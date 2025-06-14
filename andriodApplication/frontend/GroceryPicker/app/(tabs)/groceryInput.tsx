@@ -10,13 +10,14 @@ import {
 } from '@/context/groceryContext';
 import { useSession } from '@/context/authContext';
 import { router } from 'expo-router';
+import { ColorModeSwitch } from '@/components/ColorModeSwitch';
 
 const groceryInput = () => {
   const [groceryTextArea, setGroceryTextArea] = useState<string>('');
   const { grocery, setGrocery, setIsLoading, setError } = useGroceryContext();
-
   const { session } = useSession(); // obtain jwt from session context
 
+  // submitting logic
   const postData = async () => {
     try {
       if (groceryTextArea.length === 0) {
@@ -24,11 +25,10 @@ const groceryInput = () => {
       }
       setIsLoading(true);
       setError(null);
-
       const response = await fetch(`${backend_url}/grocery/generate`, {
         method: 'POST',
         headers: {
-          Authorization: `${session}`, // send jwt token to backend
+          Authorization: `${session?.access_token}`, // send jwt token to backend
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ message: groceryTextArea }),
@@ -49,7 +49,7 @@ const groceryInput = () => {
         }
         router.push('/groceryHistory?openLatest=true');
       } else {
-        alert(response.body);
+        console.log(response);
       }
     } catch (error) {
       console.error(error);
@@ -59,6 +59,7 @@ const groceryInput = () => {
 
   return (
     <View className="flex items-center mt-10 gap-2">
+      <ColorModeSwitch/>
       <Text className="font-bold font-roboto text-2xl">
         Create Grocery List!
       </Text>
