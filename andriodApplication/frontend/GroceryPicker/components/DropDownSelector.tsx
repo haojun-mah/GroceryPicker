@@ -54,7 +54,7 @@ export const DropdownSelector = ({
   };
 
   return (
-    <View className="w-full rounded-xl p-4 bg-white shadow-black dark:bg-gray-800">
+    <View className="w-full rounded-xl p-4 bg-white shadow-black dark:bg-gray-700">
       <TouchableOpacity
         className="flex-row justify-between items-center"
         onPress={toggleOpen}
@@ -75,7 +75,7 @@ export const DropdownSelector = ({
               onPress={() => toggleSelection(item)}
               className={clsx(
                 'p-2 rounded-md my-1',
-                isSelected ? 'bg-blue-500' : 'bg-gray-100 dark:bg-gray-700'
+                isSelected ? 'bg-blue-500' : 'bg-gray-100 dark:bg-gray-500'
               )}
             >
               <Text

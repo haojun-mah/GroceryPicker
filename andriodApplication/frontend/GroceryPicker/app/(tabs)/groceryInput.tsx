@@ -12,39 +12,25 @@ import {
 import { useSession } from '@/context/authContext';
 import { router } from 'expo-router';
 import { ColorModeSwitch } from '@/components/ColorModeSwitch';
-import {
-  Select,
-  SelectTrigger,
-  SelectInput,
-  SelectIcon,
-  SelectPortal,
-  SelectBackdrop,
-  SelectContent,
-  SelectDragIndicator,
-  SelectDragIndicatorWrapper,
-  SelectItem,
-} from "@/components/ui/select"
-import { ChevronDownIcon } from "@/components/ui/icon"
 import { DropdownSelector } from '@/components/DropDownSelector';
 
 const groceryInput = () => {
   const [groceryTextArea, setGroceryTextArea] = useState<string>('');
   const { grocery, setGrocery, setIsLoading, setError } = useGroceryContext();
   const [selectedGroceryShop, setSelectedGroceryShop] = useState<string[]>([]);
-  const { session } = useSession(); // obtain jwt from session context
+  const { session } = useSession();
 
-  // submitting logic
   const postData = async () => {
     try {
-      if (groceryTextArea.length === 0) {
-        return;
-      }
+      if (groceryTextArea.length === 0) return;
+
       setIsLoading(true);
       setError(null);
+
       const response = await fetch(`${backend_url}/grocery/generate`, {
         method: 'POST',
         headers: {
-          Authorization: `${session?.access_token}`, // send jwt token to backend
+          Authorization: `${session?.access_token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ message: groceryTextArea }),
@@ -52,11 +38,9 @@ const groceryInput = () => {
 
       const output: GroceryMetadataTitleOutput = await response.json();
 
-      // refactoring is necessary here
       if (response.ok) {
-        // nested if-else ugly but intuitive when reading. consider refactoring if necessary
         if (output.title === '!@#$%^') {
-          alert('Invalid Grocery List Input!'); // very very weird and deterministic way to check for invalid grocery input
+          alert('Invalid Grocery List Input!');
           return;
         } else if (grocery === null) {
           setGrocery([output]);
@@ -74,21 +58,37 @@ const groceryInput = () => {
   };
 
   return (
-    <ScrollView className='bg-white dark:bg-black'>
-      <View className="flex items-center mt-10 gap-10">
-        <ColorModeSwitch/>
-        <View>
-          <Text>Create Grocery List</Text>
-          <Text>Unsure of what groceries?</Text>
-          <Text>Describe it and we will do the work!</Text>
+    <ScrollView className="bg-blue-500 min-h-screen">
+      <View className="flex items-center mt-10 gap-10 px-4">
+        <ColorModeSwitch />
+        <View className="gap-1 items-center">
+          <Text className="text-black text-4xl font-bold">Create Grocery List</Text>
+          <Text className="text-gray-800 text-sm">Unsure of what groceries?</Text>
+          <Text className="text-gray-800 text-sm">Describe it and we will do the work!</Text>
         </View>
-        <View className='gap-10'>
-          <Textarea>
-            <TextareaInput placeholder='Enter groceries or description'/>
-          </Textarea>
-          <DropdownSelector title='Select Grocery Shops' items={["FairPrice", "ShengShiong"]} selectedItems={selectedGroceryShop} onSelectionChange={setSelectedGroceryShop}/>
+
+        <View className="gap-4 bg-[#EEEEEE] rounded-xl px-4 py-6 w-full min-h-[100%] left-0 right-0">
+          <View className="bg-white rounded-xl p-2">
+            <Textarea className="border-0">
+              <TextareaInput
+                className='text-left text-top'
+                placeholder="Enter groceries or description"
+                value={groceryTextArea}
+                onChangeText={setGroceryTextArea}
+              />
+            </Textarea>
+          </View>
+
+          <View className="bg-white rounded-xl p-2">
+            <DropdownSelector
+              title="Select Grocery Shops"
+              items={['FairPrice', 'ShengShiong']}
+              selectedItems={selectedGroceryShop}
+              onSelectionChange={setSelectedGroceryShop}
+            />
+          </View>
         </View>
-     </View>
+      </View>
     </ScrollView>
   );
 };
