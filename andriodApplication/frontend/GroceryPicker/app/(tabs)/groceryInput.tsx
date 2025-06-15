@@ -1,7 +1,8 @@
 import { Button, ButtonGroup, ButtonText } from '@/components/ui/button';
 import { Textarea, TextareaInput } from '@/components/ui/textarea';
+import { Text } from '@/components/ui/text';
 import React, { useState } from 'react';
-import { Text, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { backend_url } from '../../config/api';
 import { useGroceryContext } from '@/context/groceryContext';
 import {
@@ -11,10 +12,25 @@ import {
 import { useSession } from '@/context/authContext';
 import { router } from 'expo-router';
 import { ColorModeSwitch } from '@/components/ColorModeSwitch';
+import {
+  Select,
+  SelectTrigger,
+  SelectInput,
+  SelectIcon,
+  SelectPortal,
+  SelectBackdrop,
+  SelectContent,
+  SelectDragIndicator,
+  SelectDragIndicatorWrapper,
+  SelectItem,
+} from "@/components/ui/select"
+import { ChevronDownIcon } from "@/components/ui/icon"
+import { DropdownSelector } from '@/components/DropDownSelector';
 
 const groceryInput = () => {
   const [groceryTextArea, setGroceryTextArea] = useState<string>('');
   const { grocery, setGrocery, setIsLoading, setError } = useGroceryContext();
+  const [selectedGroceryShop, setSelectedGroceryShop] = useState<string[]>([]);
   const { session } = useSession(); // obtain jwt from session context
 
   // submitting logic
@@ -58,31 +74,22 @@ const groceryInput = () => {
   };
 
   return (
-    <View className="flex items-center mt-10 gap-2">
-      <ColorModeSwitch/>
-      <Text className="font-bold font-roboto text-2xl">
-        Create Grocery List!
-      </Text>
-      <Textarea size="md" className="w-72">
-        <TextareaInput
-          value={groceryTextArea}
-          onChangeText={(value) => setGroceryTextArea(value)}
-          placeholder="Insert your Groceries!"
-          onSubmitEditing={() => postData()}
-        />
-      </Textarea>
-      <ButtonGroup>
-        <Button
-          className="bg-amber-50 hover:bg-black w-72"
-          size="xl"
-          variant="outline"
-          action="primary"
-          onPress={() => postData()}
-        >
-          <ButtonText>Generate List!</ButtonText>
-        </Button>
-      </ButtonGroup>
-    </View>
+    <ScrollView className='bg-white dark:bg-black'>
+      <View className="flex items-center mt-10 gap-10">
+        <ColorModeSwitch/>
+        <View>
+          <Text>Create Grocery List</Text>
+          <Text>Unsure of what groceries?</Text>
+          <Text>Describe it and we will do the work!</Text>
+        </View>
+        <View className='gap-10'>
+          <Textarea>
+            <TextareaInput placeholder='Enter groceries or description'/>
+          </Textarea>
+          <DropdownSelector title='Select Grocery Shops' items={["FairPrice", "ShengShiong"]} selectedItems={selectedGroceryShop} onSelectionChange={setSelectedGroceryShop}/>
+        </View>
+     </View>
+    </ScrollView>
   );
 };
 

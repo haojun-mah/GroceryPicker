@@ -1,15 +1,11 @@
-import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
-import { useState } from 'react';
 import { Redirect, Stack } from 'expo-router';
 import React from 'react';
 import '../global.css';
 import { SessionProvider, useSession } from '@/context/authContext';
 import { GroceryContextProvider } from '@/context/groceryContext';
 import 'cross-fetch/polyfill';
-import { ThemeProvider } from '@/components/ThemeProvider';
 
 export default function RootLayout() {
-  const [colorMode, setColorMode] = useState<"light" | "dark">("light");
 
   // session checks
   const session = useSession();
@@ -18,8 +14,6 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider>
-      <GluestackUIProvider mode={colorMode}>
         <GroceryContextProvider>
           <SessionProvider>
             <Stack screenOptions={{ headerShown: false }}>
@@ -28,7 +22,5 @@ export default function RootLayout() {
             </Stack>
           </SessionProvider>
         </GroceryContextProvider>
-      </GluestackUIProvider>
-    </ThemeProvider>
   );
 }
