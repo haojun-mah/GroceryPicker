@@ -7,81 +7,51 @@ import {
 } from '../interfaces/fetchPricesInterface';
 import { getProductsByNames } from '../models/grocerypricemodel';
 
-export async function fetchPricesController(
-  req: Request<
-    {},
-    FetchedItemResponse[] | ErrorResponse,
-    FetchPricesRequestBody,
-    {}
-  >,
-  res: Response<FetchedItemResponse[] | ErrorResponse>,
-): Promise<void> {
-  const { items } = req.body;
+export const fetchPricesController = async (req: Request, res: Response): Promise<void> => {
+  const { items } = req.body as FetchPricesRequestBody;
 
-  // Validate input
   if (!Array.isArray(items) || items.length === 0) {
-    res
-      .status(400)
-      .json({
-        statusCode: 400,
-        message: 'Request body must contain a non-empty array of "items".',
-      });
+    res.status(400).json({ statusCode: 400, message: 'Request body must contain a non-empty array of "items".' });
     return;
   }
 
-  console.log(`Controller: Fetching prices for items: ${items.join(', ')}`);
-
   try {
-    // Query database via the import models. Ref model to understand logic
     const productsResult = await getProductsByNames(items);
 
-    // Handle model-level errors
-    if ('statusCode' in productsResult && 'message' in productsResult) {
+    if ('statusCode' in productsResult) {
       res.status(productsResult.statusCode || 500).json(productsResult);
       return;
     }
 
-    // Process results
-    const dbItems: ProductRow[] = productsResult; // Type is now ProductRow[] due to narrowing
+    const dbItems: ProductRow[] = productsResult;
 
-    // part of the error handling. productResult is already filtered. This code iterates through productResult to see if the item exist in the DB. Then, it returns respective json format.
     const results: FetchedItemResponse[] = items.map((itemName) => {
-      const foundItem = dbItems.find((dbItem) => dbItem.name === itemName);
+      // Find all products that match the name, case-insensitively
+      const matchingProducts = dbItems.filter(dbItem => 
+        dbItem.name.toLowerCase().includes(itemName.toLowerCase())
+      );
 
-      if (foundItem) {
-        return {
-          name: foundItem.name,
-          price: foundItem.price !== null ? foundItem.price : undefined,
-          supermarket:
-            foundItem.supermarket !== null ? foundItem.supermarket : undefined,
-          found: true,
-        };
-      } else {
-        return {
-          name: itemName,
-          found: false,
-          message: `Item "${itemName}" not found in the database.`,
-        };
+      if (matchingProducts.length === 0) {
+        return { name: itemName, found: false, message: `Item "${itemName}" not found in the database.` };
       }
+
+      // Find the cheapest product among the matches
+      const cheapestProduct = matchingProducts.reduce((cheapest, current) => 
+        (current.price !== null && (cheapest.price === null || current.price < cheapest.price)) ? current : cheapest
+      );
+
+      return {
+        name: cheapestProduct.name,
+        price: cheapestProduct.price !== null ? cheapestProduct.price : undefined,
+        supermarket: cheapestProduct.supermarket !== null ? cheapestProduct.supermarket : undefined,
+        found: true,
+      };
     });
 
-    console.log('Controller: Successfully fetched and processed prices.');
-    res.json(results);
+    res.status(200).json(results);
   } catch (error) {
-    console.error(
-      'Controller: Internal server error processing request:',
-      error,
-    );
-    const errorMessage =
-      error instanceof Error
-        ? error.message
-        : 'An unknown internal server error occurred.';
-    res
-      .status(500)
-      .json({
-        statusCode: 500,
-        message: 'Internal server error: ' + errorMessage,
-      });
-    return;
+    const e = error as Error;
+    console.error(`[Controller Error] fetchPricesController: ${e.message}`);
+    res.status(500).json({ statusCode: 500, message: 'Internal server error in controller.' });
   }
-}
+};
