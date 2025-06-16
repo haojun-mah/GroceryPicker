@@ -2,23 +2,24 @@ import { Button, ButtonGroup, ButtonText } from '@/components/ui/button';
 import { Textarea, TextareaInput } from '@/components/ui/textarea';
 import { Text } from '@/components/ui/text';
 import React, { useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Dimensions, ScrollView, View } from 'react-native';
 import { backend_url } from '../../config/api';
 import { useGroceryContext } from '@/context/groceryContext';
 import {
   GroceryMetadataTitleOutput,
-  ErrorResponse,
 } from '@/context/groceryContext';
 import { useSession } from '@/context/authContext';
 import { router } from 'expo-router';
 import { ColorModeSwitch } from '@/components/ColorModeSwitch';
 import { DropdownSelector } from '@/components/DropDownSelector';
+import { useColorScheme } from 'nativewind';
 
 const groceryInput = () => {
   const [groceryTextArea, setGroceryTextArea] = useState<string>('');
   const { grocery, setGrocery, setIsLoading, setError } = useGroceryContext();
   const [selectedGroceryShop, setSelectedGroceryShop] = useState<string[]>([]);
   const { session } = useSession();
+  const { colorScheme } = useColorScheme();
 
   const postData = async () => {
     try {
@@ -58,28 +59,31 @@ const groceryInput = () => {
   };
 
   return (
-    <ScrollView className="bg-blue-500 min-h-screen">
+    <ScrollView className="bg-blue-500 dark:bg-black min-h-screen">
       <View className="flex items-center mt-10 gap-10 px-4">
         <ColorModeSwitch />
-        <View className="gap-1 items-center">
-          <Text className="text-black text-4xl font-bold">Create Grocery List</Text>
-          <Text className="text-gray-800 text-sm">Unsure of what groceries?</Text>
-          <Text className="text-gray-800 text-sm">Describe it and we will do the work!</Text>
-        </View>
+        <View className="gap-5 items-center">
+          <Text className="text-white text-5xl font-bold text-center">Create Grocery List</Text>
+          <View className='items-center'>
+            <Text className="text-blue-200 text-sm">Unsure of what groceries?</Text>
+            <Text className="text-blue-200 text-sm">Describe it and we will do the work!</Text>
+          </View>
+       </View>
 
-        <View className="gap-4 bg-[#EEEEEE] rounded-xl px-4 py-6 w-full min-h-[100%] left-0 right-0">
-          <View className="bg-white rounded-xl p-2">
-            <Textarea className="border-0">
+        <View className="gap-4 bg-[#EEEEEE] dark:bg-gray-800 rounded-xl min-h-[100%] px-4 py-6 w-full left-0 right-0">
+          <View className="bg-white dark:bg-gray-700 rounded-xl px-3 pt-2 pb-3">
+            <Textarea className="border-0 h-40 justify-start">
               <TextareaInput
-                className='text-left text-top'
+                className="text-left font-roboto text-black dark:text-white pt-0"
                 placeholder="Enter groceries or description"
+                placeholderTextColor="white"
                 value={groceryTextArea}
                 onChangeText={setGroceryTextArea}
               />
             </Textarea>
           </View>
 
-          <View className="bg-white rounded-xl p-2">
+          <View className="bg-white dark:bg-gray-700 rounded-xl px-3 pt-2 pb-3">
             <DropdownSelector
               title="Select Grocery Shops"
               items={['FairPrice', 'ShengShiong']}
@@ -87,6 +91,20 @@ const groceryInput = () => {
               onSelectionChange={setSelectedGroceryShop}
             />
           </View>
+          <ButtonGroup className="rounded-xl overflow-hidden w-full">
+            <Button
+              className="
+                w-full h-12 justify-center items-center
+                bg-blue-700 dark:bg-gray-600
+                active:bg-blue-500 dark:active:bg-gray-300
+              "
+              onPress={postData}
+            >
+              <ButtonText pointerEvents='none' className="text-white dark:text-black active:text-white dark:active:text-black">
+                Generate Grocery List!
+              </ButtonText>
+            </Button>
+          </ButtonGroup>
         </View>
       </View>
     </ScrollView>

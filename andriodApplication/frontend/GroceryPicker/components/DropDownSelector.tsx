@@ -7,6 +7,7 @@ import Animated, {
   interpolate,
 } from 'react-native-reanimated';
 import Entypo from '@expo/vector-icons/Entypo';
+import { useColorScheme } from 'nativewind';
 import clsx from 'clsx';
 
 interface DropdownSelectorProps {
@@ -25,7 +26,7 @@ export const DropdownSelector = ({
   const [open, setOpen] = useState(false);
   const height = useSharedValue(0);
   const rotation = useSharedValue(0); // 0 for closed, 1 for open
-
+  const { colorScheme } = useColorScheme();
   const animatedHeightStyle = useAnimatedStyle(() => ({
     height: withTiming(height.value, { duration: 300 }),
     overflow: 'hidden',
@@ -59,11 +60,11 @@ export const DropdownSelector = ({
         className="flex-row justify-between items-center"
         onPress={toggleOpen}
       >
-        <Text className="text-lg font-semibold font-roboto text-gray-800 dark:text-white">
-          {title}
-        </Text>
+      <Text className="text-md text-center font-roboto text-gray-800 dark:text-white">
+        {title}
+      </Text>
         <Animated.View style={animatedChevronStyle}>
-          <Entypo name="chevron-down" size={24} color="black" />
+          <Entypo name="chevron-down" size={24} color={colorScheme === 'light' ? "black" : "white"} />
         </Animated.View>
       </TouchableOpacity>
       <Animated.View style={animatedHeightStyle} className="mt-2">
