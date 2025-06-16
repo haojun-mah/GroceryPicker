@@ -19,7 +19,6 @@ const groceryInput = () => {
   const { grocery, setGrocery, setIsLoading, setError } = useGroceryContext();
   const [selectedGroceryShop, setSelectedGroceryShop] = useState<string[]>([]);
   const { session } = useSession();
-  const { colorScheme } = useColorScheme();
 
   const postData = async () => {
     try {
@@ -48,7 +47,7 @@ const groceryInput = () => {
         } else {
           setGrocery([output, ...grocery]);
         }
-        router.push('/groceryHistory?openLatest=true');
+        router.push('/groceryRefinement');
       } else {
         console.log(response);
       }
@@ -60,7 +59,7 @@ const groceryInput = () => {
 
   return (
     <ScrollView className="bg-blue-500 dark:bg-black min-h-screen">
-      <View className="flex items-center mt-10 gap-10 px-4">
+      <View className="flex items-center mt-10 gap-10">
         <ColorModeSwitch />
         <View className="gap-5 items-center">
           <Text className="text-white text-5xl font-bold text-center">Create Grocery List</Text>
