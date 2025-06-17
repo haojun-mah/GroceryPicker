@@ -2,23 +2,23 @@ import { Button, ButtonGroup, ButtonText } from '@/components/ui/button';
 import { Textarea, TextareaInput } from '@/components/ui/textarea';
 import { Text } from '@/components/ui/text';
 import React, { useState } from 'react';
-import { Dimensions, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { backend_url } from '../../config/api';
 import { useGroceryContext } from '@/context/groceryContext';
 import {
   GroceryMetadataTitleOutput,
 } from '@/context/groceryContext';
 import { useSession } from '@/context/authContext';
+import { useGroceryRefinementContext } from '@/context/groceryRefinement';
 import { router } from 'expo-router';
 import { ColorModeSwitch } from '@/components/ColorModeSwitch';
 import { DropdownSelector } from '@/components/DropDownSelector';
-import { useColorScheme } from 'nativewind';
 
 const groceryInput = () => {
   const [groceryTextArea, setGroceryTextArea] = useState<string>('');
-  const { grocery, setGrocery, setIsLoading, setError } = useGroceryContext();
   const [selectedGroceryShop, setSelectedGroceryShop] = useState<string[]>([]);
   const { session } = useSession();
+  const { setIsLoading, setError, setGroceryRefinement } = useGroceryRefinementContext();
 
   const postData = async () => {
     try {
@@ -38,18 +38,11 @@ const groceryInput = () => {
 
       const output: GroceryMetadataTitleOutput = await response.json();
 
-      if (response.ok) {
-        if (output.title === '!@#$%^') {
-          alert('Invalid Grocery List Input!');
-          return;
-        } else if (grocery === null) {
-          setGrocery([output]);
-        } else {
-          setGrocery([output, ...grocery]);
-        }
+      if (response.ok && output.title !== '!@#$%^') {
+        setGroceryRefinement(output);
         router.push('/groceryRefinement');
       } else {
-        console.log(response);
+        alert('Your Grocery List Contains Invalid Items!');
       }
     } catch (error) {
       console.error(error);

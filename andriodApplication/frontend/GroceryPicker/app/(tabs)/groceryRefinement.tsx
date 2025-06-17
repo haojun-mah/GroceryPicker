@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dimensions, View } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -14,7 +14,7 @@ const { height: screenHeight } = Dimensions.get('window');
 
 const ModalPage = () => {
   const modalHeight = useSharedValue(screenHeight * 0.55555); // screenheight * x, where x is the percentage the screen starts from
-  const router = useRouter();
+  const [generateGrocery, setGeneratedGrocery] = useState<string>("")
 
   useEffect(() => {
     modalHeight.value = withTiming(screenHeight * 0.9, { duration: 500 }); // screenheight * x, where x is the percentage the screen expands to
@@ -25,6 +25,7 @@ const ModalPage = () => {
       height: modalHeight.value,
     };
   });
+
 
   return (
     <View className="flex-1 bg-blue-700 dark:bg-black justify-end">
@@ -49,9 +50,10 @@ const ModalPage = () => {
         <View className="w-full">
           <Textarea className="w-full h-40 rounded-xl text-black dark:text-white bg-white dark:bg-gray-700 border-0 focus:border-0 focus:outline-none">
             <TextareaInput
-              placeholder="Groceries here"
               className="text-black"
               multiline
+              value={generateGrocery}
+              onChangeText={(e : string) => setGeneratedGrocery(e)}
             />
           </Textarea>
         </View>
@@ -59,13 +61,13 @@ const ModalPage = () => {
         <ButtonGroup className="w-full gap-4 flex-row justify-center">
           <Button className="bg-blue-700 rounded-md dark:bg-gray-600
                 active:bg-blue-500 dark:active:bg-gray-300
-              " style={{width: '45%'}}>
+              " style={{width: '49%'}}>
             <ButtonText className="text-white">Refine My List</ButtonText>
           </Button>
 
           <Button className="bg-blue-700 rounded-md dark:bg-gray-600
                 active:bg-blue-500 dark:active:bg-gray-300
-              " style={{width: '45%'}}>
+              " style={{width: '49%'}}>
                     <ButtonText className="text-white text-center" >Find Cheapest</ButtonText>
           </Button>
         </ButtonGroup>
