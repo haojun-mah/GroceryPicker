@@ -9,15 +9,33 @@ import { useRouter } from 'expo-router';
 import { Text } from '@/components/ui/text';
 import { Textarea, TextareaInput } from '@/components/ui/textarea';
 import { ButtonGroup, Button, ButtonText } from '@/components/ui/button';
+import { useGroceryRefinementContext } from '@/context/groceryRefinement';
+import { GroceryItem, GroceryMetadataTitleOutput } from '@/context/groceryContext';
+import { useSession } from '@/context/authContext';
 
 const { height: screenHeight } = Dimensions.get('window');
 
 const ModalPage = () => {
   const modalHeight = useSharedValue(screenHeight * 0.55555); // screenheight * x, where x is the percentage the screen starts from
-  const [generateGrocery, setGeneratedGrocery] = useState<string>("")
+  const [generateGrocery, setGeneratedGrocery] = useState<string>("");
+  const { groceryRefinement, setGroceryRefinement } = useGroceryRefinementContext();
+  const groceryList : GroceryItem[] | undefined = groceryRefinement?.items;
+  const { session } = useSession();
 
   useEffect(() => {
     modalHeight.value = withTiming(screenHeight * 0.9, { duration: 500 }); // screenheight * x, where x is the percentage the screen expands to
+  }, []);
+
+  // runs through grocerylist array, converting all groceries into a single string
+  // useEffect needed to prevent it from perma running
+
+  useEffect(() => {
+    if (groceryList !== undefined) {
+      let groceryListString : string = ""
+      for (let i = 0; i < groceryList.length; i++) {
+        groceryListString += groceryList[i].name + ' - ' + groceryList[i].quantity + groceryList[i].unit + '\n';
+      }
+    }
   }, []);
 
   const animatedStyle = useAnimatedStyle(() => {
@@ -25,6 +43,64 @@ const ModalPage = () => {
       height: modalHeight.value,
     };
   });
+
+  // sends user edited grocerylist as a string type into backend for regeneration. backend to support refinement
+  const refineMyList = async () => {
+    try {
+      if (generateGrocery.length === 0) return;
+
+      const response = await fetch('api', {
+        method: 'POST',
+        headers: {
+          Authorization: `${session?.access_token}`,
+          'Context-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: generateGrocery}),
+      })
+
+      const output : GroceryMetadataTitleOutput = await response.json() // define output types
+
+      if (response.ok) {
+        const groceryList : GroceryItem[] = output.items;
+        let groceryListString : string = ""
+        for (let i = 0; i < groceryList.length; i++) {
+          groceryListString += groceryListString + groceryList[i].name + ' - ' + groceryList[i].quantity + groceryList[i].unit + '\n';
+        }
+        setGeneratedGrocery(groceryListString);
+        // test if rerendering is necessary after it has been set
+      }
+    } catch (error) {
+      // may need a better User Error handling
+      console.log(error);
+      alert(error);
+    }
+  }
+
+  // sends grocery list to back end to run optimisation
+  const findCheapest = async () => {
+    try {
+      if (generateGrocery.length === 0) return;
+
+      const response = await fetch('api', {
+        method: 'POST',
+        headers: {
+          Authorization: `${session?.access_token}`,
+          'Context-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: groceryRefinement}),
+      })
+
+      const output : GroceryMetadataTitleOutput = await response.json() // define output types
+
+      
+
+
+    } catch (error) {
+      // may need a better User Error handling
+      console.log(error);
+      alert(error);
+    }
+  }
 
 
   return (
