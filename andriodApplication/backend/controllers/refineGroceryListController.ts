@@ -13,7 +13,7 @@ GroceryMetadataTitleOutput | ErrorResponse,
 RefinementPrompt,
 {}
 > = async (req, res) => {
-    const input = req.body.message;
+    const input : string = req.body.message;
     const instruction = `You are a grocery generator. You have previously
     generated a grocery list with given prompts and information. You are
     given a refined grocery list by the user. The refined grocery list contains
@@ -28,6 +28,11 @@ RefinementPrompt,
     The title MUST BE A SUMMARY OF GROCERY ITEMS. DO NOT GIVE "TITLE". The
     summarised title is made from the summary of the new refined grocery.
     Groceries MUST BE SEPERATED BY /
+    When given suggestions, answer to the best of abilities
+    Do not give examples e.g. such as apples, carrots.
+    Give definite ingredients. Make the decision for the user.
+    Name/quantity/unit must be GIVEN. QUANTITY MUST BE GIVEN TO ALL ITEMS
+    REGARDLESS IF THERE ISNT ANY.
 
     Example output:
     Title
@@ -35,13 +40,13 @@ RefinementPrompt,
     Milk/1/liter
     Bread/1/loaf
     `
-if (typeof input !== 'string' || input.trim().length === 0) {
-    res.status(400).json({
-      statusCode: 400,
-      message: 'Request body is empty or not a string',
-    });
-    return;
-  }
+  if (typeof input !== 'string' || input.trim().length === 0) {
+      res.status(400).json({
+        statusCode: 400,
+        message: 'Request body is empty or not a string',
+      });
+      return;
+    }
 
   // this entire paragraph is me trying to convert LLM information into JSON
   try {

@@ -12,12 +12,21 @@ import { ButtonGroup, Button, ButtonText } from '@/components/ui/button';
 import { useGroceryRefinementContext } from '@/context/groceryRefinement';
 import { GroceryItem, GroceryMetadataTitleOutput } from '@/context/groceryContext';
 import { useSession } from '@/context/authContext';
+import { backend_url } from '../../config/api';
+
+/*
+  This page takes in generated grocery list and display it to the user. The user
+  can edit the grocery list and subsequently either pass to LLM to refine again
+  or pass to the optimsation algorithm to generate optimised grocery list.
+  Refinement will rerender the same page with updated grocery while Find
+  Cheapest will lead to grocery list display page 
+*/
 
 const { height: screenHeight } = Dimensions.get('window');
 
 const ModalPage = () => {
   const modalHeight = useSharedValue(screenHeight * 0.55555); // screenheight * x, where x is the percentage the screen starts from
-  const [generateGrocery, setGeneratedGrocery] = useState<string>("");
+  const [generateRefinementGrocery, setGenerateRefinementGrocery] = useState<string>("");
   const { groceryRefinement, setGroceryRefinement } = useGroceryRefinementContext();
   const groceryList : GroceryItem[] | undefined = groceryRefinement?.items;
   const { session } = useSession();
@@ -27,14 +36,14 @@ const ModalPage = () => {
   }, []);
 
   // runs through grocerylist array, converting all groceries into a single string
-  // useEffect needed to prevent it from perma running
-
+  // useEffect needed to prevent it from perma running. useEffect dictates this function to only run during render
   useEffect(() => {
     if (groceryList !== undefined) {
       let groceryListString : string = ""
       for (let i = 0; i < groceryList.length; i++) {
         groceryListString += groceryList[i].name + ' - ' + groceryList[i].quantity + groceryList[i].unit + '\n';
       }
+      setGenerateRefinementGrocery(groceryListString);
     }
   }, []);
 
@@ -47,26 +56,26 @@ const ModalPage = () => {
   // sends user edited grocerylist as a string type into backend for regeneration. backend to support refinement
   const refineMyList = async () => {
     try {
-      if (generateGrocery.length === 0) return;
-
-      const response = await fetch('api', {
+      if (generateRefinementGrocery.length === 0) return;
+      const response = await fetch(`${backend_url}/grocery/refine`, {
         method: 'POST',
         headers: {
           Authorization: `${session?.access_token}`,
-          'Context-Type': 'application/json',
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: generateGrocery}),
+        body: JSON.stringify({ message: generateRefinementGrocery}),
       })
 
       const output : GroceryMetadataTitleOutput = await response.json() // define output types
 
       if (response.ok) {
         const groceryList : GroceryItem[] = output.items;
+        setGroceryRefinement(output);
         let groceryListString : string = ""
         for (let i = 0; i < groceryList.length; i++) {
-          groceryListString += groceryListString + groceryList[i].name + ' - ' + groceryList[i].quantity + groceryList[i].unit + '\n';
+          groceryListString += groceryList[i].name + ' - ' + groceryList[i].quantity + groceryList[i].unit + '\n';
         }
-        setGeneratedGrocery(groceryListString);
+        setGenerateRefinementGrocery(groceryListString);
         // test if rerendering is necessary after it has been set
       }
     } catch (error) {
@@ -79,9 +88,9 @@ const ModalPage = () => {
   // sends grocery list to back end to run optimisation
   const findCheapest = async () => {
     try {
-      if (generateGrocery.length === 0) return;
+      if (generateRefinementGrocery.length === 0) return;
 
-      const response = await fetch('api', {
+      const response = await fetch('${backend_url}/grocery/optimize', {
         method: 'POST',
         headers: {
           Authorization: `${session?.access_token}`,
@@ -89,11 +98,8 @@ const ModalPage = () => {
         },
         body: JSON.stringify({ message: groceryRefinement}),
       })
-
+      console.log(response.body);
       const output : GroceryMetadataTitleOutput = await response.json() // define output types
-
-      
-
 
     } catch (error) {
       // may need a better User Error handling
@@ -128,8 +134,8 @@ const ModalPage = () => {
             <TextareaInput
               className="text-black"
               multiline
-              value={generateGrocery}
-              onChangeText={(e : string) => setGeneratedGrocery(e)}
+              value={generateRefinementGrocery}
+              onChangeText={(e : string) => setGenerateRefinementGrocery(e)}
             />
           </Textarea>
         </View>
@@ -137,14 +143,16 @@ const ModalPage = () => {
         <ButtonGroup className="w-full gap-4 flex-row justify-center">
           <Button className="bg-blue-700 rounded-md dark:bg-gray-600
                 active:bg-blue-500 dark:active:bg-gray-300
-              " style={{width: '49%'}}>
+              " style={{width: '49%'}}
+              onPress={refineMyList}>
             <ButtonText className="text-white">Refine My List</ButtonText>
           </Button>
 
           <Button className="bg-blue-700 rounded-md dark:bg-gray-600
                 active:bg-blue-500 dark:active:bg-gray-300
-              " style={{width: '49%'}}>
-                    <ButtonText className="text-white text-center" >Find Cheapest</ButtonText>
+              " style={{width: '49%'}}
+              onPress={findCheapest}>
+            <ButtonText className="text-white text-center" >Find Cheapest</ButtonText>
           </Button>
         </ButtonGroup>
       </Animated.View>

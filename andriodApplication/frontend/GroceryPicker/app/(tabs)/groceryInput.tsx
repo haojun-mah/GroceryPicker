@@ -26,7 +26,6 @@ const groceryInput = () => {
 
       setIsLoading(true);
       setError(null);
-
       const response = await fetch(`${backend_url}/grocery/generate`, {
         method: 'POST',
         headers: {
@@ -41,6 +40,8 @@ const groceryInput = () => {
       if (response.ok && output.title !== '!@#$%^') {
         setGroceryRefinement(output);
         router.push('/groceryRefinement');
+      } else if (response.status === 403) {
+        alert('You are not authorized to perform this action. Please log in again.');
       } else {
         alert('Your Grocery List Contains Invalid Items!');
       }
