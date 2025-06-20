@@ -1,11 +1,8 @@
-// Import only the standard Request and Response types from express
 import { Request, Response } from 'express';
 import { getAllUserLists } from '../models/groceryListModel';
-// The import for AuthenticatedRequest has been removed.
 
 export const getAllUserGroceryLists = async (req: Request, res: Response): Promise<void> => {
   try {
-    // No more casting needed!
     const userId = req.user?.id;
 
     if (!userId) {
