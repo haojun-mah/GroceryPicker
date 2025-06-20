@@ -1,16 +1,13 @@
 import { RequestHandler } from "express-serve-static-core";
-import { GroceryMetadataTitleOutput, GeneratedGroceryItem } from "../interfaces/generateGroceryListInterface";
+import { GroceryMetadataTitleOutput, GeneratedGroceryItem, AiPromptRequestBody } from "../interfaces/generateGroceryListInterface";
 import { ErrorResponse } from "../interfaces/fetchPricesInterface";
 import generate from "../services/llm";
 
-interface RefinementPrompt {
-    message: string
-}
 
 export const refineGroceryListController: RequestHandler<
 {},
 GroceryMetadataTitleOutput | ErrorResponse,
-RefinementPrompt,
+AiPromptRequestBody,
 {}
 > = async (req, res) => {
     const input : string = req.body.message;
@@ -89,6 +86,7 @@ RefinementPrompt,
         title: title,
         metadata: metadata,
         items: arrayGrocery,
+        groceryShop: req.body.groceryShop,
       };
 
       res.status(200).json(output);

@@ -27,7 +27,7 @@ const { height: screenHeight } = Dimensions.get('window');
 const ModalPage = () => {
   const modalHeight = useSharedValue(screenHeight * 0.55555); // screenheight * x, where x is the percentage the screen starts from
   const [generateRefinementGrocery, setGenerateRefinementGrocery] = useState<string>("");
-  const { groceryRefinement, setGroceryRefinement } = useGroceryRefinementContext();
+  const { groceryRefinement, setGroceryRefinement, setGroceryShop } = useGroceryRefinementContext();
   const groceryList : GroceryItem[] | undefined = groceryRefinement?.items;
   const { session } = useSession();
 
@@ -71,6 +71,7 @@ const ModalPage = () => {
       if (response.ok) {
         const groceryList : GroceryItem[] = output.items;
         setGroceryRefinement(output);
+        setGroceryShop(output.groceryShop);
         let groceryListString : string = ""
         for (let i = 0; i < groceryList.length; i++) {
           groceryListString += groceryList[i].name + ' - ' + groceryList[i].quantity + groceryList[i].unit + '\n';

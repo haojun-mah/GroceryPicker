@@ -1,5 +1,6 @@
 export interface AiPromptRequestBody {
   message: string;
+  groceryShop: string[];
 }
 
 export interface ProductRow {
@@ -18,6 +19,7 @@ export interface GroceryMetadataTitleOutput {
   title: string;
   metadata: string;
   items: GeneratedGroceryItem[];
+  groceryShop: string[];
 }
 
 export type GeneratedGroceryListResponse = GeneratedGroceryItem[];

@@ -89,6 +89,7 @@ export const generateGroceryList: RequestHandler<
         title: title,
         metadata: metadata,
         items: arrayGrocery,
+        groceryShop: req.body.groceryShop,
       };
 
       res.status(200).json(output);

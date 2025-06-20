@@ -18,7 +18,7 @@ const groceryInput = () => {
   const [groceryTextArea, setGroceryTextArea] = useState<string>('');
   const [selectedGroceryShop, setSelectedGroceryShop] = useState<string[]>([]);
   const { session } = useSession();
-  const { setIsLoading, setError, setGroceryRefinement } = useGroceryRefinementContext();
+  const { setIsLoading, setError, setGroceryRefinement, setGroceryShop } = useGroceryRefinementContext();
 
   const postData = async () => {
     try {
@@ -32,13 +32,14 @@ const groceryInput = () => {
           Authorization: `${session?.access_token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: groceryTextArea }),
+        body: JSON.stringify({ message: groceryTextArea, groceryShop: selectedGroceryShop}),
       });
 
       const output: GroceryMetadataTitleOutput = await response.json();
 
       if (response.ok && output.title !== '!@#$%^') {
         setGroceryRefinement(output);
+        setGroceryShop(selectedGroceryShop);
         router.push('/groceryRefinement');
       } else if (response.status === 403) {
         alert('You are not authorized to perform this action. Please log in again.');
