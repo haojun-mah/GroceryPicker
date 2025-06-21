@@ -60,7 +60,7 @@ export const DropdownSelector = ({
         className="flex-row justify-between items-center"
         onPress={toggleOpen}
       >
-      <Text className="text-md text-center font-roboto text-gray-800 dark:text-white">
+      <Text className="text-md font-semibold text-center font-roboto text-gray-800 dark:text-white">
         {title}
       </Text>
         <Animated.View style={animatedChevronStyle}>

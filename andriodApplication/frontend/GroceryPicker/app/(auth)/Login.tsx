@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Pressable } from 'react-native';
+import { KeyboardAvoidingView, Pressable, Alert, ScrollView } from 'react-native';
 import { supabase } from '@/lib/supabase';
 import { Box } from '@/components/ui/box';
 import { Text } from '@/components/ui/text';
@@ -7,27 +7,26 @@ import { Input, InputField, InputIcon } from '@/components/ui/input';
 import { Button, ButtonGroup, ButtonText } from '@/components/ui/button';
 import { VStack } from '@/components/ui/vstack';
 import { Heading } from '@/components/ui/heading';
-import { Alert } from 'react-native';
 import { Image } from '@/components/ui/image';
 import { EyeIcon, EyeOffIcon, MailIcon, LockIcon } from '@/components/ui/icon';
 import { useRouter } from 'expo-router';
+import { useColorScheme } from 'nativewind';
 import Logo from '../../assets/images/icon.png';
-import Background from '@/components/Background';
 
 export default function Login() {
   const router = useRouter();
   const [email, setEmail] = useState({ value: '', error: '' });
   const [password, setPassword] = useState({ value: '', error: '' });
-  const [loading, setLoading] = useState(false); // archive, set splash screen when loading
+  const [loading, setLoading] = useState(false);
+  const { colorScheme } = useColorScheme();
 
   async function signInWithEmail() {
+    if (email.value.length === 0 || password.value.length === 0) return;
     setLoading(true);
-
     const { data, error } = await supabase.auth.signInWithPassword({
       email: email.value,
       password: password.value,
     });
-    // authContext contain jwt listener. automatically stashes jwt under auth in authContext. do not need to manually stash authContext
 
     if (error) {
       Alert.alert(error.message);
@@ -39,74 +38,82 @@ export default function Login() {
   }
 
   return (
-    <Background>
+      <ScrollView className='bg-[#EEEEEE} dark:bg-gray-900' contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center' }}>
       <Box className="flex-1 px-6 bg-white dark:bg-gray-900 justify-center">
         <Box className="items-center mb-16">
           <Image source={Logo} size="2xl" alt="Logo" />
         </Box>
+
         <VStack space="md">
-          <Heading size="4xl" className="text-center mb-8">
+          <Heading size="4xl" className="w-full text-center mb-8 text-black dark:text-white">
             GroceryPicker
           </Heading>
-          <Box>
-            <Input className="p-2 h-16" isInvalid={!!email.error}>
-              <InputIcon as={MailIcon} className="w-6 h-6" />
-              <InputField
-                placeholder="Email"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoComplete="email"
-                value={email.value}
-                className="m-0"
-                onChangeText={(text) => setEmail({ value: text, error: '' })}
-              />
-            </Input>
-            {email.error ? (
-              <Text className="text-red-500 text-xs mt-1">{email.error}</Text>
-            ) : null}
-          </Box>
 
-          <Box>
-            <Input className="p-2 h-16" isInvalid={!!password.error}>
-              <InputIcon as={LockIcon} className="w-6 h-6" />
-              <InputField
-                placeholder="Password"
-                secureTextEntry
-                value={password.value}
-                className="m-0"
-                onChangeText={(text) => setPassword({ value: text, error: '' })}
-              />
-            </Input>
-            {password.error ? (
-              <Text className="text-red-500 text-xs mt-1">
-                {password.error}
-              </Text>
-            ) : null}
-          </Box>
+          <KeyboardAvoidingView>
+            <Box>
+              <Input className={`p-2 h-16 w-full bg-gray-100 dark:bg-gray-800 border ${
+                  colorScheme === 'dark' ? 'border-gray-400' : 'border-white'
+                }`} isInvalid={!!email.error}>
+                <InputIcon as={MailIcon} className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+                <InputField
+                  placeholder="Email"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  value={email.value}
+                  className="m-0 text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                  onChangeText={(text) => setEmail({ value: text, error: '' })}
+                />
+              </Input>
+              {email.error ? (
+                <Text className="text-red-500 text-xs mt-1">{email.error}</Text>
+              ) : null}
+            </Box>
+
+            <Box className="mt-4">
+              <Input className={`p-2 h-16 w-full bg-gray-100 dark:bg-gray-800 border ${
+                  colorScheme === 'dark' ? 'border-gray-400' : 'border-white'
+                }`} isInvalid={!!password.error}>
+                <InputIcon as={LockIcon} className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+                <InputField
+                  placeholder="Password"
+                  secureTextEntry
+                  value={password.value}
+                  className="m-0 text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                  onChangeText={(text) => setPassword({ value: text, error: '' })}
+                />
+              </Input>
+              {password.error ? (
+                <Text className="text-red-500 text-xs mt-1">{password.error}</Text>
+              ) : null}
+            </Box>
+          </KeyboardAvoidingView>
 
           <Pressable onPress={() => router.push('/ResetPassword')}>
-            <Text className="text-right text-sm text-blue-600 dark:text-blue-400">
+            <Text className="text-right text-sm text-blue-600 dark:text-blue-400 mt-2">
               Forgot your password?
             </Text>
           </Pressable>
-          <ButtonGroup>
+
+          <ButtonGroup className="mt-4">
             <Button
-              className="bg-blue-500 h-16"
-              onPress={() => signInWithEmail()}
+              className="bg-blue-500 h-16 active:bg-blue-600 dark:bg-gray-600 dark:active:bg-gray-400"
+              onPress={signInWithEmail}
             >
-              <ButtonText className="text-white text-base font-semibold">
+              <ButtonText className="text-black dark:text-white text-base font-semibold">
                 Login
               </ButtonText>
             </Button>
           </ButtonGroup>
+
           <Box className="flex-row justify-center mt-4">
-            <Text className="text-sm">Don’t have an account? </Text>
+            <Text className="text-sm text-gray-700 dark:text-gray-300">Don’t have an account? </Text>
             <Pressable onPress={() => router.push('/Register')}>
-              <Text className="text-sm text-blue-600 font-bold">Sign up</Text>
+              <Text className="text-sm text-blue-600 dark:text-blue-400 font-bold">Sign up</Text>
             </Pressable>
           </Box>
         </VStack>
       </Box>
-    </Background>
+      </ScrollView>
   );
 }

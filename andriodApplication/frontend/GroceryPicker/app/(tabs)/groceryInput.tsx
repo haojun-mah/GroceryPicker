@@ -4,14 +4,12 @@ import { Text } from '@/components/ui/text';
 import React, { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { backend_url } from '../../config/api';
-import { useGroceryContext } from '@/context/groceryContext';
 import {
   GroceryMetadataTitleOutput,
 } from '@/context/groceryContext';
 import { useSession } from '@/context/authContext';
 import { useGroceryRefinementContext } from '@/context/groceryRefinement';
 import { router } from 'expo-router';
-import { ColorModeSwitch } from '@/components/ColorModeSwitch';
 import { DropdownSelector } from '@/components/DropDownSelector';
 
 const groceryInput = () => {
@@ -53,11 +51,10 @@ const groceryInput = () => {
   };
 
   return (
-    <ScrollView className="bg-blue-500 dark:bg-black min-h-screen">
+    <ScrollView contentContainerStyle={{ paddingTop: 52}} className="bg-blue-700 dark:bg-black min-h-screen">
       <View className="flex items-center mt-10 gap-10">
-        <ColorModeSwitch />
         <View className="gap-5 items-center">
-          <Text className="text-white text-5xl font-bold text-center">Create Grocery List</Text>
+          <Text className="font-roboto text-white text-5xl font-bold text-center">Create Grocery List</Text>
           <View className='items-center'>
             <Text className="text-blue-200 text-sm">Unsure of what groceries?</Text>
             <Text className="text-blue-200 text-sm">Describe it and we will do the work!</Text>
@@ -73,6 +70,7 @@ const groceryInput = () => {
                 placeholderTextColor="white"
                 value={groceryTextArea}
                 onChangeText={setGroceryTextArea}
+                textAlignVertical='top'
               />
             </Textarea>
           </View>
@@ -94,7 +92,7 @@ const groceryInput = () => {
               "
               onPress={postData}
             >
-              <ButtonText pointerEvents='none' className="text-white dark:text-black active:text-white dark:active:text-black">
+              <ButtonText pointerEvents='none' className="text-white dark:text-white active:text-white dark:active:text-black">
                 Generate Grocery List!
               </ButtonText>
             </Button>

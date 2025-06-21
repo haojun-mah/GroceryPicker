@@ -1,10 +1,29 @@
 import { GroceryRefinementContextProvider } from '@/context/groceryRefinement';
 import { Tabs } from 'expo-router';
+import { useColorScheme } from 'nativewind';
 
 export default function TabsLayout() {
+  const { colorScheme } = useColorScheme();
+
+  const tabBgColor = colorScheme === 'light' ? 'white' : '#1F2937'; // dark gray
+  const tabTextColor = colorScheme === 'light' ? 'black' : 'white';
+
   return (
     <GroceryRefinementContextProvider>
-      <Tabs screenOptions={{ headerShown: false, tabBarActiveTintColor: 'blue' }}>
+      <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: 'blue',
+        tabBarInactiveTintColor: tabTextColor,
+        tabBarLabelStyle: { color: tabTextColor },
+        tabBarStyle: {
+          backgroundColor: tabBgColor,
+          borderTopWidth: 0,
+          elevation: 0,
+          shadowOpacity: 0,
+        },
+      }}
+    >
         <Tabs.Screen
           name="Home"
           options={{

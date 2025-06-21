@@ -1,35 +1,39 @@
 import React, { useState } from 'react';
-import { Pressable } from 'react-native';
+import {
+  Alert,
+  Pressable,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
+import { useRouter } from 'expo-router';
+import { supabase } from '@/lib/supabase';
+
+import { Box } from '@/components/ui/box';
 import { Text } from '@/components/ui/text';
-import { Button, ButtonGroup, ButtonText } from '@/components/ui/button';
-import { Input, InputIcon, InputField } from '@/components/ui/input';
+import { Input, InputField, InputIcon } from '@/components/ui/input';
 import { Heading } from '@/components/ui/heading';
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
+import { Button, ButtonGroup, ButtonText } from '@/components/ui/button';
+import { MailIcon, LockIcon } from '@/components/ui/icon';
 import BackButton from '@/components/BackButton';
-import Background from '@/components/Background';
-import { useNavigation, useRouter } from 'expo-router';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '@/lib/RootStackParamList';
-import { supabase } from '@/lib/supabase';
-import { Alert } from 'react-native';
-import { Box } from '@/components/ui/box';
-import { EyeIcon, EyeOffIcon, MailIcon, LockIcon } from '@/components/ui/icon'; // to add password reveal feature
-import { UserPen } from 'lucide-react-native';
+import { useColorScheme } from 'nativewind';
 
 export default function Register() {
   const router = useRouter();
+  const { colorScheme } = useColorScheme();
+
   const [name, setName] = useState({ value: '', error: '' });
   const [email, setEmail] = useState({ value: '', error: '' });
   const [password, setPassword] = useState({ value: '', error: '' });
-  const [loading, setLoading] = useState(false); // archive, set splash screen when loading
+  const [loading, setLoading] = useState(false);
 
   async function signUpWithEmail() {
     setLoading(true);
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.signUp({
+    if (name.value.length === 0 || email.value.length === 0 || password.value.length === 0) return;
+
+    const { error } = await supabase.auth.signUp({
       email: email.value,
       password: password.value,
     });
@@ -37,7 +41,7 @@ export default function Register() {
     if (error) {
       Alert.alert(error.message);
     } else {
-      Alert.alert('Sign up successful');
+      Alert.alert('Sign up successful!');
       router.replace('/Login');
     }
 
@@ -45,71 +49,101 @@ export default function Register() {
   }
 
   return (
-    <Background>
-      <BackButton goBack={() => router.back()} />
-      <Box className="gap-12 items-center">
-        <Heading size="4xl">Create Account</Heading>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+        className='bg-[#EEEEEE] dark:bg-gray-900'
+      >
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: 'center',
+            paddingHorizontal: 24,
+            paddingVertical: 48,
+          }}
+        >
+          <BackButton goBack={() => router.back()} />
 
-        <VStack space="md" className="w-full">
-          {/* lucide icon library error. i really like the library thou. consider solutions further down the line
-            <InputIcon as={UserPen} className='w-6 h-6'/> */}
-          <Input className="p-2 h-16 w-full" isInvalid={!!name.error}>
-            <InputField
-              variant="outline"
-              placeholder="Name"
-              value={name.value}
-              onChangeText={(text) => setName({ value: text, error: '' })}
-            />
-          </Input>
-          {name.error ? (
-            <Text className="text-red-500 text-xs">{name.error}</Text>
-          ) : null}
+          <Box className="gap-12 items-center">
+            <Heading size="4xl" className="text-black dark:text-white">
+              Create Account
+            </Heading>
 
-          <Input className="p-2 h-16 w-full" isInvalid={!!email.error}>
-            <InputIcon as={MailIcon} className="w-6 h-6" />
-            <InputField
-              variant="outline"
-              placeholder="Email"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              value={email.value}
-              onChangeText={(text) => setEmail({ value: text, error: '' })}
-            />
-          </Input>
-          {email.error ? (
-            <Text className="text-red-500 text-xs">{email.error}</Text>
-          ) : null}
+            <VStack space="md" className="w-full">
+              <Input
+                className={`p-2 h-16 w-full bg-gray-100 dark:bg-gray-800 border ${
+                  colorScheme === 'dark' ? 'border-gray-400' : 'border-white'
+                }`}
+                isInvalid={!!name.error}
+              >
+                <InputField
+                  placeholder="Name"
+                  value={name.value}
+                  onChangeText={(text) => setName({ value: text, error: '' })}
+                  className="text-black dark:text-white"
+                />
+              </Input>
+              {name.error && <Text className="text-red-500 text-xs">{name.error}</Text>}
 
-          <Input className="p-2 h-16 w-full" isInvalid={!!password.error}>
-            <InputIcon as={LockIcon} className="w-6 h-6" />
-            <InputField
-              variant="outline"
-              placeholder="Password"
-              secureTextEntry
-              value={password.value}
-              onChangeText={(text) => setPassword({ value: text, error: '' })}
-            />
-          </Input>
-          {password.error ? (
-            <Text className="text-red-500 text-xs">{password.error}</Text>
-          ) : null}
+              <Input
+                className={`p-2 h-16 w-full bg-gray-100 dark:bg-gray-800 border ${
+                  colorScheme === 'dark' ? 'border-gray-400' : 'border-white'
+                }`}
+                isInvalid={!!email.error}
+              >
+                <InputIcon as={MailIcon} className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+                <InputField
+                  placeholder="Email"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  value={email.value}
+                  onChangeText={(text) => setEmail({ value: text, error: '' })}
+                  className="text-black dark:text-white"
+                />
+              </Input>
+              {email.error && <Text className="text-red-500 text-xs">{email.error}</Text>}
 
-          <ButtonGroup>
-            <Button
-              onPress={() => signUpWithEmail()}
-              className="bg-blue-500 mt-2"
-            >
-              <ButtonText className="text-black">Sign Up</ButtonText>
-            </Button>
-          </ButtonGroup>
-          <HStack className="mt-4 justify-center">
-            <Text>Already have an account? </Text>
-            <Pressable onPress={() => router.replace('/Login')}>
-              <Text className="text-blue-500 font-bold">Login</Text>
-            </Pressable>
-          </HStack>
-        </VStack>
-      </Box>
-    </Background>
+              <Input
+                className={`p-2 h-16 w-full bg-gray-100 dark:bg-gray-800 border ${
+                  colorScheme === 'dark' ? 'border-gray-400' : 'border-white'
+                }`}
+                isInvalid={!!password.error}
+              >
+                <InputIcon as={LockIcon} className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+                <InputField
+                  placeholder="Password"
+                  secureTextEntry
+                  value={password.value}
+                  onChangeText={(text) => setPassword({ value: text, error: '' })}
+                  className="text-black dark:text-white"
+                />
+              </Input>
+              {password.error && <Text className="text-red-500 text-xs">{password.error}</Text>}
+
+              <ButtonGroup>
+                <Button
+                  className="bg-blue-500 mt-2 active:bg-blue-600 dark:bg-gray-600 dark:active:bg-gray-400"
+                  onPress={signUpWithEmail}
+                  disabled={loading}
+                >
+                  <ButtonText className="text-black dark:text-white">
+                    {loading ? 'Signing Up...' : 'Sign Up'}
+                  </ButtonText>
+                </Button>
+              </ButtonGroup>
+
+              <HStack className="mt-4 justify-center">
+                <Text className="text-gray-700 dark:text-gray-300">
+                  Already have an account?{' '}
+                </Text>
+                <Pressable onPress={() => router.replace('/Login')}>
+                  <Text className="text-blue-500 dark:text-blue-400 font-bold">Login</Text>
+                </Pressable>
+              </HStack>
+            </VStack>
+          </Box>
+        </ScrollView>
+      </KeyboardAvoidingView>
   );
 }
