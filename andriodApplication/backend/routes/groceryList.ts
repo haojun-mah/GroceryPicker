@@ -10,9 +10,9 @@ const groceryListRouter = Router();
 groceryListRouter.post('/generate', verifyToken, generateGroceryList);
 
 // saving a new list for the logged-in user
-groceryListRouter.post('/lists', verifyToken, saveGroceryList);
+groceryListRouter.post('/save', verifyToken, saveGroceryList);
 
 // fetching all lists for the logged-in user
-groceryListRouter.get('/lists', verifyToken, getAllUserGroceryLists);
+groceryListRouter.get('/getAll', verifyToken, getAllUserGroceryLists);
 
 export default groceryListRouter;
