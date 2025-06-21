@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import dotenv from 'dotenv';
 
-dotenv.config({ path: '../.env' });
+dotenv.config();
 
 const apiKey = process.env.LLM_KEY;
 
@@ -15,7 +15,7 @@ if (apiKey === undefined) {
 const ai = new GoogleGenerativeAI(apiKey);
 
 async function generate(prompt: string, instruction: string) {
-  const model = ai.getGenerativeModel({ model: 'gemini-2.0-flash' });
+  const model = ai.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
   const response = await model.generateContent({
     contents: [{ role: 'user', parts: [{ text: prompt }] }],

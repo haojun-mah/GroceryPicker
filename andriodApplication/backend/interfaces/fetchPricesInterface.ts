@@ -14,9 +14,15 @@ export interface FetchedItemResponse {
 }
 
 export interface ProductRow {
+  id: string;
   name: string;
   price: number | null;
   supermarket: string | null;
+  quantity: string | null;
+  similarity?: number | null;
+  product_url?: string | null;
+  image_url?: string | null;
+  embedding?: number[] | null;
 }
 
 export interface ControllerError {
