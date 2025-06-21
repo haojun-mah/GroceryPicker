@@ -18,7 +18,7 @@ export interface ProductRow {
   name: string;
   price: number | null;
   supermarket: string | null;
-  scraper_quantity_info: string | null;
+  quantity: string | null;
   similarity?: number | null;
   product_url?: string | null;
   image_url?: string | null;
