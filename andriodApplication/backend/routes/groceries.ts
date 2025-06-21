@@ -4,6 +4,7 @@ import { generateGroceryList } from '../controllers/generateGroceryListControlle
 import verifyToken from '../middleware/auth';
 import { saveGroceryList } from '../controllers/saveListController';
 import { getAllUserGroceryLists } from '../controllers/getListsController';
+import { embedTextController } from '../controllers/embeddingController'; 
 const router = Router();
 
 // to change naming and route conventions if necessary.
@@ -19,5 +20,8 @@ router.post('/lists', verifyToken, saveGroceryList);
 
 // fetching all lists for the logged-in user
 router.get('/lists', verifyToken, getAllUserGroceryLists);
+
+// generated embed, called by price scraper
+router.post('/embed-text', embedTextController);
 
 export default router;
