@@ -19,6 +19,7 @@ export interface GroceryMetadataTitleOutput {
   title: string;
   metadata: string;
   items: GroceryItem[];
+  groceryShop: string[],
 }
 
 export interface GroceryItem {

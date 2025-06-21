@@ -1,55 +1,48 @@
 import { Button, ButtonGroup, ButtonText } from '@/components/ui/button';
 import { Textarea, TextareaInput } from '@/components/ui/textarea';
+import { Text } from '@/components/ui/text';
 import React, { useState } from 'react';
-import { Text, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { backend_url } from '../../config/api';
-import { useGroceryContext } from '@/context/groceryContext';
 import {
   GroceryMetadataTitleOutput,
-  ErrorResponse,
 } from '@/context/groceryContext';
 import { useSession } from '@/context/authContext';
+import { useGroceryRefinementContext } from '@/context/groceryRefinement';
 import { router } from 'expo-router';
+import { DropdownSelector } from '@/components/DropDownSelector';
 
 const groceryInput = () => {
   const [groceryTextArea, setGroceryTextArea] = useState<string>('');
-  const { grocery, setGrocery, setIsLoading, setError } = useGroceryContext();
-
-  const { session } = useSession(); // obtain jwt from session context
+  const [selectedGroceryShop, setSelectedGroceryShop] = useState<string[]>([]);
+  const { session } = useSession();
+  const { setIsLoading, setError, setGroceryRefinement, setGroceryShop } = useGroceryRefinementContext();
 
   const postData = async () => {
     try {
-      if (groceryTextArea.length === 0) {
-        return;
-      }
+      if (groceryTextArea.length === 0) return;
+
       setIsLoading(true);
       setError(null);
-
       const response = await fetch(`${backend_url}/grocery/generate`, {
         method: 'POST',
         headers: {
-          Authorization: `${session}`, // send jwt token to backend
+          Authorization: `${session?.access_token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: groceryTextArea }),
+        body: JSON.stringify({ message: groceryTextArea, groceryShop: selectedGroceryShop}),
       });
 
       const output: GroceryMetadataTitleOutput = await response.json();
 
-      // refactoring is necessary here
-      if (response.ok) {
-        // nested if-else ugly but intuitive when reading. consider refactoring if necessary
-        if (output.title === '!@#$%^') {
-          alert('Invalid Grocery List Input!'); // very very weird and deterministic way to check for invalid grocery input
-          return;
-        } else if (grocery === null) {
-          setGrocery([output]);
-        } else {
-          setGrocery([output, ...grocery]);
-        }
-        router.push('/groceryHistory?openLatest=true');
+      if (response.ok && output.title !== '!@#$%^') {
+        setGroceryRefinement(output);
+        setGroceryShop(selectedGroceryShop);
+        router.push('/groceryRefinement');
+      } else if (response.status === 403) {
+        alert('You are not authorized to perform this action. Please log in again.');
       } else {
-        alert(response.body);
+        alert('Your Grocery List Contains Invalid Items!');
       }
     } catch (error) {
       console.error(error);
@@ -58,30 +51,55 @@ const groceryInput = () => {
   };
 
   return (
-    <View className="flex items-center mt-10 gap-2">
-      <Text className="font-bold font-roboto text-2xl">
-        Create Grocery List!
-      </Text>
-      <Textarea size="md" className="w-72">
-        <TextareaInput
-          value={groceryTextArea}
-          onChangeText={(value) => setGroceryTextArea(value)}
-          placeholder="Insert your Groceries!"
-          onSubmitEditing={() => postData()}
-        />
-      </Textarea>
-      <ButtonGroup>
-        <Button
-          className="bg-amber-50 hover:bg-black w-72"
-          size="xl"
-          variant="outline"
-          action="primary"
-          onPress={() => postData()}
-        >
-          <ButtonText>Generate List!</ButtonText>
-        </Button>
-      </ButtonGroup>
-    </View>
+    <ScrollView contentContainerStyle={{ paddingTop: 52}} className="bg-blue-700 dark:bg-black min-h-screen">
+      <View className="flex items-center mt-10 gap-10">
+        <View className="gap-5 items-center">
+          <Text className="font-roboto text-white text-5xl font-bold text-center">Create Grocery List</Text>
+          <View className='items-center'>
+            <Text className="text-blue-200 text-sm">Unsure of what groceries?</Text>
+            <Text className="text-blue-200 text-sm">Describe it and we will do the work!</Text>
+          </View>
+       </View>
+
+        <View className="gap-4 bg-[#EEEEEE] dark:bg-gray-800 rounded-xl min-h-[100%] px-4 py-6 w-full left-0 right-0">
+          <View className="bg-white dark:bg-gray-700 rounded-xl px-3 pt-2 pb-3">
+            <Textarea className="border-0 h-40 justify-start">
+              <TextareaInput
+                className="text-left font-roboto text-black dark:text-white pt-0"
+                placeholder="Enter groceries or description"
+                placeholderTextColor="white"
+                value={groceryTextArea}
+                onChangeText={setGroceryTextArea}
+                textAlignVertical='top'
+              />
+            </Textarea>
+          </View>
+
+          <View className="bg-white dark:bg-gray-700 rounded-xl px-3 pt-2 pb-3">
+            <DropdownSelector
+              title="Select Grocery Shops"
+              items={['FairPrice', 'ShengShiong']}
+              selectedItems={selectedGroceryShop}
+              onSelectionChange={setSelectedGroceryShop}
+            />
+          </View>
+          <ButtonGroup className="rounded-xl overflow-hidden w-full">
+            <Button
+              className="
+                w-full h-12 justify-center items-center
+                bg-blue-700 dark:bg-gray-600
+                active:bg-blue-500 dark:active:bg-gray-300
+              "
+              onPress={postData}
+            >
+              <ButtonText pointerEvents='none' className="text-white dark:text-white active:text-white dark:active:text-black">
+                Generate Grocery List!
+              </ButtonText>
+            </Button>
+          </ButtonGroup>
+        </View>
+      </View>
+    </ScrollView>
   );
 };
 

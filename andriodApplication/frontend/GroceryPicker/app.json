@@ -17,12 +17,14 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.ckwflash.GroceryPicker"
+      "package": "com.ckwflash.GroceryPicker",
+      "softwareKeyboardLayoutMode": "pan"
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/icon.png"
+      "favicon": "./assets/images/icon.png",
+      "softwareKeyboardLayoutMode": "pan"
     },
     "plugins": [
       "expo-router",

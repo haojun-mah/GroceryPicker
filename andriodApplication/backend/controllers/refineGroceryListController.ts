@@ -1,37 +1,35 @@
-import generate from '../services/llm';
-import { RequestHandler } from 'express-serve-static-core';
-import {
-  AiPromptRequestBody,
-  ErrorResponse,
-  GeneratedGroceryItem,
-} from '../interfaces/generateGroceryListInterface';
-import { GroceryMetadataTitleOutput } from '../interfaces/generateGroceryListInterface';
+import { RequestHandler } from "express-serve-static-core";
+import { GroceryMetadataTitleOutput, GeneratedGroceryItem, AiPromptRequestBody } from "../interfaces/generateGroceryListInterface";
+import { ErrorResponse } from "../interfaces/fetchPricesInterface";
+import generate from "../services/llm";
 
-export const generateGroceryList: RequestHandler<
-  {},
-  GroceryMetadataTitleOutput | ErrorResponse,
-  AiPromptRequestBody,
-  {}
+
+export const refineGroceryListController: RequestHandler<
+{},
+GroceryMetadataTitleOutput | ErrorResponse,
+AiPromptRequestBody,
+{}
 > = async (req, res) => {
-  const input = req.body.message;
-  const instruction = `You are a grocery generator. You are to generate and
-    structure a grocery list from groceries, recipes, ingredients or even vague
-    descriptions given. Only return grocery and the count. Do not return any
-    other text or categories the groceries. Use metric units. Do not entertain
-    any request outside of groceries.
+    const input : string = req.body.message;
+    const instruction = `You are a grocery generator. You have previously
+    generated a grocery list with given prompts and information. You are
+    given a refined grocery list by the user. The refined grocery list contains
+    users edit or even prompts on how to better improve the grocery list. You
+    are to return an improved grocery list following the prompts. If no prompts
+    regarding the specific grocery, ignore that grocery.
 
-    Return the grocery list as a plain string, where each line represents a grocery item.
-    Each item should have the format: "name/quantity/unit"
-    Do NOT include any markdown (like \`\`\`json\` or \`\`\`),
-    or any headers like "Name, Quantity, Unit".
-    On top of the grocery list, summarise the entire grocery list with maximum of 10 words.
-    If there is any error, return !@#$%^. Always try to answer the
-    question to the best of your ability and return the answer in example output
-    form. Must be in example output form. If asked for suggestions of what to
-    eat and what to buy, just return the suggestion with the ingredients.
-    The summarised title must always be there regardless of what.
-    The title MUST BE A SUMMARY OF GROCERY ITEMS. DO NOT GIVE "TITLE".
+    If there is any error, return !@#$%^. Always try to answer the question to
+    the best of your abilities and return the answer in the example output form.
+    Must be in the example output form.   The summarised title must always be
+    there regardless of what.
+    The title MUST BE A SUMMARY OF GROCERY ITEMS. DO NOT GIVE "TITLE". The
+    summarised title is made from the summary of the new refined grocery.
     Groceries MUST BE SEPERATED BY /
+    When given suggestions, answer to the best of abilities
+    Do not give examples e.g. such as apples, carrots.
+    Give definite ingredients. Make the decision for the user.
+    Name/quantity/unit must be GIVEN. QUANTITY MUST BE GIVEN TO ALL ITEMS
+    REGARDLESS IF THERE ISNT ANY.
 
     Example output:
     Title
@@ -39,14 +37,13 @@ export const generateGroceryList: RequestHandler<
     Milk/1/liter
     Bread/1/loaf
     `
-
   if (typeof input !== 'string' || input.trim().length === 0) {
-    res.status(400).json({
-      statusCode: 400,
-      message: 'Request body is empty or not a string',
-    });
-    return;
-  }
+      res.status(400).json({
+        statusCode: 400,
+        message: 'Request body is empty or not a string',
+      });
+      return;
+    }
 
   // this entire paragraph is me trying to convert LLM information into JSON
   try {
@@ -121,4 +118,6 @@ export const generateGroceryList: RequestHandler<
       details: errorMessage,
     });
   }
-};
+}
+
+
