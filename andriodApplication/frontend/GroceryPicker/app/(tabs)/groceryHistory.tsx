@@ -29,7 +29,7 @@ const groceryHistory = () => {
     .filter(
       (group): group is GroceryMetadataTitleOutput =>
         group !== null && typeof group === 'object',
-    ) // I DO NOT UNDERSTAND!!! THE FILTER HERE IS WRONG. BUT IT IS WRONG IT RETURNS THE ABOVE ONE?
+    ) 
     .map((group: GroceryMetadataTitleOutput, groupIndex: number) => {
       // 'group' here is an array of GeneratedGroceryItem
       const title = group.title;

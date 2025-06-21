@@ -5,7 +5,6 @@ import productRouter from './routes/product';
 import cors from 'cors';
 
 dotenv.config();
-console.log(process.env.LLM_KEY);
 const app = express();
 const port = process.env.PORT || 3000;
 

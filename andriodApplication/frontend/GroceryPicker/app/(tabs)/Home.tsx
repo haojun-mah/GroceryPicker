@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { ScrollView, Text, View } from 'react-native';
 import { Button, ButtonGroup, ButtonText } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
+import { ColorModeSwitch } from '@/components/ColorModeSwitch';
 
 export default function HomePage() {
   // likewise have no idea why setting w-max is not working. unable to
@@ -19,7 +20,8 @@ export default function HomePage() {
 
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-      <View className="flex-1 justify-center items-center gap-6 p-6">
+      <View className="flex-1 justify-center items-center bg-white dark:bg-black? gap-6 p-6">
+        <ColorModeSwitch/>
         <Text className="text-2xl">Welcome to Grocery Picker</Text>
         <ButtonGroup>
           <Button

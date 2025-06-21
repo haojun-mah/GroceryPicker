@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { generateGroceryList } from '../controllers/generateGroceryListController';
+import { refineGroceryListController } from '../controllers/refineGroceryListController';
 import { saveGroceryList } from '../controllers/saveListController';
 import { getAllUserGroceryLists } from '../controllers/getListsController';
 import verifyToken from '../middleware/auth';
@@ -8,6 +9,9 @@ const groceryListRouter = Router();
 
 // generates structured grocerylist from unstructured grocery input.
 groceryListRouter.post('/generate', verifyToken, generateGroceryList);
+
+// refines grocery list to users customisation.
+groceryListRouter.post('/refine', refineGroceryListController);
 
 // saving a new list for the logged-in user
 groceryListRouter.post('/save', verifyToken, saveGroceryList);
