@@ -27,7 +27,7 @@ export const scraperUploadController = async (req: Request, res: Response): Prom
     return;
   }
   
-  if (!products[0].name || !products[0].supermarket || !products[0].quantity || products[0].price === undefined || products[0].embedding === undefined) {
+  if (!products[0].name || !products[0].supermarket || !products[0].quantity || products[0].price === undefined || products[0].embedding === undefined) { // inconsistency?
     res.status(400).json({ statusCode: 400, message: 'At least one product is missing required fields (name, supermarket, quantity, price, embedding).' });
     return;
   }

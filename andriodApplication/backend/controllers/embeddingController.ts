@@ -12,8 +12,10 @@ if (!EMBEDDING_API_KEY) {
 /**
  * Controller to generate embeddings for provided text.
  * Requires a secure API key for access.
- * Expected JSON body: { "text": "Your text to embed" }
+ * Expected Req JSON body: { "text": "Your text to embed" }
+ * Only 1 text can be embedded per call
  */
+
 export const embedTextController = async (req: Request, res: Response): Promise<void> => {
   // 1. API Key Authentication (Custom simple check)
   const incomingApiKey = req.headers['x-api-key'] as string; // Your scraper must send this header

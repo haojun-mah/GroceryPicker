@@ -1,0 +1,176 @@
+[
+  {
+    "name": "I'm Bulgogi Frozen Marinated Meat - Spicy Pork",
+    "quantity": "300g",
+    "price": "$9.40",
+    "image_url": "https://media.nedigital.sg/fairprice/fpol/media/images/product/XL/13093506_XL1_20250619.jpg?w=400&q=70",
+    "product_url": "https://www.fairprice.com.sg/product/i-m-bulgogi-frozen-marinated-meat-spicy-pork-300g-13093506",
+    "supermarket": "FairPrice"
+  },
+  {
+    "name": "I'm Bulgogi Frozen Marinated Meat - Galbi Chicken",
+    "quantity": "300g",
+    "price": "$9.40",
+    "image_url": "https://media.nedigital.sg/fairprice/fpol/media/images/product/XL/13258397_XL1_20250619.jpg?w=400&q=70",
+    "product_url": "https://www.fairprice.com.sg/product/i-m-bulgogi-frozen-marinated-meat-galbi-chicken-300g-13258397",
+    "supermarket": "FairPrice"
+  },
+  {
+    "name": "I'm Bulgogi Frozen Marinated Meat - Spicy Chicken",
+    "quantity": "300g",
+    "price": "$9.40",
+    "image_url": "https://media.nedigital.sg/fairprice/fpol/media/images/product/XL/13093509_XL1_20250619.jpg?w=400&q=70",
+    "product_url": "https://www.fairprice.com.sg/product/i-m-bulgogi-frozen-marinated-meat-spicy-chicken-300g-13093509",
+    "supermarket": "FairPrice"
+  },
+  {
+    "name": "Magiclean Toilet Bleach Power Cleaner",
+    "quantity": "3 x 500ml",
+    "price": "$9.43",
+    "image_url": "https://media.nedigital.sg/fairprice/fpol/media/images/product/XL/11951709_XL1_20250617.jpg?w=400&q=70",
+    "product_url": "https://www.fairprice.com.sg/product/magiclean-toilet-bleach-triple-pack-500ml-11951709",
+    "supermarket": "FairPrice"
+  },
+  {
+    "name": "I'm Bulgogi Frozen Marinated Meat - Chicken",
+    "quantity": "300g",
+    "price": "$9.40",
+    "image_url": "https://media.nedigital.sg/fairprice/fpol/media/images/product/XL/13093508_XL1_20250619.jpg?w=400&q=70",
+    "product_url": "https://www.fairprice.com.sg/product/i-m-bulgogi-frozen-marinated-meat-chicken-300g-13093508",
+    "supermarket": "FairPrice"
+  },
+  {
+    "name": "Kleenex Facial Tissue Box - Lifestyle (3ply)",
+    "quantity": "5 x 100 per pack",
+    "price": "$6.57",
+    "image_url": "https://media.nedigital.sg/fairprice/fpol/media/images/product/XL/13017673_XL1_20250522.jpg?w=400&q=70",
+    "product_url": "https://www.fairprice.com.sg/product/kleenex-ultrasoft-3ply-vin-facial-tissue-5pk-x-100s-13017673",
+    "supermarket": "FairPrice"
+  },
+  {
+    "name": "Dettol Anti-Bacterial Trigger Spray - Bathroom",
+    "quantity": "500ml",
+    "price": "$7.16",
+    "image_url": "https://media.nedigital.sg/fairprice/fpol/media/images/product/XL/13080542_XL1_20220817.jpg?w=400&q=70",
+    "product_url": "https://www.fairprice.com.sg/product/dettol-anti-bacterial-trigger-spray-bathroom-500ml-13080542",
+    "supermarket": "FairPrice"
+  },
+  {
+    "name": "Coca-Cola Mini Can Drink - Classic",
+    "quantity": "6 x 180ml",
+    "price": "$4.95",
+    "image_url": "https://media.nedigital.sg/fairprice/fpol/media/images/product/XL/13145828_XL1_20250616.jpg?w=400&q=70",
+    "product_url": "https://www.fairprice.com.sg/product/coca-cola-mini-can-drink-classic-6-x-180ml-13145828",
+    "supermarket": "FairPrice"
+  },
+  {
+    "name": "Kleenex Toilet Tissue Rolls - Ultra Soft (3 ply)",
+    "quantity": "20 x 200 per pack",
+    "price": "$14.35",
+    "promotion_description": "Save$0.71",
+    "promotion_end_date_text": "Till 1st Jul 2025",
+    "image_url": "https://media.nedigital.sg/fairprice/fpol/media/images/product/XL/13093697_XL1_20250522.jpg?w=400&q=70",
+    "product_url": "https://www.fairprice.com.sg/product/kleenex-toilet-tissue-rolls-ultra-soft-3-ply-20-x-200-per-pack-13093697",
+    "supermarket": "FairPrice"
+  },
+  {
+    "name": "Kirin Ichiban Lager Beer",
+    "quantity": "6 x 350ml",
+    "price": "$18.90",
+    "promotion_description": "Save$4.32",
+    "promotion_end_date_text": "Till 1st Jul 2025",
+    "image_url": "https://media.nedigital.sg/fairprice/fpol/media/images/product/XL/13014650_XL1_20250108.jpg?w=400&q=70",
+    "product_url": "https://www.fairprice.com.sg/product/kirin-original-brew-draft-beer-canned-6s-x-350ml-13014650",
+    "supermarket": "FairPrice"
+  },
+  {
+    "name": "Magiclean Bathroom Stain & Mold Remover Refill",
+    "quantity": "2 x 400ml",
+    "price": "$7.97",
+    "image_url": "https://media.nedigital.sg/fairprice/fpol/media/images/product/XL/13018761_XL1_20250617.jpg?w=400&q=70",
+    "product_url": "https://www.fairprice.com.sg/product/13018761",
+    "supermarket": "FairPrice"
+  },
+  {
+    "name": "Coca-Cola Can Drink - Zero Sugar",
+    "quantity": "12 x 320ml (CTN)",
+    "price": "$7.95",
+    "promotion_description": "Save$2.85",
+    "promotion_end_date_text": "Till 26th Jun 2025",
+    "image_url": "https://media.nedigital.sg/fairprice/fpol/media/images/product/XL/13083570_XL1_20250606.jpg?w=400&q=70",
+    "product_url": "https://www.fairprice.com.sg/product/coca-cola-can-drink-zero-sugar-12-x-320ml-ctn-13083570",
+    "supermarket": "FairPrice"
+  },
+  {
+    "name": "Milo Chocolate Malt Milk UHT Packet Drink",
+    "quantity": "24 x 200ml (CTN)",
+    "price": "$13.20",
+    "promotion_description": "Save$2.40",
+    "promotion_end_date_text": "Till 26th Jun 2025",
+    "image_url": "https://media.nedigital.sg/fairprice/fpol/media/images/product/XL/12704741_XL1_20250428.jpg?w=400&q=70",
+    "product_url": "https://www.fairprice.com.sg/product/milo-chocolate-malt-milk-uht-packet-drink-24-x-200ml-ctn-12704741",
+    "supermarket": "FairPrice"
+  },
+  {
+    "name": "Dettol Anti-Bacterial Trigger Spray - Kitchen",
+    "quantity": "500ml",
+    "price": "$7.16",
+    "image_url": "https://media.nedigital.sg/fairprice/fpol/media/images/product/XL/13080543_XL1_20230125.jpg?w=400&q=70",
+    "product_url": "https://www.fairprice.com.sg/product/dettol-anti-bacterial-trigger-spray-kitchen-500ml-13080543",
+    "supermarket": "FairPrice"
+  },
+  {
+    "name": "Milo Chocolate Malt Drink Powder with Milk - Regular",
+    "quantity": "900g",
+    "price": "$7.60",
+    "promotion_description": "Save$2.35",
+    "promotion_end_date_text": "Till 26th Jun 2025",
+    "image_url": "https://media.nedigital.sg/fairprice/fpol/media/images/product/XL/11838626_XL1_20250213.jpg?w=400&q=70",
+    "product_url": "https://www.fairprice.com.sg/product/milo-chocolate-malt-drink-powder-with-milk-regular-900g-11838626",
+    "supermarket": "FairPrice"
+  },
+  {
+    "name": "Meiji Fresh Milk - Regular",
+    "quantity": "2L",
+    "price": "$6.70",
+    "promotion_description": "Save$0.27",
+    "promotion_end_date_text": "Till 1st Jul 2025",
+    "image_url": "https://media.nedigital.sg/fairprice/fpol/media/images/product/XL/10238055_XL1_20240506.jpg?w=400&q=70",
+    "product_url": "https://www.fairprice.com.sg/product/meiji-fresh-milk-2lt-10238055",
+    "supermarket": "FairPrice"
+  },
+  {
+    "name": "Milo 3 in 1 Instant Chocolate Malt with Milk- Regular",
+    "quantity": "16 x 27g",
+    "price": "$7.95",
+    "image_url": "https://media.nedigital.sg/fairprice/fpol/media/images/product/XL/13058254_XL1_20250616.jpg?w=400&q=70",
+    "product_url": "https://www.fairprice.com.sg/product/milo-3-in-1-instant-chocolate-malt-with-milk-regular-16-x-27g-13058254",
+    "supermarket": "FairPrice"
+  },
+  {
+    "name": "Yakult Cultured Milk Bottle Drink - Assorted Flavours (Twin Pack)",
+    "quantity": "10 x 100ml",
+    "price": "$6.91",
+    "image_url": "https://media.nedigital.sg/fairprice/fpol/media/images/product/XL/13109359_XL1_20240408.jpg?w=400&q=70",
+    "product_url": "https://www.fairprice.com.sg/product/yakult-cultured-milk-bottle-drink-assorted-flavours-twin-pack-10-x-100ml-13109359",
+    "supermarket": "FairPrice"
+  },
+  {
+    "name": "Meiji Low Fat Fresh Milk - Regular",
+    "quantity": "2L",
+    "price": "$6.70",
+    "promotion_description": "Save$0.27",
+    "promotion_end_date_text": "Till 1st Jul 2025",
+    "image_url": "https://media.nedigital.sg/fairprice/fpol/media/images/product/XL/10549750_XL1_20240506.jpg?w=400&q=70",
+    "product_url": "https://www.fairprice.com.sg/product/meiji-low-fat-fresh-milk-2lt-10549750",
+    "supermarket": "FairPrice"
+  },
+  {
+    "name": "Meiji Flavoured Yoghurt with Nata De Coco - Kyoho Grape",
+    "quantity": "135g",
+    "price": "$1.01",
+    "image_url": "https://media.nedigital.sg/fairprice/fpol/media/images/product/XL/13171976_XL1_20240506.jpg?w=400&q=70",
+    "product_url": "https://www.fairprice.com.sg/product/meiji-flavoured-yoghurt-with-nata-de-coco-kyoho-grape-135g-13171976",
+    "supermarket": "FairPrice"
+  }
+]

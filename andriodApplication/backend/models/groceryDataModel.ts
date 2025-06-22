@@ -1,6 +1,11 @@
 import supabase from '../config/supabase';
 import { ControllerError } from '../interfaces/fetchPricesInterface';
 
+/*
+  Handles pushing scraped grocery data into DB.
+  Scraped Grocery Data will be embedded into vectors, appended into the JSON and parsed into DB
+*/
+
 export interface ScrapedProductData {
   id?: string;
   name: string;

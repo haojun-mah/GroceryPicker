@@ -3,6 +3,13 @@ import { GroceryMetadataTitleOutput, GeneratedGroceryItem, AiPromptRequestBody }
 import { ErrorResponse } from "../interfaces/fetchPricesInterface";
 import generate from "../services/llm";
 
+/*
+  Handles grocery lists refined and modified by user. Below code will regenerate
+  new grocery list based on user's modifications.
+
+  Req Type: String
+  Res Type: GroceryMetadataTitleOutput
+*/
 
 export const refineGroceryListController: RequestHandler<
 {},
