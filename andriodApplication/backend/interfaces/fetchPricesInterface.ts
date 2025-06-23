@@ -25,6 +25,30 @@ export interface ProductRow {
   embedding?: number[] | null;
 }
 
+export interface GroceryItem {
+  name: string;
+  quantity: number;
+  unit: string;
+}
+
+export interface SupermarketFilter {
+  exclude?: string[];  // Exclude these supermarkets
+}
+
+export interface GroceryListRequest {
+  items: GroceryItem[];
+  supermarketFilter?: SupermarketFilter;
+}
+
+export interface EnhancedGroceryPriceResponse {
+  item: string;
+  selectedProduct?: ProductRow;
+  amount?: number;
+  allProducts: ProductRow[];
+  error?: string;
+  query?: string;
+}
+
 export interface ControllerError {
   statusCode: number;
   message: string;
