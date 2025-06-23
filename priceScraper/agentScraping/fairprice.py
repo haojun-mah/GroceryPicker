@@ -123,76 +123,80 @@ csvCol = ['name', 'supermarket', 'quantity', 'price', 'promotion_description', '
 async def main():
     all_products = []
     async with AsyncWebCrawler(config=browser_cfg) as crawler:
-        # Scrap single page
-        results = await crawler.arun(URL_TO_SCRAPE, config=crawl_cfg)    
-        for i, result in enumerate(results):
-            try:
-                if hasattr(result, "success") and result.success:
-                    data = json.loads(result.extracted_content)
-                    product_url = result.url
-                    if isinstance(data, list):
-                        for product in data:
-                            product["product_url"] = product_url
-                            product["supermarket"] = "FairPrice"
-                            # Name, Quantity and Price are being embedded. Change this to adjust embeddding accuracy
-                            embedding_input = f"{product.get('name', '')} {product.get('quantity', '')} {product.get('price', '')}"
-                            # sends to embedding service
-                            response = await asyncio.to_thread(
-                                requests.post,
-                                "http://localhost:3000/products/embed-text",
-                                headers={
-                                    'Content-Type': 'application/json',
-                                    'X-API-Key': os.getenv("JWT_SECRET")
-                                },
-                                json={"text": embedding_input},
-                                timeout=60,
-                            )
-                            output = response.json()
-                            embedding = output.get('embedding')
-                            product["embedding"] = embedding
-                            all_products.append(product)
-                    elif isinstance(data, dict):
-                        all_products.append(data)
-                    else:
-                        print(f"⚠️ [{i}] Unexpected data format: {type(data)}")
-            except Exception as e:
-                print(f"⚠️ [{i}] JSON decode failed: {e}")
+        # Scrap single page. Used for testing
+        # results = await crawler.arun(URL_TO_SCRAPE, config=crawl_cfg)    
+        # for i, result in enumerate(results):
+        #     try:
+        #         if hasattr(result, "success") and result.success:
+        #             data = json.loads(result.extracted_content)
+        #             product_url = result.url
+        #             if isinstance(data, list):
+        #                 for product in data:
+        #                     product["product_url"] = product_url
+        #                     product["supermarket"] = "FairPrice"
+                            
+        #                     # Name, Quantity and Price are being embedded. Change this to adjust embedding accuracy
+        #                     embedding_input = f"{product.get('name', '')} {product.get('quantity', '')} {product.get('price', '')}"
+
+        #                     # sends to embedding service
+        #                     response = await asyncio.to_thread(
+        #                         requests.post,
+        #                         "http://localhost:3000/products/embed-text",
+        #                         headers={
+        #                             'Content-Type': 'application/json',
+        #                             'X-API-Key': os.getenv("JWT_SECRET")
+        #                         },
+        #                         json={"text": embedding_input},
+        #                         timeout=60,
+        #                     )
+        #                     output = response.json()
+        #                     embedding = output.get('embedding')
+        #                     product["embedding"] = embedding
+        #                     all_products.append(product)
+        #             elif isinstance(data, dict):
+        #                 all_products.append(data)
+        #             else:
+        #                 print(f"⚠️ [{i}] Unexpected data format: {type(data)}")
+        #     except Exception as e:
+        #         print(f"⚠️ [{i}] JSON decode failed: {e}")
 
         # Scraping multiple pages in concurrency. Do not know why parallel does not work
-        # for target_url in LIST_URL_TO_SCRAPE:
-        #     results = await crawler.arun(target_url, config=crawl_cfg)
-        #     for i, result in enumerate(results):
-        #         try:
-        #             if hasattr(result, "success") and result.success:
-        #                 data = json.loads(result.extracted_content)
-        #                 product_url = result.url
-        #                 if isinstance(data, list):
-        #                     for product in data:
-        #                         product["product_url"] = product_url
-        #                         product["supermarket"] = "FairPrice"
-        #                         # Name, Quantity and Price are being embedded. Change this to adjust embeddding accuracy
-        #                         embedding_input = f"{product.get('name', '')} {product.get('quantity', '')} {product.get('price', '')}"
-        #                         # sends to embedding service
-        #                         response = await asyncio.to_thread(
-        #                             requests.post,
-        #                             "http://localhost:3000/products/embed-text",
-        #                             headers={
-        #                                 'Content-Type': 'application/json',
-        #                                 'X-API-Key': os.getenv("JWT_SECRET")
-        #                             },
-        #                             json={"text": embedding_input},
-        #                             timeout=60,
-        #                         )
-        #                         output = response.json()
-        #                         embedding = output.get('embedding')
-        #                         product["embedding"] = embedding
-        #                         all_products.append(product)
-        #                 elif isinstance(data, dict):
-        #                     all_products.append(data)
-        #                 else:
-        #                     print(f"⚠️ [{i}] Unexpected data format: {type(data)}")
-        #         except Exception as e:
-        #             print(f"⚠️ [{i}] JSON decode failed: {e}")
+        for target_url in LIST_URL_TO_SCRAPE:
+            results = await crawler.arun(target_url, config=crawl_cfg)
+            for i, result in enumerate(results):
+                try:
+                    if hasattr(result, "success") and result.success:
+                        data = json.loads(result.extracted_content)
+                        product_url = result.url
+                        if isinstance(data, list):
+                            for product in data:
+                                product["product_url"] = product_url
+                                product["supermarket"] = "FairPrice"
+                                
+                                # Name, Quantity and Price are being embedded. Change this to adjust embeddding accuracy
+                                embedding_input = f"{product.get('name', '')} {product.get('quantity', '')} {product.get('price', '')}"
+                                
+                                # sends to embedding service
+                                response = await asyncio.to_thread(
+                                    requests.post,
+                                    "http://localhost:3000/products/embed-text",
+                                    headers={
+                                        'Content-Type': 'application/json',
+                                        'X-API-Key': os.getenv("JWT_SECRET")
+                                    },
+                                    json={"text": embedding_input},
+                                    timeout=60,
+                                )
+                                output = response.json()
+                                embedding = output.get('embedding')
+                                product["embedding"] = embedding
+                                all_products.append(product)
+                        elif isinstance(data, dict):
+                            all_products.append(data)
+                        else:
+                            print(f"⚠️ [{i}] Unexpected data format: {type(data)}")
+                except Exception as e:
+                    print(f"⚠️ [{i}] JSON decode failed: {e}")
 
 
         # Scrap list of pages on parallel. I do not know why i cannot.
