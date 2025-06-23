@@ -40,9 +40,11 @@ export interface GroceryListRequest {
   supermarketFilter?: SupermarketFilter;
 }
 
-export interface GroceryPriceResponse {
+export interface EnhancedGroceryPriceResponse {
   item: string;
-  recommendation: string;
+  selectedProduct?: ProductRow;
+  amount?: number;
+  allProducts: ProductRow[];
   error?: string;
   query?: string;
 }
