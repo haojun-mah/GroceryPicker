@@ -7,6 +7,17 @@ import {
 } from '../interfaces/generateGroceryListInterface';
 import { GroceryMetadataTitleOutput } from '../interfaces/generateGroceryListInterface';
 
+/*
+  Handles the logic where it converts users unstructured grocery
+  list/input into structured and refined grocery lists. 
+  It then returns the structed list to the user for refinement. Note that the
+  list is NOT OPTIMIZED
+  yet.
+
+  Req Type: String
+  Res Type: GroceryMetadataTitleOutput
+*/
+
 export const generateGroceryList: RequestHandler<
   {},
   GroceryMetadataTitleOutput | ErrorResponse,

@@ -24,7 +24,6 @@ export async function getEmbedding(text: string): Promise<number[] | null> {
   try {
     const model = genAI.getGenerativeModel({ model: EMBEDDING_MODEL_NAME });
     const result = await model.embedContent(cleanedText);
-
     return result.embedding.values;
   } catch (error: any) {
     console.error(`Error generating embedding for text: '${cleanedText.substring(0, 50)}...' - ${error.message}`);

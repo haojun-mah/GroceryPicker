@@ -12,8 +12,10 @@ if (!EMBEDDING_API_KEY) {
 /**
  * Controller to generate embeddings for provided text.
  * Requires a secure API key for access.
- * Expected JSON body: { "text": "Your text to embed" }
+ * Expected Req JSON body: { "text": "Your text to embed" }
+ * Only 1 text can be embedded per call
  */
+
 export const embedTextController = async (req: Request, res: Response): Promise<void> => {
   // 1. API Key Authentication (Custom simple check)
   const incomingApiKey = req.headers['x-api-key'] as string; // Your scraper must send this header
@@ -23,7 +25,7 @@ export const embedTextController = async (req: Request, res: Response): Promise<
     return;
   }
 
-  // 2. Validate Request Method
+  // 2. Validate Request Method // do you need to check POST? isnt post route already filtering?
   if (req.method !== 'POST') {
     res.status(405).json({ statusCode: 405, message: 'Method Not Allowed. Only POST is supported.' });
     return;
