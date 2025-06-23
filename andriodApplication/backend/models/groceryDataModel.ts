@@ -1,6 +1,11 @@
 import supabase from '../config/supabase';
 import { ControllerError } from '../interfaces/fetchPricesInterface';
 
+/*
+  Handles pushing scraped grocery data into DB.
+  Scraped Grocery Data will be embedded into vectors, appended into the JSON and parsed into DB
+*/
+
 export interface ScrapedProductData {
   id?: string;
   name: string;
@@ -26,7 +31,7 @@ export async function upsertScrapedProducts(
     p.name && typeof p.name === 'string' &&
     p.supermarket && typeof p.supermarket === 'string' &&
     p.quantity && typeof p.quantity === 'string' &&
-    p.price !== undefined && p.price !== null && typeof p.price === 'number' &&
+    p.price !== undefined && p.price !== null && typeof p.price === 'string' &&
     p.embedding && Array.isArray(p.embedding) && p.embedding.length > 0
   );
 

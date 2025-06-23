@@ -23,13 +23,13 @@ export async function getEmbedding(text: string, options?: { type?: 'query' }): 
 
   try {
     const model = genAI.getGenerativeModel({ model: EMBEDDING_MODEL_NAME });
+
     let result;
     if (options?.type === 'query') {
       result = await model.embedContent({ content: { role: 'user', parts: [{ text: cleanedText }] }, taskType: TaskType.RETRIEVAL_QUERY });
     } else {
       result = await model.embedContent({ content: { role: 'user', parts: [{ text: cleanedText }] }, taskType: TaskType.RETRIEVAL_DOCUMENT });
     }
-    return result.embedding.values;
   } catch (error: any) {
     console.error(`Error generating embedding for text: '${cleanedText.substring(0, 50)}...' - ${error.message}`);
     return null;
