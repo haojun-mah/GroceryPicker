@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import { fetchPricesController } from '../controllers/fetchPricesController';
+import { findBestPricesForGroceryList } from '../controllers/fetchPricesController';
 import { embedTextController } from '../controllers/embeddingController';
 import { scraperUploadController } from '../controllers/uploadProductController'; 
 
 const productRouter = Router();
 
-// fetch grocery information of input grocery
-productRouter.post('/prices', fetchPricesController);
+// RAG-based grocery price comparison
+productRouter.post('/prices', findBestPricesForGroceryList);
 
 // generated embed, called by price scraper
 productRouter.post('/embed-text', embedTextController);
