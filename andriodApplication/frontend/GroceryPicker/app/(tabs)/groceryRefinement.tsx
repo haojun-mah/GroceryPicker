@@ -74,12 +74,12 @@ const ModalPage = () => {
   };
 
   return (
-    <ScrollView contentContainerStyle={{ paddingTop: 60 }} className="bg-blue-700 dark:bg-black min-h-screen px-4">
+    <ScrollView contentContainerStyle={{ paddingTop: 60 }} className="bg-[#EEEEEE] dark:bg-black min-h-screen px-4">
       <View className="gap-6">
         <View className="gap-2">
-          <Text className="text-4xl font-bold text-white dark:text-white">Refine Your List</Text>
-          <Text className="text-md text-blue-200 dark:text-gray-300">Don’t like your list?</Text>
-          <Text className="text-md text-blue-200 dark:text-gray-300">Edit it and we’ll do the work!</Text>
+          <Text className="text-4xl font-bold text-black dark:text-white">Refine Your List</Text>
+          <Text className="text-md text-gray-500 dark:text-gray-300">Don’t like your list?</Text>
+          <Text className="text-md text-gray-500 dark:text-gray-300">Edit it and we’ll do the work!</Text>
         </View>
 
         <View style={{ height: screenHeight * 0.6 }}>
@@ -90,7 +90,7 @@ const ModalPage = () => {
               value={generateRefinementGrocery}
               onChangeText={setGenerateRefinementGrocery}
               textAlignVertical="top"
-            />
+                />
           </Textarea>
         </View>
 

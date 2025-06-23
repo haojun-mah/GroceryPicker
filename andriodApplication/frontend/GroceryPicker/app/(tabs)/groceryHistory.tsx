@@ -1,66 +1,34 @@
-import DropdownCard from '@/components/DropdownCard';
-import {
-  GroceryMetadataTitleOutput,
-  useGroceryContext,
-} from '@/context/groceryContext';
-import { Text, View } from 'react-native';
-import { GroceryItem } from '@/context/groceryContext';
-import { ScrollView } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { ScrollView, View } from "react-native"
+import { Text } from "@/components/ui/text"
+import { Card } from "@/components/ui/card"
 
-const groceryHistory = () => {
-  const { grocery, isLoading, error } = useGroceryContext();
-  const { openLatest } = useLocalSearchParams();
+interface groceryList {
 
-  if (error) {
-    console.log(
-      'Front end handling error from grocerycontext. Receiving at groceryHistory',
-    );
-  }
-  if (!grocery || !Array.isArray(grocery) || grocery.length === 0) {
-    return (
-      <View className="flex items-center mt-20 p-4 gap-2">
-        <Text className="font-bold font-roboto text-2xl">Grocery History</Text>
-      </View>
-    );
-  }
 
-  const dropDownPopulatedWithInfo = grocery
-    .filter(
-      (group): group is GroceryMetadataTitleOutput =>
-        group !== null && typeof group === 'object',
-    ) 
-    .map((group: GroceryMetadataTitleOutput, groupIndex: number) => {
-      // 'group' here is an array of GeneratedGroceryItem
-      const title = group.title;
-      const metadata = group.metadata;
-      const groceryConcat = group.items
-        .filter(
-          (item): item is GroceryItem => item !== null && item !== undefined,
-        ) // Robust filter for safety
-        .map((item: GroceryItem) => {
-          return `${item.name} - ${item.quantity} ${item.unit}`;
-        });
+}
 
-      return (
-        <DropdownCard
-          key={`group-${groupIndex}`} // Unique key for each DropdownCard (based on group index)
-          title={title} // Title for card
-          outsideText={metadata} // Metadata (time and date)
-          insideText={groceryConcat} // This array contains the formatted strings for this group
-          defaultOpen={groupIndex === 0 && openLatest === 'true'}
-        />
-      );
-    });
-
-  return (
-    <ScrollView>
-      <View className="flex items-center mt-20 p-4 gap-2">
-        <Text className="font-bold font-roboto text-2xl">Grocery History</Text>
-        {dropDownPopulatedWithInfo}
+const GroceryListHistoryPage = () => {
+  return(
+    <ScrollView contentContainerStyle={{ paddingTop: 60 }} className="bg-[#EEEEEE] dark:bg-black">
+      <View className="px-6">
+        <Text className="text-4xl font-bold text-dark dark:text-white">History</Text>
+        <View>
+              <Card className="bg-white dark:bg-gray-700 rounded-md">
+                <Text className="text-xl font-semibold text-black dark:text-white">
+                  Title
+                </Text>
+                <Text className="text-xs font-normal text-gray-500 dark:text-gray-300">
+                  Metadata
+                </Text>
+                <Text className="text-md font-normal">
+                  Status
+                </Text>
+              </Card>
+        </View>
       </View>
     </ScrollView>
-  );
-};
+  )
+}
 
-export default groceryHistory;
+export default GroceryListHistoryPage;
+ 

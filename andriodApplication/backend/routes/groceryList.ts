@@ -13,6 +13,8 @@ groceryListRouter.post('/generate', verifyToken, generateGroceryList);
 // refines grocery list to users customisation.
 groceryListRouter.post('/refine', refineGroceryListController);
 
+// groceryListRouter.post('/optimize');
+
 // saving a new list for the logged-in user
 groceryListRouter.post('/save', verifyToken, saveGroceryList);
 
