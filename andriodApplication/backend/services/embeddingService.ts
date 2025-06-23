@@ -30,6 +30,13 @@ export async function getEmbedding(text: string, options?: { type?: 'query' }): 
     } else {
       result = await model.embedContent({ content: { role: 'user', parts: [{ text: cleanedText }] }, taskType: TaskType.RETRIEVAL_DOCUMENT });
     }
+
+    // Return the embedding vector if available
+    if (result && result.embedding && Array.isArray(result.embedding.values)) {
+      return result.embedding.values;
+    }
+    console.error('Embedding result did not contain expected values:', result);
+    return null;
   } catch (error: any) {
     console.error(`Error generating embedding for text: '${cleanedText.substring(0, 50)}...' - ${error.message}`);
     return null;
