@@ -25,7 +25,7 @@ export const embedTextController = async (req: Request, res: Response): Promise<
     return;
   }
 
-  // 2. Validate Request Method
+  // 2. Validate Request Method // do you need to check POST? isnt post route already filtering?
   if (req.method !== 'POST') {
     res.status(405).json({ statusCode: 405, message: 'Method Not Allowed. Only POST is supported.' });
     return;

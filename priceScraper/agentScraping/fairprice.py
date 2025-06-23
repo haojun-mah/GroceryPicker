@@ -2,7 +2,7 @@
 # pip install crawl4ai openai pydantic python-dotenv
 # playwright install
 
-import os, json, asyncio, csv, requests
+import os, json, asyncio, csv, requests, math
 from crawl4ai.deep_crawling import BFSDeepCrawlStrategy
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
@@ -19,8 +19,17 @@ from crawl4ai.deep_crawling.filters import (
 )
 from crawl4ai.extraction_strategy import LLMExtractionStrategy
 
+# Code scraps FairPrice website for products and their details. It embeds the
+# product details, store the vectors and pushes it to DB to keep
+
+
 load_dotenv()                                   
+
+# URL used for scrape testing
 URL_TO_SCRAPE = "https://www.fairprice.com.sg/category/international-selections"
+
+
+# URsLs used for production. Currently only scraps food categories
 LIST_URL_TO_SCRAPE = ["https://www.fairprice.com.sg/category/international-selections",
                     # "https://www.fairprice.com.sg/category/electronics-5",
                      #   "https://www.fairprice.com.sg/category/baby-child-toys",
@@ -115,7 +124,8 @@ async def main():
     all_products = []
     async with AsyncWebCrawler(config=browser_cfg) as crawler:
         # Scrap single page
-        async for i, result in await enumerate(crawler.arun(URL_TO_SCRAPE, config=crawl_cfg)):
+        results = await crawler.arun(URL_TO_SCRAPE, config=crawl_cfg)    
+        for i, result in enumerate(results):
             try:
                 if hasattr(result, "success") and result.success:
                     data = json.loads(result.extracted_content)
@@ -124,7 +134,9 @@ async def main():
                         for product in data:
                             product["product_url"] = product_url
                             product["supermarket"] = "FairPrice"
-                            all_products.append(product)
+                            # Name, Quantity and Price are being embedded. Change this to adjust embeddding accuracy
+                            embedding_input = f"{product.get('name', '')} {product.get('quantity', '')} {product.get('price', '')}"
+                            # sends to embedding service
                             response = await asyncio.to_thread(
                                 requests.post,
                                 "http://localhost:3000/products/embed-text",
@@ -132,12 +144,13 @@ async def main():
                                     'Content-Type': 'application/json',
                                     'X-API-Key': os.getenv("JWT_SECRET")
                                 },
-                                json={"text": data[0]},
+                                json={"text": embedding_input},
                                 timeout=60,
                             )
-                            output = await response.json()
+                            output = response.json()
                             embedding = output.get('embedding')
                             product["embedding"] = embedding
+                            all_products.append(product)
                     elif isinstance(data, dict):
                         all_products.append(data)
                     else:
@@ -152,16 +165,32 @@ async def main():
         #         try:
         #             if hasattr(result, "success") and result.success:
         #                 data = json.loads(result.extracted_content)
-        #                 product_url = result.url  
+        #                 product_url = result.url
         #                 if isinstance(data, list):
         #                     for product in data:
         #                         product["product_url"] = product_url
         #                         product["supermarket"] = "FairPrice"
+        #                         # Name, Quantity and Price are being embedded. Change this to adjust embeddding accuracy
+        #                         embedding_input = f"{product.get('name', '')} {product.get('quantity', '')} {product.get('price', '')}"
+        #                         # sends to embedding service
+        #                         response = await asyncio.to_thread(
+        #                             requests.post,
+        #                             "http://localhost:3000/products/embed-text",
+        #                             headers={
+        #                                 'Content-Type': 'application/json',
+        #                                 'X-API-Key': os.getenv("JWT_SECRET")
+        #                             },
+        #                             json={"text": embedding_input},
+        #                             timeout=60,
+        #                         )
+        #                         output = response.json()
+        #                         embedding = output.get('embedding')
+        #                         product["embedding"] = embedding
         #                         all_products.append(product)
         #                 elif isinstance(data, dict):
-        #                     data["productURL"] = product_url
         #                     all_products.append(data)
-
+        #                 else:
+        #                     print(f"⚠️ [{i}] Unexpected data format: {type(data)}")
         #         except Exception as e:
         #             print(f"⚠️ [{i}] JSON decode failed: {e}")
 
@@ -200,10 +229,43 @@ async def main():
             json.dump(all_products, jf, indent=2, ensure_ascii=False)
 
         print(f"✅ Saved {len(all_products)} products to '{csv_file}' and '{json_file}'")
+        
+        # Size of each chunk of JSON to upload to DB
+        BATCH_SIZE = 5 # Edit this to change the size of each chunk
+        
+        try:
+            with open(json_file, 'r', encoding='utf-8') as json_file:
+                json_data = json.load(json_file)    
+            
+            # Calculate number of chunks needed  
+            total_products = len(json_data)
+            total_batches = math.ceil(total_products / BATCH_SIZE)
+           
+            # Break into chunks and upload chunks into DB
+            print(f"Uploading {total_products} products in {total_batches} batches of {BATCH_SIZE} products each...") 
+            for batch_num in range(total_batches):
+                start = batch_num * BATCH_SIZE
+                end = start + BATCH_SIZE
+                chunk = json_data[start:end]
+                
+                response = await asyncio.to_thread(
+                    requests.post,
+                    "http://localhost:3000/products/upload",
+                    headers={
+                        'Content-Type': 'application/json',
+                        'X-API-Key': os.getenv("JWT_SECRET")
+                    },
+                    json=chunk,
+                )
+                output = response.json()
+                if output.get('statusCode') == 200:
+                    print(output.get('message'))
+                else:
+                    print(f"⚠️ [{i}] Upload To DB Failed: {output.get('message')}")
+        except Exception as e:
+            print(f"⚠️ [{i}] Upload To DB Failed: {e}")
 
-    else:
-        print("⚠️ No products found.")
 
-   
+
 if __name__ == "__main__":
     asyncio.run(main())

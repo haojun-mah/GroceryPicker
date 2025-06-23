@@ -31,7 +31,7 @@ export async function upsertScrapedProducts(
     p.name && typeof p.name === 'string' &&
     p.supermarket && typeof p.supermarket === 'string' &&
     p.quantity && typeof p.quantity === 'string' &&
-    p.price !== undefined && p.price !== null && typeof p.price === 'number' &&
+    p.price !== undefined && p.price !== null && typeof p.price === 'string' &&
     p.embedding && Array.isArray(p.embedding) && p.embedding.length > 0
   );
 

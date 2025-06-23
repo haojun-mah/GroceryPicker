@@ -2,8 +2,14 @@ import { Request, Response } from 'express';
 import { upsertScrapedProducts, ScrapedProductData } from '../models/groceryDataModel';
 import dotenv from 'dotenv';
 
-dotenv.config();
+/*
+  Handles array of JSONs scraped grocery data with embeddings and upload&insert (upsert) it into the DB.
 
+  Req Type: ScrapedProductData[]
+  Res Type: { statusCode: number, message: string }
+*/
+
+dotenv.config();
 const SCRAPER_UPLOAD_API_KEY = process.env.JWT_SECRET;
 if (!SCRAPER_UPLOAD_API_KEY) {
   console.warn("WARNING: SCRAPER_UPLOAD_API_KEY is not set in .env. Scraper upload endpoint will be insecure.");
