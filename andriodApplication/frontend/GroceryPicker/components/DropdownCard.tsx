@@ -15,8 +15,7 @@ import { Image } from './ui/image';
 import { CheckboxIcon, CheckboxIndicator, CheckboxGroup, Checkbox } from './ui/checkbox';
 import { CircleIcon } from './ui/icon';
 import { Pressable } from 'react-native';
-import { GroceryItem } from '@/context/groceryContext';
-import { OptimizedGroceryItem } from '@/app/(tabs)/groceryDisplay/groceryDisplay';
+import { SavedGroceryListItem } from '@/app/(tabs)/groceryHistory';
 
 
 // Enable LayoutAnimation for Android
@@ -33,8 +32,8 @@ const DropdownCard = ({
   insideText,
   defaultOpen,
 }: {
-  outsideText: OptimizedGroceryItem[];
-  insideText: OptimizedGroceryItem[];
+  outsideText: SavedGroceryListItem[];
+  insideText: SavedGroceryListItem[];
   defaultOpen: boolean;
 }) => {
   const [expanded, setExpanded] = useState(defaultOpen);
@@ -106,7 +105,7 @@ return (
       }}
       className="flex-row items-center gap-3 m-2"
     >
-            <Image source={{ uri: item.image }} alt='Image of grocer' className="w-20 h-20 rounded-md bg-gray-300" />
+            <Image source={{ uri: !item.image_url ? "" : item.image_url }} alt='Image of grocer' className="w-20 h-20 rounded-md bg-gray-300" />
             <View className="flex-1">
               <Text
           className={`text-black text-xl dark:text-white font-semibold ${

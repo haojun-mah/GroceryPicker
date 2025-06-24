@@ -7,37 +7,11 @@ import { useLocalSearchParams } from "expo-router";
 import { useGroceryContext } from "@/context/groceryContext";
 import { SavedGroceryList } from "../groceryHistory";
 
-const testItem: OptimizedGroceryItem = {
-    name: "Sadia",
-    quantity: "1",
-    price: "$1",
-    image: "123",
-    purchased: true,
-}
-
-const test : OptimizedList = {
-    groceryShop: "FairPrice",
-    groceryList: [testItem, testItem],
-}
-
-export interface OptimizedGroceryItem {
-    name: string,
-    quantity: string,
-    price: string,
-    image: string,
-    purchased: boolean,
-}
-
-interface OptimizedList {
-    groceryShop: string,
-    groceryList: OptimizedGroceryItem[]
-}
-
-
 const GroceryDisplay = () => {
   const { id } = useLocalSearchParams(); // id of grocerylist
   const { groceryListHistory } = useGroceryContext();
-  let currGroceryList: SavedGroceryList | null = null
+  const [currGroceryList, setCurrGroceryList] = useState<SavedGroceryList | null>(null);
+  const groceryShops = [ "FairPrice", "Sheng Shiong"];
 
     useEffect(() => {
       fetchDisplayInfo();
@@ -45,38 +19,40 @@ const GroceryDisplay = () => {
 
     // filter target grocery list from context with ID
     const fetchDisplayInfo = async () => {
-      currGroceryList = groceryListHistory?.filter(list => list.id === id)[0]
+      const list = groceryListHistory?.find(list => list.id === id);
+      setCurrGroceryList(list ?? null);
     };
 
-
-// disable for testing purpose
-//   if (!optimizedList) {
-//     return  (
-//     <ScrollView contentContainerStyle={{ paddingTop: 52}}>
-//         <View className="px-4 gap-4">
-//             <Text className="text-4xl font-semibold mb-2">Optimized Grocery List</Text>
-//         </View>
-//     </ScrollView>
-//     )
-//   }
+    if (!currGroceryList) {
+      return (
+        <ScrollView contentContainerStyle={{ paddingTop: 52}}>
+          <View className="px-4 gap-4">
+            <Text className="text-4xl font-semibold mb-2">Optimized Grocery List</Text> 
+         </View>
+        </ScrollView>
+      );
+    }
 
 return (
 <ScrollView className='bg-[#EEEEEE] dark:bg-black' contentContainerStyle={{ paddingTop: 52}}>
   <View className="px-4 gap-4">
     <Text className="text-4xl font-semibold mb-2 text-black dark:text-white">Optimized Grocery List</Text>
+
+    {groceryShops.map((shops, idx)=> {
+      const items = currGroceryList.grocery_list_items.filter(item => item.supermarket === shops);
+      if (items.length === 0) return null;
+          return (
+            <View key={idx} className="items-start w-full">
+              <Text className="text-xl font-bold mb-1 ml-[2.5%] text-black dark:text-white">{shops}</Text>
+              <DropdownCard
+              outsideText={items}
+              insideText={items}
+              defaultOpen={false}
+              />
+            </View>
+              );
+            })}
     
-    {optimizedList.map((store, idx)=> {
-        return (
-          <View key={idx} className="items-start w-full">
-            <Text className="text-xl font-bold mb-1 ml-[2.5%] text-black dark:text-white">{store.groceryShop}</Text>
-           <DropdownCard
-            outsideText={store.groceryList}
-            insideText={store.groceryList}
-            defaultOpen={false}
-            />
-        </View>
-        )
-    })}
     <ButtonGroup className="rounded-xl overflow-hidden w-full">
         <Button className="
                 w-full h-12 justify-center items-center

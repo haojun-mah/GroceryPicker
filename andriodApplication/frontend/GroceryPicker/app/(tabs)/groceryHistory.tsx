@@ -14,18 +14,26 @@ import { useEffect } from "react"
 
 // Below are types for Res. IMO quite messy to put here. Unsure of putting it in
 // a separate interface file.
-// Grocery Item Types
-interface SavedGroceryListItem {
+// Grocery Item Typesc
+export interface SavedGroceryListItem {
   id: string;
-  list_id: string;
   name: string;
-  quantity: number;
-  unit: string;
-  purchased: boolean;
-  created_at: string;
-  rag_product_id?: string; // direct mapping to products table
-  amount?: number; // recommended amount from LLM/RAG
+  price: number | null;
+  supermarket: string | null;
+  quantity: string | null;
+  similarity?: number | null;
+  product_url?: string | null;
+  image_url?: string | null;
+  embedding?: number[] | null;
 }
+
+// Grocery List Status
+export const GROCERY_LIST_STATUSES = [
+  'incomplete',
+  'purchased',
+  'archived',
+] as const;
+export type GroceryListStatus = typeof GROCERY_LIST_STATUSES[number] | string;
 
 // Grocery List Types. 
 export interface SavedGroceryList {
