@@ -1,19 +1,62 @@
 import { RequestHandler } from 'express';
 import { findBestProductsForGroceryListEnhanced } from '../services/ragGenerationService';
-import { 
-  ControllerError, 
-  GroceryListRequest,
-  EnhancedGroceryPriceResponse
-} from '../interfaces/fetchPricesInterface';
+import { saveUserGroceryList } from '../models/groceryListModel';
+import { refineGroceryListController } from './refineGroceryListController';
+import { ControllerError } from '../interfaces/fetchPricesInterface';
+import { GeneratedGroceryItem, SavedGroceryList } from '../interfaces/groceryListInterface';
+import { AiPromptRequestBody, GroceryMetadataTitleOutput } from '../interfaces/generateGroceryListInterface';
 
 export const findBestPricesForGroceryList: RequestHandler<
   {},
-  EnhancedGroceryPriceResponse[] | ControllerError,
-  GroceryListRequest,
+  SavedGroceryList | ControllerError,
+  AiPromptRequestBody,
   {}
 > = async (req, res) => {
   try {
-    const { items, supermarketFilter } = req.body;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      res.status(401).json({
+        statusCode: 401,
+        message: 'User not authenticated'
+      });
+      return;
+    }
+
+    // Refine the input using refineGroceryListController
+    let refinedResult: GroceryMetadataTitleOutput;
+    try {
+      refinedResult = await new Promise<GroceryMetadataTitleOutput>((resolve, reject) => {
+        const mockRes = {
+          status: (code: number) => ({
+            json: (data: any) => {
+              if (code === 200) {
+                resolve(data as GroceryMetadataTitleOutput);
+              } else {
+                reject(data);
+              }
+            }
+          })
+        };
+        
+        refineGroceryListController(
+          { body: req.body } as any,
+          mockRes as any,
+          () => {} // next function
+        );
+      });
+    } catch (refinementError: any) {
+      res.status(refinementError.statusCode || 500).json(refinementError);
+      return;
+    }
+
+    const items = refinedResult.items;
+    
+    // Extract supermarket filter from the refined result
+    const excludedSupermarkets = refinedResult.supermarketFilter || [];
+    const supermarketFilter = excludedSupermarkets.length > 0 
+      ? { exclude: excludedSupermarkets }
+      : undefined;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       res.status(400).json({
@@ -34,16 +77,6 @@ export const findBestPricesForGroceryList: RequestHandler<
       }
     }
 
-    // Validate supermarket filter if provided
-    if (supermarketFilter) {
-      if (supermarketFilter.exclude && !Array.isArray(supermarketFilter.exclude)) {
-        res.status(400).json({
-          statusCode: 400,
-          message: 'supermarketFilter.exclude must be an array of strings'
-        });
-        return;
-      }
-    }
 
     const results = await findBestProductsForGroceryListEnhanced(items, supermarketFilter);
 
@@ -52,12 +85,37 @@ export const findBestPricesForGroceryList: RequestHandler<
       return;
     }
 
-    res.status(200).json(results);
+    // Transform the enhanced results into items suitable for saving
+    const optimizedItems: GeneratedGroceryItem[] = results.map(result => ({
+      name: result.item,
+      quantity: items.find(item => item.name === result.item)?.quantity || 1,
+      unit: items.find(item => item.name === result.item)?.unit || 'piece',
+      rag_product_id: result.selectedProduct?.id,
+      amount: result.amount
+    }));
+
+    // Use the title and metadata from refinedResult
+    const title =  refinedResult.title;
+    const metadata = refinedResult.metadata;
+
+    // Save the optimized list to the database
+    const savedList = await saveUserGroceryList(userId, {
+      title,
+      metadata,
+      items: optimizedItems
+    });
+
+    if ('statusCode' in savedList) {
+      res.status(savedList.statusCode).json(savedList);
+      return;
+    }
+
+    res.status(201).json(savedList);
   } catch (error: any) {
-    console.error('Product selection error:', error.message);
+    console.error('Product optimization and save error:', error.message);
     res.status(500).json({
       statusCode: 500,
-      message: 'Failed to process grocery list for product selection',
+      message: 'Failed to optimize and save grocery list',
       details: error.message
     });
   }
