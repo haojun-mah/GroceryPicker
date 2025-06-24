@@ -3,6 +3,8 @@ export interface GeneratedGroceryItem {
   name: string;
   quantity: number;
   unit: string;
+  rag_product_id?: string; // direct mapping to products table
+  amount?: number; // recommended amount from LLM/RAG
 }
 
 export interface SaveGroceryListRequestBody {
@@ -20,7 +22,16 @@ export interface SavedGroceryListItem {
   unit: string;
   purchased: boolean;
   created_at: string;
+  rag_product_id?: string; // direct mapping to products table
+  amount?: number; // recommended amount from LLM/RAG
 }
+
+export const GROCERY_LIST_STATUSES = [
+  'incomplete',
+  'purchased',
+  'archived',
+] as const;
+export type GroceryListStatus = typeof GROCERY_LIST_STATUSES[number] | string;
 
 export interface SavedGroceryList {
   id: string;
@@ -28,6 +39,7 @@ export interface SavedGroceryList {
   title: string;
   metadata: string | null;
   created_at: string;
+  list_status: GroceryListStatus;
   grocery_list_items: SavedGroceryListItem[];
 }
 
