@@ -15,7 +15,7 @@ groceryListRouter.post('/generate', verifyToken, generateGroceryList);
 groceryListRouter.post('/refine', refineGroceryListController);
 
 // RAG-based grocery list processing - returns selected products with database IDs
-groceryListRouter.post('/prices', findBestPricesForGroceryList);
+groceryListRouter.post('/optimize', findBestPricesForGroceryList);
 
 // saving a new list for the logged-in user
 groceryListRouter.post('/save', verifyToken, saveGroceryList);
