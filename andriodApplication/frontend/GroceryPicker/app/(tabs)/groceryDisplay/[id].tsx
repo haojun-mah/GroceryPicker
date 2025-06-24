@@ -6,12 +6,12 @@ import { Button, ButtonGroup, ButtonText} from "@/components/ui/button";
 import { useLocalSearchParams } from "expo-router";
 import { useGroceryContext } from "@/context/groceryContext";
 import { SavedGroceryList } from "../groceryHistory";
+import { groceryShops } from "../groceryHistory";
 
 const GroceryDisplay = () => {
   const { id } = useLocalSearchParams(); // id of grocerylist
   const { groceryListHistory } = useGroceryContext();
   const [currGroceryList, setCurrGroceryList] = useState<SavedGroceryList | null>(null);
-  const groceryShops = [ "FairPrice", "Sheng Shiong"];
 
     useEffect(() => {
       fetchDisplayInfo();
@@ -26,7 +26,7 @@ const GroceryDisplay = () => {
     if (!currGroceryList) {
       return (
         <ScrollView contentContainerStyle={{ paddingTop: 52}}>
-          <View className="px-4 gap-4">
+          <View className="px-4 gap-4 text-4xl font-bold text-black dark:text-white">
             <Text className="text-4xl font-semibold mb-2">Optimized Grocery List</Text> 
          </View>
         </ScrollView>
@@ -36,7 +36,7 @@ const GroceryDisplay = () => {
 return (
 <ScrollView className='bg-[#EEEEEE] dark:bg-black' contentContainerStyle={{ paddingTop: 52}}>
   <View className="px-4 gap-4">
-    <Text className="text-4xl font-semibold mb-2 text-black dark:text-white">Optimized Grocery List</Text>
+    <Text className="text-4xl font-bold mb-2 text-black dark:text-white">Optimized Grocery List</Text>
 
     {groceryShops.map((shops, idx)=> {
       const items = currGroceryList.grocery_list_items.filter(item => item.supermarket === shops);

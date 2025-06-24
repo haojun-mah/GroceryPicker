@@ -4,6 +4,8 @@ import { Card } from "@/components/ui/card"
 import { backend_url } from "@/lib/api"
 import { useGroceryContext } from "@/context/groceryContext"
 import { useEffect } from "react"
+import { useSession } from "@/context/authContext"
+import { router } from "expo-router"
 
 /*
   Page host grocery list history for each user.
@@ -53,8 +55,11 @@ interface ControllerError {
   details?: string;
 }
 
+export const groceryShops = [ "FairPrice", "Sheng Shiong"]; // to change
+
 const GroceryListHistoryPage = () => {
   const { groceryListHistory, setGroceryListHistory } = useGroceryContext();
+  const { session } = useSession();
 
   // Fetch grocery history from backend and cache into context
   const fetchGroceryHistory = async () => {
@@ -62,6 +67,7 @@ const GroceryListHistoryPage = () => {
       const response = await fetch(`${backend_url}/lists/getAll`, {
         method: 'GET',
         headers: {
+          Authorization: `${session?.access_token}`,
           'Content-Type': 'application/json',
         },
       });
@@ -101,7 +107,7 @@ const GroceryListHistoryPage = () => {
         <View>
           {groceryListHistory.map((list, idx) => {
             return ( 
-              <Pressable>
+              <Pressable onPress={() => router.push(`/groceryDisplay/${list.id}`)}>
                 <Card id={`${idx}`} className="bg-white dark:bg-gray-700 rounded-md">
                   <Text className="text-xl font-semibold text-black dark:text-white">
                     {list.title}

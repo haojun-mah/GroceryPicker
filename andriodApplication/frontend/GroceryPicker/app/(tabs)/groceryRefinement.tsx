@@ -1,19 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { Dimensions, ScrollView, View } from 'react-native';
-import { useRouter } from 'expo-router';
 import { Text } from '@/components/ui/text';
 import { Textarea, TextareaInput } from '@/components/ui/textarea';
 import { ButtonGroup, Button, ButtonText } from '@/components/ui/button';
 import { useGroceryRefinementContext } from '@/context/groceryRefinement';
+import { useGroceryContext } from '@/context/groceryContext';
 import { GroceryItem, GroceryMetadataTitleOutput } from '@/context/groceryContext';
 import { useSession } from '@/context/authContext';
 import { backend_url } from '../../config/api';
+import { SavedGroceryList, SavedGroceryListItem } from './groceryHistory';
+import { router } from 'expo-router';
 
 const { height: screenHeight } = Dimensions.get('window');
 
 const ModalPage = () => {
   const [generateRefinementGrocery, setGenerateRefinementGrocery] = useState<string>('');
   const { groceryRefinement, setGroceryRefinement, setGroceryShop } = useGroceryRefinementContext();
+  const { setGroceryListHistory } = useGroceryContext();
   const groceryList: GroceryItem[] | undefined = groceryRefinement?.items;
   const { session } = useSession();
 
@@ -56,7 +59,7 @@ const ModalPage = () => {
     try {
       if (generateRefinementGrocery.length === 0) return;
 
-      const response = await fetch(`${backend_url}/grocery/optimize`, {
+      const response = await fetch(`${backend_url}/lists/optimise`, {
         method: 'POST',
         headers: {
           Authorization: `${session?.access_token}`,
@@ -65,7 +68,22 @@ const ModalPage = () => {
         body: JSON.stringify({ message: groceryRefinement }),
       });
 
-      const output: GroceryMetadataTitleOutput = await response.json();
+      // Optimise list obtained to get its list ID
+      const optimisedList: SavedGroceryListItem = await response.json();
+     
+      // All of users grocery lists retrieved. Contains newly generated optimised list as well
+      const responseAllList = await fetch(`${backend_url}/lists/getAll`, {
+        method: 'GET',
+        headers: {
+          Authorization: `${session?.access_token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const allList : SavedGroceryList[] = await responseAllList.json();
+
+      setGroceryListHistory(allList);
+      router.push(`/groceryDisplay/${optimisedList.id}`)
       // Handle output
     } catch (error) {
       console.log(error);
