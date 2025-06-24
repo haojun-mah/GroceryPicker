@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import { findBestPricesForGroceryList } from '../controllers/optimizeListController';
 import { embedTextController } from '../controllers/embeddingController';
 import { scraperUploadController } from '../controllers/uploadProductController';
 
@@ -20,8 +19,6 @@ import { scraperUploadController } from '../controllers/uploadProductController'
 
 const productRouter = Router();
 
-// RAG-based grocery list processing - returns selected products with database IDs
-productRouter.post('/prices', findBestPricesForGroceryList);
 
 // generated embed, called by price scraper
 productRouter.post('/embed-text', embedTextController);
