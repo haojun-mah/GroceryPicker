@@ -2,8 +2,8 @@ import generate from '../services/llm';
 import { RequestHandler } from 'express-serve-static-core';
 import {
   AiPromptRequestBody,
-  ErrorResponse,
-  GeneratedGroceryItem,
+  ControllerError,
+  GroceryItem,
 } from '../interfaces/generateGroceryListInterface';
 import { GroceryMetadataTitleOutput } from '../interfaces/generateGroceryListInterface';
 
@@ -20,7 +20,7 @@ import { GroceryMetadataTitleOutput } from '../interfaces/generateGroceryListInt
 
 export const generateGroceryList: RequestHandler<
   {},
-  GroceryMetadataTitleOutput | ErrorResponse,
+  GroceryMetadataTitleOutput | ControllerError,
   AiPromptRequestBody,
   {}
 > = async (req, res) => {
@@ -80,7 +80,7 @@ export const generateGroceryList: RequestHandler<
       const metadata: string = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()} ${date.getDate()}/${date.getMonth()}/${date.getFullYear()}`;
 
       // 5. Obtain grocery
-      const arrayGrocery: GeneratedGroceryItem[] = [];
+      const arrayGrocery: GroceryItem[] = [];
       for (let i = 1; i < lines.length; i++) {
         const line = lines[i];
         const parts = line.split('/').map((part) => part.trim()); // Split by comma and trim parts

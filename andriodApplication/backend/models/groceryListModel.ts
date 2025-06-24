@@ -2,8 +2,8 @@ import supabase from '../config/supabase';
 import {
   SaveGroceryListRequestBody,
   SavedGroceryList,
-  ControllerError,
-} from '../interfaces/groceryListInterface'; 
+} from '../interfaces/groceryListInterface';
+import { ControllerError } from '../interfaces/fetchPricesInterface'; 
 
 // Function to save a new grocery list and its items
 export async function saveUserGroceryList(

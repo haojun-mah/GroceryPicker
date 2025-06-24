@@ -1,22 +1,19 @@
 /*
- *  This file includes the interface type definitions for groceryprices files.
+ * Interface type definitions for grocery prices and product-related functionality.
  */
 
-export interface FetchPricesRequestBody {
-  items: string[];
+// Common error interface used across all controllers
+export interface ControllerError {
+  statusCode: number;
+  message: string;
+  details?: string;
 }
 
-export interface FetchedItemResponse {
-  name: string;
-  price?: number;
-  supermarket?: string;
-  found: boolean;
-}
-
+// Product-related interfaces
 export interface ProductRow {
   id: string;
   name: string;
-  price: number | null;
+  price: string | null;
   supermarket: string | null;
   quantity: string | null;
   similarity?: number | null;
@@ -25,6 +22,7 @@ export interface ProductRow {
   embedding?: number[] | null;
 }
 
+// Request/Response interfaces
 export interface GroceryItem {
   name: string;
   quantity: number;
@@ -48,11 +46,3 @@ export interface EnhancedGroceryPriceResponse {
   error?: string;
   query?: string;
 }
-
-export interface ControllerError {
-  statusCode: number;
-  message: string;
-  details?: string;
-}
-
-export type ErrorResponse = ControllerError;
