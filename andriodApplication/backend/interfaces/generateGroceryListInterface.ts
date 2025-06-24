@@ -3,14 +3,14 @@ export { ControllerError, GroceryItem } from "./fetchPricesInterface";
 
 export interface AiPromptRequestBody {
   message: string;
-  groceryShop: string[];
+  supermarketFilter: string[]; // excluded supermarkets
 }
 
 export interface GroceryMetadataTitleOutput {
   title: string;
   metadata: string;
   items: GroceryItem[];
-  groceryShop: string[];
+  supermarketFilter: string[];
 }
 
 export type GeneratedGroceryListResponse = GroceryItem[];
