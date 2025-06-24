@@ -7,7 +7,7 @@ export const saveGroceryList: RequestHandler<
   any,
   SaveGroceryListRequestBody,
   {}
-> = async (req, res, next) => {
+> = async (req, res) => {
   try {
     const userId = req.user?.id;
 
@@ -51,10 +51,15 @@ export const saveGroceryList: RequestHandler<
 
     if ('message' in result) {
       res.status(result.statusCode || 500).json(result);
-    } else {
-      res.status(201).json(result);
+      return;
     }
-  } catch (error) {
-    next(error);
+    res.status(201).json(result);
+  } catch (error: any) {
+    console.error('Save list error:', error.message);
+    res.status(500).json({
+      statusCode: 500,
+      message: 'Failed to save grocery list.',
+      details: error.message
+    });
   }
 };
