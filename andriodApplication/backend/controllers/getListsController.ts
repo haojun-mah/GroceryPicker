@@ -1,7 +1,13 @@
-import { Request, Response } from 'express';
+import { RequestHandler } from 'express';
 import { getAllUserLists } from '../models/groceryListModel';
+import { SavedGroceryList, ControllerError } from '../interfaces/groceryListInterface';
 
-export const getAllUserGroceryLists = async (req: Request, res: Response): Promise<void> => {
+export const getAllUserGroceryLists: RequestHandler<
+  {},
+  SavedGroceryList[] | ControllerError,
+  {},
+  {}
+> = async (req, res, next) => {
   try {
     const userId = req.user?.id;
 
@@ -18,8 +24,6 @@ export const getAllUserGroceryLists = async (req: Request, res: Response): Promi
       res.status(200).json(result);
     }
   } catch (error) {
-    const e = error as Error;
-    console.error(`[Controller Error] getAllUserGroceryLists: ${e.message}`);
-    res.status(500).json({ statusCode: 500, message: 'An internal server error occurred.' });
+    next(error);
   }
 };

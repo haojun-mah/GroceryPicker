@@ -33,6 +33,8 @@ export async function saveUserGroceryList(
     quantity: item.quantity,
     unit: item.unit,
     purchased: false,
+    rag_product_id: item.rag_product_id || null, // direct mapping to products table
+    amount: item.amount !== undefined ? item.amount : null, // recommended amount
   }));
 
   const { error: itemsError } = await supabase.from('grocery_list_items').insert(itemsToInsert);
@@ -71,7 +73,12 @@ export async function getAllUserLists(userId: string): Promise<SavedGroceryList[
     .from('grocery_lists')
     .select(`
       *,
-      grocery_list_items ( * )
+      grocery_list_items (
+        *,
+        product:rag_product_id (
+          id, name, price, supermarket, quantity, product_url, image_url
+        )
+      )
     `)
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
