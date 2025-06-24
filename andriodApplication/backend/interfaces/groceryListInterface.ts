@@ -26,12 +26,20 @@ export interface SavedGroceryListItem {
   amount?: number; // recommended amount from LLM/RAG
 }
 
+export const GROCERY_LIST_STATUSES = [
+  'incomplete',
+  'purchased',
+  'archived',
+] as const;
+export type GroceryListStatus = typeof GROCERY_LIST_STATUSES[number] | string;
+
 export interface SavedGroceryList {
   id: string;
   user_id: string;
   title: string;
   metadata: string | null;
   created_at: string;
+  list_status: GroceryListStatus;
   grocery_list_items: SavedGroceryListItem[];
 }
 
