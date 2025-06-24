@@ -1,10 +1,11 @@
 import DropdownCard from "@/components/DropdownCard";
 import { Text } from "@/components/ui/text";
-import { backend_url } from "@/config/api";
 import { useEffect, useState } from "react";
 import { View, ScrollView } from "react-native";
-import { useSession } from "@/context/authContext";
 import { Button, ButtonGroup, ButtonText} from "@/components/ui/button";
+import { useLocalSearchParams } from "expo-router";
+import { useGroceryContext } from "@/context/groceryContext";
+import { SavedGroceryList } from "../groceryHistory";
 
 const testItem: OptimizedGroceryItem = {
     name: "Sadia",
@@ -34,38 +35,19 @@ interface OptimizedList {
 
 
 const GroceryDisplay = () => {
-    const { session } = useSession();
-    const [optimizedList, setOptimizedList] = useState<OptimizedList[]>([]); // disabled undefined for testing purposees
+  const { id } = useLocalSearchParams(); // id of grocerylist
+  const { groceryListHistory } = useGroceryContext();
+  let currGroceryList: SavedGroceryList | null = null
 
     useEffect(() => {
-    setOptimizedList([test, test]);
+      fetchDisplayInfo();
+    }, []);
 
-    const fetchOptimizedList = async () => {
-      try {
-        const response = await fetch(`${backend_url}/id/grocery`, {
-          method: "GET",
-          headers: {
-            Authorization: `${session?.access_token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        const output: OptimizedList[] = await response.json();
-        
-        if (response.ok) {
-          setOptimizedList(output);
-        } else {
-          alert("Backend GET retrieval failed");
-        }
-      } catch (error) {
-        console.error("Error fetching optimized list:", error);
-        alert("An error occurred while fetching data.");
-      }
+    // filter target grocery list from context with ID
+    const fetchDisplayInfo = async () => {
+      currGroceryList = groceryListHistory?.filter(list => list.id === id)[0]
     };
 
-    // testing disabled
-    //   fetchOptimizedList(); 
-  }, [session]); // change session to any other triggers which leads to a new backend call
 
 // disable for testing purpose
 //   if (!optimizedList) {

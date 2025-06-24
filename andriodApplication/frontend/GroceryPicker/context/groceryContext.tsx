@@ -1,3 +1,4 @@
+import { SavedGroceryList } from '@/app/(tabs)/groceryHistory';
 import React, { useContext, useState, Dispatch, SetStateAction } from 'react';
 
 export interface ErrorResponse {
@@ -13,6 +14,8 @@ interface GroceryContextType {
   error: ErrorResponse | null;
   setIsLoading: (loading: boolean) => void;
   setError: (error: ErrorResponse | null) => void;
+  groceryListHistory: SavedGroceryList[] | null;
+  setGroceryListHistory: Dispatch<SetStateAction<SavedGroceryList[] | null>>;
 }
 
 export interface GroceryMetadataTitleOutput {
@@ -38,6 +41,8 @@ export const GroceryContextProvider: any = ({ children }: any) => {
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<ErrorResponse | null>(null);
+  const [groceryListHistory, setGroceryListHistory] = useState<
+    SavedGroceryList[] | null>(null);
 
   const value: GroceryContextType = {
     grocery,
@@ -46,6 +51,8 @@ export const GroceryContextProvider: any = ({ children }: any) => {
     setIsLoading,
     error,
     setError,
+    groceryListHistory,
+    setGroceryListHistory,
   };
 
   return (
@@ -60,3 +67,8 @@ export const useGroceryContext = () => {
   }
   return context;
 };
+
+
+
+
+

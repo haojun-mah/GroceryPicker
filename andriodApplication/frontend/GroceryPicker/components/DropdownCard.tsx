@@ -16,7 +16,7 @@ import { CheckboxIcon, CheckboxIndicator, CheckboxGroup, Checkbox } from './ui/c
 import { CircleIcon } from './ui/icon';
 import { Pressable } from 'react-native';
 import { GroceryItem } from '@/context/groceryContext';
-import { OptimizedGroceryItem } from '@/app/(tabs)/groceryDisplay';
+import { OptimizedGroceryItem } from '@/app/(tabs)/groceryDisplay/groceryDisplay';
 
 
 // Enable LayoutAnimation for Android
