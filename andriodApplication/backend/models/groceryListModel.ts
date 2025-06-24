@@ -73,7 +73,12 @@ export async function getAllUserLists(userId: string): Promise<SavedGroceryList[
     .from('grocery_lists')
     .select(`
       *,
-      grocery_list_items ( * )
+      grocery_list_items (
+        *,
+        product:rag_product_id (
+          id, name, price, supermarket, quantity, product_url, image_url
+        )
+      )
     `)
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
