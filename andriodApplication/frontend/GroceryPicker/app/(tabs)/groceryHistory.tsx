@@ -1,66 +1,132 @@
-import DropdownCard from '@/components/DropdownCard';
-import {
-  GroceryMetadataTitleOutput,
-  useGroceryContext,
-} from '@/context/groceryContext';
-import { Text, View } from 'react-native';
-import { GroceryItem } from '@/context/groceryContext';
-import { ScrollView } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { Pressable, ScrollView, View } from "react-native"
+import { Text } from "@/components/ui/text"
+import { Card } from "@/components/ui/card"
+import { backend_url } from "@/lib/api"
+import { useGroceryContext } from "@/context/groceryContext"
+import { useEffect } from "react"
+import { useSession } from "@/context/authContext"
+import { router } from "expo-router"
 
-const groceryHistory = () => {
-  const { grocery, isLoading, error } = useGroceryContext();
-  const { openLatest } = useLocalSearchParams();
+/*
+  Page host grocery list history for each user.
+  User can click on grocery list card which leads to grocery display.
 
-  if (error) {
-    console.log(
-      'Front end handling error from grocerycontext. Receiving at groceryHistory',
-    );
+  GET request to /lists/getAll return SavedGroceryList[] type.
+  */
+
+// Below are types for Res. IMO quite messy to put here. Unsure of putting it in
+// a separate interface file.
+// Grocery Item Typesc
+export interface SavedGroceryListItem {
+  id: string;
+  name: string;
+  price: number | null;
+  supermarket: string | null;
+  quantity: string | null;
+  similarity?: number | null;
+  product_url?: string | null;
+  image_url?: string | null;
+  embedding?: number[] | null;
+}
+
+// Grocery List Status
+export const GROCERY_LIST_STATUSES = [
+  'incomplete',
+  'purchased',
+  'archived',
+] as const;
+export type GroceryListStatus = typeof GROCERY_LIST_STATUSES[number] | string;
+
+// Grocery List Types. 
+export interface SavedGroceryList {
+  id: string;
+  user_id: string;
+  title: string;
+  metadata: string | null;
+  created_at: string;
+  grocery_list_items: SavedGroceryListItem[];
+  list_status: string;
+}
+
+// Controller Error Types
+interface ControllerError {
+  statusCode: number;
+  message: string;
+  details?: string;
+}
+
+export const groceryShops = [ "FairPrice", "Sheng Shiong"]; // to change
+
+const GroceryListHistoryPage = () => {
+  const { groceryListHistory, setGroceryListHistory } = useGroceryContext();
+  const { session } = useSession();
+
+  // Fetch grocery history from backend and cache into context
+  const fetchGroceryHistory = async () => {
+    try {
+      const response = await fetch(`${backend_url}/lists/getAll`, {
+        method: 'GET',
+        headers: {
+          Authorization: `${session?.access_token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data: SavedGroceryList[] = await response.json();
+        setGroceryListHistory(data);
+      } else {
+        const error: ControllerError = await response.json();
+        throw new Error(`Error ${error.statusCode}: ${error.message}`);
+      }
+    } catch (error) {
+      console.error("Failed to fetch grocery history:", error);
+    }
   }
-  if (!grocery || !Array.isArray(grocery) || grocery.length === 0) {
+
+  // Runs fetchGroceryHistory on component mount/render
+  useEffect(() => {
+    fetchGroceryHistory();
+  }, []);
+
+  // Displays nothing when groceryListHistory is null or empty
+  if (!groceryListHistory) {
     return (
-      <View className="flex items-center mt-20 p-4 gap-2">
-        <Text className="font-bold font-roboto text-2xl">Grocery History</Text>
-      </View>
+      <ScrollView contentContainerStyle={{ paddingTop: 60 }} className="bg-[#EEEEEE] dark:bg-black">
+        <View className="px-6">
+          <Text className="text-4xl font-bold text-dark dark:text-white">History</Text>
+        </View>
+      </ScrollView>
     );
   }
 
-  const dropDownPopulatedWithInfo = grocery
-    .filter(
-      (group): group is GroceryMetadataTitleOutput =>
-        group !== null && typeof group === 'object',
-    ) 
-    .map((group: GroceryMetadataTitleOutput, groupIndex: number) => {
-      // 'group' here is an array of GeneratedGroceryItem
-      const title = group.title;
-      const metadata = group.metadata;
-      const groceryConcat = group.items
-        .filter(
-          (item): item is GroceryItem => item !== null && item !== undefined,
-        ) // Robust filter for safety
-        .map((item: GroceryItem) => {
-          return `${item.name} - ${item.quantity} ${item.unit}`;
-        });
-
-      return (
-        <DropdownCard
-          key={`group-${groupIndex}`} // Unique key for each DropdownCard (based on group index)
-          title={title} // Title for card
-          outsideText={metadata} // Metadata (time and date)
-          insideText={groceryConcat} // This array contains the formatted strings for this group
-          defaultOpen={groupIndex === 0 && openLatest === 'true'}
-        />
-      );
-    });
-
-  return (
-    <ScrollView>
-      <View className="flex items-center mt-20 p-4 gap-2">
-        <Text className="font-bold font-roboto text-2xl">Grocery History</Text>
-        {dropDownPopulatedWithInfo}
+  return(
+    <ScrollView contentContainerStyle={{ paddingTop: 60 }} className="bg-[#EEEEEE] dark:bg-black">
+      <View className="px-6">
+        <Text className="text-4xl font-bold text-dark dark:text-white">History</Text>
+        <View>
+          {groceryListHistory.map((list, idx) => {
+            return ( 
+              <Pressable onPress={() => router.push(`/groceryDisplay/${list.id}`)}>
+                <Card id={`${idx}`} className="bg-white dark:bg-gray-700 rounded-md">
+                  <Text className="text-xl font-semibold text-black dark:text-white">
+                    {list.title}
+                  </Text>
+                  <Text className="text-xs font-normal text-gray-500 dark:text-gray-300">
+                    {list.metadata ? list.metadata : ""}  
+                  </Text>
+                  <Text className="text-md font-normal">
+                    {list.list_status}
+                  </Text>
+                </Card>
+              </Pressable>
+            );
+          })}
+       </View>
       </View>
     </ScrollView>
-  );
-};
+  )
+}
 
-export default groceryHistory;
+export default GroceryListHistoryPage;
+ 
