@@ -6,6 +6,7 @@ import { useGroceryContext } from "@/context/groceryContext"
 import { useEffect } from "react"
 import { useSession } from "@/context/authContext"
 import { router } from "expo-router"
+import { ControllerError, SavedGroceryList } from "./interface"
 
 /*
   Page host grocery list history for each user.
@@ -13,49 +14,6 @@ import { router } from "expo-router"
 
   GET request to /lists/getAll return SavedGroceryList[] type.
   */
-
-// Below are types for Res. IMO quite messy to put here. Unsure of putting it in
-// a separate interface file.
-// Grocery Item Typesc
-export interface SavedGroceryListItem {
-  id: string;
-  name: string;
-  price: number | null;
-  supermarket: string | null;
-  quantity: string | null;
-  similarity?: number | null;
-  product_url?: string | null;
-  image_url?: string | null;
-  embedding?: number[] | null;
-}
-
-// Grocery List Status
-export const GROCERY_LIST_STATUSES = [
-  'incomplete',
-  'purchased',
-  'archived',
-] as const;
-export type GroceryListStatus = typeof GROCERY_LIST_STATUSES[number] | string;
-
-// Grocery List Types. 
-export interface SavedGroceryList {
-  id: string;
-  user_id: string;
-  title: string;
-  metadata: string | null;
-  created_at: string;
-  grocery_list_items: SavedGroceryListItem[];
-  list_status: string;
-}
-
-// Controller Error Types
-interface ControllerError {
-  statusCode: number;
-  message: string;
-  details?: string;
-}
-
-export const groceryShops = [ "Fairprice", "Cold Storage", "Sheng Shiong"]; // to change
 
 const GroceryListHistoryPage = () => {
   const { groceryListHistory, setGroceryListHistory } = useGroceryContext();

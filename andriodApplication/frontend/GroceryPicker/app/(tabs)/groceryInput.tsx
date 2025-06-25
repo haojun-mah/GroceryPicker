@@ -9,7 +9,7 @@ import { useGroceryRefinementContext } from '@/context/groceryRefinement';
 import { router } from 'expo-router';
 import { DropdownSelector } from '@/components/DropDownSelector';
 import { GroceryMetadataTitleOutput } from '@/context/groceryContext';
-import { groceryShops } from './groceryHistory';
+import { groceryShops, AiPromptRequestBody } from './interface';
 
 /*
   Initial grocery input page where user can key in unstructred grocrey list to receive structured grocery list.
@@ -17,12 +17,6 @@ import { groceryShops } from './groceryHistory';
 */
 
 // postData req type
-export interface AiPromptRequestBody {
-  message: string;
-  supermarketFilter: string[]; // excluded supermarkets
-}
-
-
 const groceryInput = () => {
   const [groceryTextArea, setGroceryTextArea] = useState<string>('');
   const [selectedGroceryShop, setSelectedGroceryShop] = useState<string[]>([]);

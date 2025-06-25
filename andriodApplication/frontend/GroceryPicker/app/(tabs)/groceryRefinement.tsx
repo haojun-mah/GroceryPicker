@@ -5,12 +5,11 @@ import { Textarea, TextareaInput } from '@/components/ui/textarea';
 import { ButtonGroup, Button, ButtonText } from '@/components/ui/button';
 import { useGroceryRefinementContext } from '@/context/groceryRefinement';
 import { useGroceryContext } from '@/context/groceryContext';
-import { GroceryItem, GroceryMetadataTitleOutput } from '@/context/groceryContext';
+import { GroceryItem, GroceryMetadataTitleOutput, SavedGroceryList, SavedGroceryListItem } from './interface';
 import { useSession } from '@/context/authContext';
 import { backend_url } from '../../lib/api';
-import { SavedGroceryList, SavedGroceryListItem } from './groceryHistory';
 import { router } from 'expo-router';
-import { AiPromptRequestBody } from './groceryInput';
+import { AiPromptRequestBody } from './interface';
 
 const { height: screenHeight } = Dimensions.get('window');
 
