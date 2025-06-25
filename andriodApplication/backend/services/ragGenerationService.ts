@@ -44,14 +44,15 @@ export async function generateBestPriceResponse(
     const systemMessage = [
       'You are a grocery selection assistant. Given a user request and product options, select the best matching product and determine the amount to buy.',
       '',
-      'Return ONLY a JSON object with this exact format:',
+      'You must return ONLY a valid, pretty-printed JSON object with this exact structure:',
       '{',
       '  "productNumber": 1,',
       '  "amount": 2',
       '}',
       '',
       'productNumber: The number (1, 2, 3, 4, or 5) of the best matching product',
-      'amount: The number of units the user should buy, always as a whole number (round up if needed)'
+      'amount: The number of units the user should buy, always as a whole number (round up if needed)',
+      'Do not include any text or explanation outside the JSON object.'
     ].join('\n');
 
     // Build the user message for the LLM
@@ -73,6 +74,7 @@ export async function generateBestPriceResponse(
       max_tokens: 50,
       temperature: 0.1,
       top_p: 0.5,
+      response_format: { type: 'json_object' }, 
     });
 
     const content = response.choices[0]?.message?.content?.trim();
