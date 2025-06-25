@@ -7,7 +7,7 @@ import { useGroceryRefinementContext } from '@/context/groceryRefinement';
 import { useGroceryContext } from '@/context/groceryContext';
 import { GroceryItem, GroceryMetadataTitleOutput } from '@/context/groceryContext';
 import { useSession } from '@/context/authContext';
-import { backend_url } from '../../config/api';
+import { backend_url } from '../../lib/api';
 import { SavedGroceryList, SavedGroceryListItem } from './groceryHistory';
 import { router } from 'expo-router';
 import { AiPromptRequestBody } from './groceryInput';
