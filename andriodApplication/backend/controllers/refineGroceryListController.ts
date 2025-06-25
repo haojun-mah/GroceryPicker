@@ -67,7 +67,7 @@ AiPromptRequestBody,
 
       // 4. Obtain metadata (date, time created)
       const date = new Date();
-      const metadata: string = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()} ${date.getDate()}/${date.getMonth()}/${date.getFullYear()}`;
+      const metadata: string = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()} ${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
 
       // 5. Obtain grocery
       const arrayGrocery: GroceryItem[] = [];
