@@ -86,11 +86,13 @@ const GroceryListHistoryPage = () => {
 
   // Runs fetchGroceryHistory on component mount/render
   useEffect(() => {
-    fetchGroceryHistory();
-  }, []);
+    if (session) {
+      fetchGroceryHistory();
+    }
+  }, [session]);
 
   // Displays nothing when groceryListHistory is null or empty
-  if (!groceryListHistory) {
+  if (!groceryListHistory || groceryListHistory.length === 0) {
     return (
       <ScrollView contentContainerStyle={{ paddingTop: 60 }} className="bg-[#EEEEEE] dark:bg-black">
         <View className="px-6">
@@ -107,8 +109,8 @@ const GroceryListHistoryPage = () => {
         <View>
           {groceryListHistory.map((list, idx) => {
             return ( 
-              <Pressable onPress={() => router.push(`/groceryDisplay/${list.id}`)}>
-                <Card id={`${idx}`} className="bg-white dark:bg-gray-700 rounded-md">
+              <Pressable key={idx} onPress={() => router.push(`/groceryDisplay/${list.id}`)}>
+                <Card className="bg-white dark:bg-gray-700 rounded-md">
                   <Text className="text-xl font-semibold text-black dark:text-white">
                     {list.title}
                   </Text>

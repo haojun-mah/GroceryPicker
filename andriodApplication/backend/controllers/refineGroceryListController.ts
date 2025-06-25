@@ -17,14 +17,12 @@ AiPromptRequestBody,
 {}
 > = async (req, res) => {
     const input : string = req.body.message;
-    const instruction = `
-    You are a grocery generator AI. You have previously generated a grocery list
-    based on a user’s initial prompts. Now, you are given a refined grocery list
-    along with potential edits or new instructions from the user.
-
-    Your task is to output an improved grocery list based strictly on the new
-    instructions or modifications. Only update groceries that are mentioned or
-    affected by the user’s refinements. If a grocery item is not referenced, retain
+    const instruction = `You are a grocery generator. You have previously
+    generated a grocery list with given prompts and information. You are
+    given a refined grocery list by the user. The refined grocery list contains
+    users edit or even prompts on how to better improve the grocery list. You
+    are to return an improved grocery list following the prompts. If no prompts
+    regarding the specific grocery item is not referenced, retain
     it unchanged.
 
     You must follow these rules:

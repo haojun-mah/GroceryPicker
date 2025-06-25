@@ -23,6 +23,7 @@ export const getAllUserGroceryLists: RequestHandler<
       return;
     }
     res.status(200).json(result);
+    console.log(result[0].grocery_list_items);
   } catch (error: any) {
     console.error('Get lists error:', error.message);
     res.status(500).json({

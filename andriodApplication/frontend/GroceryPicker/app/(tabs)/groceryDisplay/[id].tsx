@@ -13,16 +13,21 @@ const GroceryDisplay = () => {
   const { groceryListHistory } = useGroceryContext();
   const [currGroceryList, setCurrGroceryList] = useState<SavedGroceryList | null>(null);
 
-    useEffect(() => {
+  console.log(id); // debug
+  console.log(groceryListHistory); // debug
+
+  // Check ID exist and groceryListHistory is successfully fetched before calling for fetchDisplayInfo
+  useEffect(() => {
+    if (id && groceryListHistory && groceryListHistory?.length > 0) {
       fetchDisplayInfo();
-    }, []);
+    }
+  }, [id, groceryListHistory]); // useEffect will run again when these 2 values changes
 
     // filter target grocery list from context with ID
     const fetchDisplayInfo = async () => {
-      const list = groceryListHistory?.find(list => list.id === id);
+      const list = groceryListHistory?.find(list => String(list.id) === String(id));
       setCurrGroceryList(list ?? null);
     };
-
     if (!currGroceryList) {
       return (
         <ScrollView contentContainerStyle={{ paddingTop: 52}}>
