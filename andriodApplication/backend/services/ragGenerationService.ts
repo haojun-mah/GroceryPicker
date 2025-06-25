@@ -122,48 +122,6 @@ export async function generateBestPriceResponse(
 }
 
 /**
- * Finds the best product based on similarity score and price considerations
- */
-function findBestProduct(products: ProductRow[], userQuery: string): ProductRow {
-  if (products.length === 0) throw new Error('No products to evaluate');
-  if (products.length === 1) return products[0];
-
-  // Sort by similarity first (highest first), then by price considerations
-  const sortedProducts = products.sort((a, b) => {
-    // Primary: similarity score (higher is better)
-    const similarityDiff = (b.similarity || 0) - (a.similarity || 0);
-    if (Math.abs(similarityDiff) > 0.1) return similarityDiff;
-
-    // Secondary: price (lower is better, but handle price strings like "$24.45")
-    const priceA = extractNumericPrice(a.price);
-    const priceB = extractNumericPrice(b.price);
-    
-    if (priceA !== null && priceB !== null) {
-      return priceA - priceB;
-    }
-    
-    // Tertiary: prefer products with complete information
-    const completenessA = (a.price ? 1 : 0) + (a.product_url ? 1 : 0) + (a.quantity ? 1 : 0);
-    const completenessB = (b.price ? 1 : 0) + (b.product_url ? 1 : 0) + (b.quantity ? 1 : 0);
-    
-    return completenessB - completenessA;
-  });
-
-  return sortedProducts[0];
-}
-
-/**
- * Extracts numeric price from string like "$24.45" or "24.45"
- */
-function extractNumericPrice(price: any): number | null {
-  if (typeof price === 'number') return price;
-  if (typeof price !== 'string') return null;
-  
-  const match = price.match(/[\d.]+/);
-  return match ? parseFloat(match[0]) : null;
-}
-
-/**
  * Enhanced batch processing that returns structured data with product links
  */
 export async function findBestProductsForGroceryListEnhanced(
