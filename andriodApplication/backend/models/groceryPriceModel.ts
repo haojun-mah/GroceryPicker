@@ -26,7 +26,7 @@ export async function getProductsByNames(
 
       if (error) {
         console.error('Model: Error during vector search:', error.message);
-        return { statusCode: 500, message: 'Failed to perform semantic search.', details: error.message };
+        return new ControllerError(500, 'Failed to perform semantic search.', error.message);
       }
       
       if (data) {
@@ -44,6 +44,6 @@ export async function getProductsByNames(
   } catch (unexpectedError: any) {
     const errorMessage = unexpectedError instanceof Error ? unexpectedError.message : 'An unknown internal error occurred.';
     console.error(`[Model Error] getProductsByNames (semantic search): ${errorMessage}`);
-    return { statusCode: 500, message: 'An unexpected error occurred during product search.', details: errorMessage };
+    return new ControllerError(500, 'An unexpected error occurred during product search.', errorMessage);
   }
 }

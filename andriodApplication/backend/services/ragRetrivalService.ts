@@ -10,7 +10,7 @@ export async function fetchProductPrices(
 ): Promise<ProductRow[] | ControllerError> {
   const queryEmbedding = await getEmbedding(userQuery, { type: 'query' });
   if (!queryEmbedding) {
-    return { statusCode: 500, message: 'Failed to generate query embedding for price retrieval.' };
+    return new ControllerError(500, 'Failed to generate query embedding for price retrieval.');
   }
 
   try {
@@ -24,7 +24,7 @@ export async function fetchProductPrices(
 
     if (error) {
       console.error('Error during filtered vector search:', error.message);
-      return { statusCode: 500, message: 'Failed to retrieve product prices.', details: error.message };
+      return new ControllerError(500, 'Failed to retrieve product prices.', error.message);
     }
 
     // Results are already filtered and limited at database level
@@ -41,7 +41,7 @@ export async function fetchProductPrices(
     return uniqueProducts;
   } catch (error: any) {
     console.error('Unexpected error during price retrieval:', error.message);
-    return { statusCode: 500, message: 'An unexpected error occurred during price retrieval.', details: error.message };
+    return new ControllerError(500, 'An unexpected error occurred during price retrieval.', error.message);
   }
 }
 

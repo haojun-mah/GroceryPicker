@@ -25,15 +25,12 @@ export async function generateBestPriceResponse(
     // Fetch fewer, higher quality products
     const products = await fetchProductPrices(userQuery, 0.6, 5, supermarketFilter);
     
-    if ('statusCode' in products) {
+    if (products instanceof ControllerError) {
       return products;
     }
 
     if (products.length === 0) {
-      return {
-        statusCode: 404,
-        message: 'No products found matching your query.',
-      };
+      return new ControllerError(404, 'No products found matching your query.');
     }
 
     // Send top 5 products to LLM for selection
@@ -80,10 +77,7 @@ export async function generateBestPriceResponse(
     const content = response.choices[0]?.message?.content?.trim();
     
     if (!content) {
-      return { 
-        statusCode: 500, 
-        message: 'No response generated from LLM' 
-      };
+      return new ControllerError(500, 'No response generated from LLM');
     }
 
     try {
@@ -115,11 +109,7 @@ export async function generateBestPriceResponse(
     }
   } catch (error: any) {
     console.error('RAG generation error:', error.message);
-    return { 
-      statusCode: 500, 
-      message: 'Failed to generate product selection', 
-      details: error.message 
-    };
+    return new ControllerError(500, 'Failed to generate product selection', error.message);
   }
 }
 
@@ -157,7 +147,7 @@ export async function findBestProductsForGroceryListEnhanced(
               selectedProduct: undefined,
               amount: undefined,
               allProducts: [],
-              error: response.message,
+              error: response instanceof ControllerError ? response.message : (response as any).message,
               query
             };
           }
@@ -198,10 +188,6 @@ export async function findBestProductsForGroceryListEnhanced(
     return results;
   } catch (error: any) {
     console.error('Enhanced batch processing error:', error.message);
-    return {
-      statusCode: 500,
-      message: 'Failed to process grocery list',
-      details: error.message
-    };
+    return new ControllerError(500, 'Failed to process grocery list', error.message);
   }
 }
