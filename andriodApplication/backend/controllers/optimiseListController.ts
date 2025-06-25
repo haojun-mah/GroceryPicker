@@ -16,10 +16,8 @@ export const findBestPricesForGroceryList: RequestHandler<
     const userId = req.user?.id;
 
     if (!userId) {
-      res.status(401).json({
-        statusCode: 401,
-        message: 'User not authenticated'
-      });
+      const err = new ControllerError(401, 'User not authenticated');
+      res.status(401).json(err);
       return;
     }
 
@@ -38,7 +36,6 @@ export const findBestPricesForGroceryList: RequestHandler<
             }
           })
         };
-        
         refineGroceryListController(
           { body: req.body } as any,
           mockRes as any,
@@ -46,12 +43,14 @@ export const findBestPricesForGroceryList: RequestHandler<
         );
       });
     } catch (refinementError: any) {
-      res.status(refinementError.statusCode || 500).json(refinementError);
+      const err = refinementError instanceof ControllerError
+        ? refinementError
+        : new ControllerError(refinementError.statusCode || 500, refinementError.message || 'Refinement failed', refinementError.details);
+      res.status(err.statusCode).json(err);
       return;
     }
 
     const items = refinedResult.items;
-    
     // Extract supermarket filter from the refined result
     const excludedSupermarkets = refinedResult.supermarketFilter || [];
     const supermarketFilter = excludedSupermarkets.length > 0 
@@ -59,29 +58,25 @@ export const findBestPricesForGroceryList: RequestHandler<
       : undefined;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
-      res.status(400).json({
-        statusCode: 400,
-        message: 'Items array is required and cannot be empty'
-      });
+      const err = new ControllerError(400, 'Items array is required and cannot be empty');
+      res.status(400).json(err);
       return;
     }
 
     // Validate each item has required fields
     for (const item of items) {
       if (!item.name || typeof item.quantity !== 'number' || !item.unit) {
-        res.status(400).json({
-          statusCode: 400,
-          message: 'Each item must have name, quantity, and unit'
-        });
+        const err = new ControllerError(400, 'Each item must have name, quantity, and unit');
+        res.status(400).json(err);
         return;
       }
     }
 
-
     const results = await findBestProductsForGroceryListEnhanced(items, supermarketFilter);
 
     if ('statusCode' in results) {
-      res.status(results.statusCode).json(results);
+      const err = new ControllerError(results.statusCode, results.message, results.details);
+      res.status(results.statusCode).json(err);
       return;
     }
 
@@ -106,17 +101,15 @@ export const findBestPricesForGroceryList: RequestHandler<
     });
 
     if ('statusCode' in savedList) {
-      res.status(savedList.statusCode).json(savedList);
+      const err = new ControllerError(savedList.statusCode, savedList.message, savedList.details);
+      res.status(savedList.statusCode).json(err);
       return;
     }
 
     res.status(201).json(savedList);
   } catch (error: any) {
     console.error('Product optimization and save error:', error.message);
-    res.status(500).json({
-      statusCode: 500,
-      message: 'Failed to optimize and save grocery list',
-      details: error.message
-    });
+    const err = new ControllerError(500, 'Failed to optimize and save grocery list.', error.message);
+    res.status(500).json(err);
   }
 };

@@ -52,10 +52,8 @@ export const generateGroceryList: RequestHandler<
     `
 
   if (typeof input !== 'string' || input.trim().length === 0) {
-    res.status(400).json({
-      statusCode: 400,
-      message: 'Request body is empty or not a string',
-    });
+    const err = new ControllerError(400, 'Request body is empty or not a string');
+    res.status(400).json(err);
     return;
   }
 
@@ -109,15 +107,12 @@ export const generateGroceryList: RequestHandler<
         'Error parsing LLM output (CSV) or validating structure:',
         parseError,
       );
-      res.status(500).json({
-        statusCode: 500,
-        message:
-          'Failed to parse LLM response into a valid grocery list format.',
-        details:
-          parseError instanceof Error
-            ? parseError.message
-            : 'Invalid LLM output format.',
-      });
+      const err = new ControllerError(
+        500,
+        'Failed to parse LLM response into a valid grocery list format.',
+        parseError instanceof Error ? parseError.message : 'Invalid LLM output format.'
+      );
+      res.status(500).json(err);
       return;
     }
   } catch (error) {
@@ -126,10 +121,7 @@ export const generateGroceryList: RequestHandler<
       error instanceof Error
         ? error.message
         : 'Unknown error from LLM api integration caused';
-    res.status(500).json({
-      statusCode: 500,
-      message: 'Failed to process string input',
-      details: errorMessage,
-    });
+    const err = new ControllerError(500, 'Failed to process string input', errorMessage);
+    res.status(500).json(err);
   }
 };

@@ -2,11 +2,18 @@
  * Interface type definitions for grocery prices and product-related functionality.
  */
 
-// Common error interface used across all controllers
-export interface ControllerError {
+// Common error class used across all controllers
+export class ControllerError extends Error {
   statusCode: number;
-  message: string;
   details?: string;
+
+  constructor(statusCode: number, message: string, details?: string) {
+    super(message);
+    this.statusCode = statusCode;
+    this.details = details;
+    this.name = "ControllerError";
+    Object.setPrototypeOf(this, ControllerError.prototype);
+  }
 }
 
 // Product-related interfaces
