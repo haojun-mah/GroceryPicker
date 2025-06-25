@@ -10,14 +10,16 @@ import { useSession } from '@/context/authContext';
 import { backend_url } from '../../config/api';
 import { SavedGroceryList, SavedGroceryListItem } from './groceryHistory';
 import { router } from 'expo-router';
+import { AiPromptRequestBody } from './groceryInput';
 
 const { height: screenHeight } = Dimensions.get('window');
 
 const ModalPage = () => {
-  const [generateRefinementGrocery, setGenerateRefinementGrocery] = useState<string>('');
-  const { groceryRefinement, setGroceryRefinement, setGroceryShop } = useGroceryRefinementContext();
+  const [generateRefinementGrocery, setGenerateRefinementGrocery] = useState<AiPromptRequestBody>();
+  const { groceryRefinement, setGroceryRefinement } = useGroceryRefinementContext();
   const { setGroceryListHistory } = useGroceryContext();
   const groceryList: GroceryItem[] | undefined = groceryRefinement?.items;
+  const supermarketFilter: string[] | undefined = !groceryRefinement?.supermarketFilter ? [] : groceryRefinement.supermarketFilter;
   const { session } = useSession();
 
   useEffect(() => {
@@ -26,28 +28,29 @@ const ModalPage = () => {
       for (let i = 0; i < groceryList.length; i++) {
         groceryListString += `${groceryList[i].name} - ${groceryList[i].quantity}${groceryList[i].unit}\n`;
       }
-      setGenerateRefinementGrocery(groceryListString);
+      setGenerateRefinementGrocery({ message: groceryListString, supermarketFilter: supermarketFilter});
     }
   }, []);
 
   const refineMyList = async () => {
     try {
-      if (generateRefinementGrocery.length === 0) return;
-      const response = await fetch(`${backend_url}/grocery/refine`, {
+      if (generateRefinementGrocery?.message.length === 0) return;
+
+      console.log(generateRefinementGrocery); // debug
+      const response = await fetch(`${backend_url}/lists/refine`, {
         method: 'POST',
         headers: {
-          Authorization: `${session?.access_token}`,
+          Authorization: `Bearer ${session?.access_token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: generateRefinementGrocery }),
+        body: JSON.stringify(generateRefinementGrocery),
       });
 
       const output: GroceryMetadataTitleOutput = await response.json();
       if (response.ok) {
         setGroceryRefinement(output);
-        setGroceryShop(output.groceryShop);
         const refinedList = output.items.map(i => `${i.name} - ${i.quantity}${i.unit}`).join('\n');
-        setGenerateRefinementGrocery(refinedList);
+        setGenerateRefinementGrocery({message: refinedList, supermarketFilter: supermarketFilter});
       }
     } catch (error) {
       console.log(error);
@@ -57,15 +60,15 @@ const ModalPage = () => {
 
   const findCheapest = async () => {
     try {
-      if (generateRefinementGrocery.length === 0) return;
-
+      if (generateRefinementGrocery?.message.length === 0) return;
+      console.log(generateRefinementGrocery); // debug
       const response = await fetch(`${backend_url}/lists/optimise`, {
         method: 'POST',
         headers: {
-          Authorization: `${session?.access_token}`,
+          Authorization: `Bearer ${session?.access_token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: groceryRefinement }),
+        body: JSON.stringify(generateRefinementGrocery),
       });
 
       // Optimise list obtained to get its list ID
@@ -75,7 +78,7 @@ const ModalPage = () => {
       const responseAllList = await fetch(`${backend_url}/lists/getAll`, {
         method: 'GET',
         headers: {
-          Authorization: `${session?.access_token}`,
+          Authorization: `Bearer ${session?.access_token}`,
           'Content-Type': 'application/json',
         },
       });
@@ -100,13 +103,13 @@ const ModalPage = () => {
           <Text className="text-md text-gray-500 dark:text-gray-300">Edit it and we’ll do the work!</Text>
         </View>
 
-        <View style={{ height: screenHeight * 0.6 }}>
+        <View style={{ height: screenHeight * 0.3 }}>
           <Textarea className="w-full h-full rounded-xl bg-white dark:bg-gray-700 border-0">
             <TextareaInput
               className="text-black dark:text-white"
               multiline
-              value={generateRefinementGrocery}
-              onChangeText={setGenerateRefinementGrocery}
+              value={generateRefinementGrocery?.message}
+              onChangeText={e => setGenerateRefinementGrocery({message: e, supermarketFilter: supermarketFilter})}
               textAlignVertical="top"
                 />
           </Textarea>

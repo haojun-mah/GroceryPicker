@@ -55,7 +55,7 @@ interface ControllerError {
   details?: string;
 }
 
-export const groceryShops = [ "FairPrice", "Sheng Shiong"]; // to change
+export const groceryShops = [ "Fairprice", "Cold Storage", "Sheng Shiong"]; // to change
 
 const GroceryListHistoryPage = () => {
   const { groceryListHistory, setGroceryListHistory } = useGroceryContext();
@@ -67,7 +67,7 @@ const GroceryListHistoryPage = () => {
       const response = await fetch(`${backend_url}/lists/getAll`, {
         method: 'GET',
         headers: {
-          Authorization: `${session?.access_token}`,
+          Authorization: `Bearer ${session?.access_token}`,
           'Content-Type': 'application/json',
         },
       });
