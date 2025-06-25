@@ -4,13 +4,24 @@ import { Text } from '@/components/ui/text';
 import React, { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { backend_url } from '../../lib/api';
-import {
-  GroceryMetadataTitleOutput,
-} from '@/context/groceryContext';
 import { useSession } from '@/context/authContext';
 import { useGroceryRefinementContext } from '@/context/groceryRefinement';
 import { router } from 'expo-router';
 import { DropdownSelector } from '@/components/DropDownSelector';
+import { GroceryMetadataTitleOutput } from '@/context/groceryContext';
+import { groceryShops } from './groceryHistory';
+
+/*
+  Initial grocery input page where user can key in unstructred grocrey list to receive structured grocery list.
+  Postdata does a POST to backend. Req: AiPromptRequestBody, Req: GroceryMetadataTitleOutput
+*/
+
+// postData req type
+export interface AiPromptRequestBody {
+  message: string;
+  supermarketFilter: string[]; // excluded supermarkets
+}
+
 
 const groceryInput = () => {
   const [groceryTextArea, setGroceryTextArea] = useState<string>('');
@@ -24,13 +35,18 @@ const groceryInput = () => {
 
       setIsLoading(true);
       setError(null);
-      const response = await fetch(`${backend_url}/grocery/generate`, {
+      const req : AiPromptRequestBody = {
+        message: groceryTextArea,
+        supermarketFilter: groceryShops.filter(x => !selectedGroceryShop.includes(x)),
+      }
+      console.log(req); // debug
+      const response = await fetch(`${backend_url}/lists/generate`, {
         method: 'POST',
         headers: {
-          Authorization: `${session?.access_token}`,
+          Authorization: `Bearer ${session?.access_token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: groceryTextArea, groceryShop: selectedGroceryShop}),
+        body: JSON.stringify(req),
       });
 
       const output: GroceryMetadataTitleOutput = await response.json();
@@ -78,7 +94,7 @@ const groceryInput = () => {
           <View className="bg-white dark:bg-gray-700 rounded-xl px-3 pt-2 pb-3">
             <DropdownSelector
               title="Select Grocery Shops"
-              items={['FairPrice', 'ShengShiong']}
+              items={groceryShops}
               selectedItems={selectedGroceryShop}
               onSelectionChange={setSelectedGroceryShop}
             />

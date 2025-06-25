@@ -22,14 +22,14 @@ export interface GroceryMetadataTitleOutput {
   title: string;
   metadata: string;
   items: GroceryItem[];
-  groceryShop: string[],
+  supermarketFilter: string[],
 }
-
 export interface GroceryItem {
   name: string;
   quantity: number;
   unit: string;
 }
+
 
 const GroceryContext = React.createContext<GroceryContextType | undefined>(
   undefined,
