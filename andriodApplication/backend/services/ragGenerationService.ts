@@ -36,15 +36,11 @@ export async function generateBestPriceResponse(
       };
     }
 
-    // Send top 3 products to LLM for selection
-    const topProducts = products.slice(0, 3);
+    // Send top 5 products to LLM for selection
+    const topProducts = products.slice(0, 5);
     const productData = formatProductsForLLMSelection(topProducts);
     
     // Build the system prompt for the LLM
-    const excludedStores = supermarketFilter?.exclude?.length
-      ? `\nNote: Excluded stores: ${supermarketFilter.exclude.join(', ')}`
-      : '';
-
     const systemMessage = [
       'You are a grocery selection assistant. Given a user request and product options, select the best matching product and determine the amount to buy.',
       '',
@@ -54,9 +50,8 @@ export async function generateBestPriceResponse(
       '  "amount": 2',
       '}',
       '',
-      'productNumber: The number (1, 2, or 3) of the best matching product',
-      'amount: The number of units the user should buy, always as a whole number (round up if needed)',
-      excludedStores
+      'productNumber: The number (1, 2, 3, 4, or 5) of the best matching product',
+      'amount: The number of units the user should buy, always as a whole number (round up if needed)'
     ].join('\n');
 
     // Build the user message for the LLM
