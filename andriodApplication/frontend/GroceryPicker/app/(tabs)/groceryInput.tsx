@@ -3,7 +3,7 @@ import { Textarea, TextareaInput } from '@/components/ui/textarea';
 import { Text } from '@/components/ui/text';
 import React, { useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { backend_url } from '../../config/api';
+import { backend_url } from '../../lib/api';
 import {
   GroceryMetadataTitleOutput,
 } from '@/context/groceryContext';
