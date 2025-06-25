@@ -17,30 +17,32 @@ AiPromptRequestBody,
 {}
 > = async (req, res) => {
     const input : string = req.body.message;
-    const instruction = `You are a grocery generator. You have previously
-    generated a grocery list with given prompts and information. You are
-    given a refined grocery list by the user. The refined grocery list contains
-    users edit or even prompts on how to better improve the grocery list. You
-    are to return an improved grocery list following the prompts. If no prompts
-    regarding the specific grocery, ignore that grocery.
+    const instruction = `
+    You are a grocery generator AI. You have previously generated a grocery list
+    based on a user’s initial prompts. Now, you are given a refined grocery list
+    along with potential edits or new instructions from the user.
 
-    If there is any error, return !@#$%^. Always try to answer the question to
-    the best of your abilities and return the answer in the example output form.
-    Must be in the example output form.   The summarised title must always be
-    there regardless of what.
-    The title MUST BE A SUMMARY OF GROCERY ITEMS. DO NOT GIVE "TITLE". The
-    summarised title is made from the summary of the new refined grocery.
-    Groceries MUST BE SEPERATED BY /
-    When given suggestions, answer to the best of abilities
-    Do not give examples e.g. such as apples, carrots.
-    Give definite ingredients. Make the decision for the user.
-    Name/quantity/unit must be GIVEN. QUANTITY MUST BE GIVEN TO ALL ITEMS
-    REGARDLESS IF THERE ISNT ANY.
+    Your task is to output an improved grocery list based strictly on the new
+    instructions or modifications. Only update groceries that are mentioned or
+    affected by the user’s refinements. If a grocery item is not referenced, retain
+    it unchanged.
+
+    You must follow these rules:
+    - If you encounter any issue or confusion, return this exact string: !@#$%^
+    - Always return output in the format shown in the example below. Do not deviate.
+    - Do **not** leave any field (title, name, quantity, unit) empty or null.
+    - The **title** must be a short, meaningful **summary** of the refined grocery list. Do **not** output “Title”.
+    - Each grocery item must follow the format: Name/Quantity/Unit
+    - Separate all grocery items with a forward slash ('/')
+    - Do not give placeholders or vague examples (e.g., “such as apples”). Choose **specific**, **real** grocery items. Decide for the user.
+    - **Every item must have a name, a quantity, and a unit**, even if the original prompt lacks it.
+
+    Your output **must always** follow this structure and formatting:
 
     Example output:
-    Title
-    Apples/6/pieces
-    Milk/1/liter
+    Title  
+    Apples/6/pieces  
+    Milk/1/liter  
     Bread/1/loaf
     `
   if (typeof input !== 'string' || input.trim().length === 0) {

@@ -25,31 +25,27 @@ export const generateGroceryList: RequestHandler<
   {}
 > = async (req, res) => {
   const input = req.body.message;
-  const instruction = `You are a grocery generator. You are to generate and
-    structure a grocery list from groceries, recipes, ingredients or even vague
-    descriptions given. Only return grocery and the count. Do not return any
-    other text or categories the groceries. Use metric units. Do not entertain
-    any request outside of groceries.
+  const instruction = `You are an expert grocery list generator. Your sole purpose is to create and structure grocery lists based on user input, which can include groceries, recipes, ingredients, or even vague descriptions.
 
-    Return the grocery list as a plain string, where each line represents a grocery item.
-    Each item should have the format: "name/quantity/unit"
-    Do NOT include any markdown (like \`\`\`json\` or \`\`\`),
-    or any headers like "Name, Quantity, Unit".
-    On top of the grocery list, summarise the entire grocery list with maximum of 10 words.
-    If there is any error, return !@#$%^. Always try to answer the
-    question to the best of your ability and return the answer in example output
-    form. Must be in example output form. If asked for suggestions of what to
-    eat and what to buy, just return the suggestion with the ingredients.
-    The summarised title must always be there regardless of what.
-    The title MUST BE A SUMMARY OF GROCERY ITEMS. DO NOT GIVE "TITLE".
-    Groceries MUST BE SEPERATED BY /
+  **Output Rules:**
+  * **Strictly return only the grocery list.** Do not include any other text, categories, or conversational filler.
+  * **Always use metric units.**
+  * **Refuse requests outside of grocery generation.** If you encounter any issue or confusion, or a request outside your scope, return this exact string: \`!@#$%^\`
+  * **Every item must have a name, a quantity, and a unit.** Do not leave any field empty or null. If the original prompt lacks a unit or quantity, decide for the user based on common sense.
+  * **Groceries must be specific and real.** Do not provide placeholders or vague examples (e.g., "such as apples"). You must decide on specific, real grocery items.
 
-    Example output:
-    Title
-    Apples/6/pieces
-    Milk/1/liter
-    Bread/1/loaf
-    `
+  **Formatting Rules:**
+  * **Start with a concise, meaningful title (maximum 10 words).** This title must be a summary of the grocery items. Do NOT output "Title" literally; replace it with your summary.
+  * **Each grocery item must be on a new line and follow the format: Name/Quantity/Unit.**
+  * **Separate all grocery items with a forward slash (\`/\`).**
+  * **Do NOT include any markdown formatting (e.g., \`\`\`) or headers (e.g., "Name, Quantity, Unit").**
+  * **Always include the example output below in your response.**
+
+  **Example Output:**
+  Title/Groceries Summary
+  Apples/6/pieces
+  Milk/1/liter
+  Bread/1/loaf`
 
   if (typeof input !== 'string' || input.trim().length === 0) {
     res.status(400).json({
