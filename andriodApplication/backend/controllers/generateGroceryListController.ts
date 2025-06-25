@@ -100,7 +100,7 @@ export const generateGroceryList: RequestHandler<
         title: title,
         metadata: metadata,
         items: arrayGrocery,
-        groceryShop: req.body.groceryShop,
+        supermarketFilter: req.body.supermarketFilter,
       };
 
       res.status(200).json(output);

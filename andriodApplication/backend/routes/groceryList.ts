@@ -12,10 +12,10 @@ const groceryListRouter = Router();
 groceryListRouter.post('/generate', verifyToken, generateGroceryList);
 
 // refines grocery list to users customisation.
-groceryListRouter.post('/refine', refineGroceryListController);
+groceryListRouter.post('/refine', verifyToken, refineGroceryListController);
 
 // RAG-based grocery list processing - returns selected products with database IDs
-groceryListRouter.post('/optimise', findBestPricesForGroceryList);
+groceryListRouter.post('/optimise', verifyToken, findBestPricesForGroceryList);
 
 // saving a new list for the logged-in user
 groceryListRouter.post('/save', verifyToken, saveGroceryList);
