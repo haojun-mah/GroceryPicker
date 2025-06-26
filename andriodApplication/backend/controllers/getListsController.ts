@@ -31,7 +31,9 @@ export const getAllUserGroceryLists: RequestHandler<
       res.status(result.statusCode || 500).json(err);
       return;
     }
-    res.status(200).json(result);
+    // Filter out lists with list_status === 'deleted'
+    const filtered = (result as SavedGroceryList[]).filter(list => list.list_status !== 'deleted');
+    res.status(200).json(filtered);
   } catch (error: any) {
     console.error('Get lists error:', error.message);
     const err = new ControllerError(
