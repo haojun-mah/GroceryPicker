@@ -52,10 +52,10 @@ export const saveGroceryList: RequestHandler<
           });
         return;
       }
-      if (item.rag_product_id && typeof item.rag_product_id !== 'string') {
+      if (item.product_id && typeof item.product_id !== 'string') {
         res
           .status(400)
-          .json({ statusCode: 400, message: 'Invalid rag_product_id format.' });
+          .json({ statusCode: 400, message: 'Invalid product_id format.' });
         return;
       }
       if (item.amount !== undefined && typeof item.amount !== 'number') {

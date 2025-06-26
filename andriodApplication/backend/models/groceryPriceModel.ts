@@ -44,9 +44,9 @@ export async function getProductsByNames(
 
       if (data) {
         for (const product of data as ProductRow[]) {
-          if (!seenProductIds.has(product.id)) {
+          if (!seenProductIds.has(product.product_id)) {
             allRelevantProducts.push(product);
-            seenProductIds.add(product.id);
+            seenProductIds.add(product.product_id);
           }
         }
       }

@@ -47,9 +47,9 @@ export async function fetchProductPrices(
     const uniqueProducts: ProductRow[] = [];
     const seenIds = new Set<string>();
     for (const product of products) {
-      if (!seenIds.has(product.id)) {
+      if (!seenIds.has(product.product_id)) {
         uniqueProducts.push(product);
-        seenIds.add(product.id);
+        seenIds.add(product.product_id);
       }
     }
     return uniqueProducts;

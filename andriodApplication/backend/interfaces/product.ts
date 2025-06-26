@@ -1,5 +1,5 @@
 export interface ProductRow {
-  id: string;
+  product_id: string;
   name: string;
   price: string | null;
   supermarket: string | null;

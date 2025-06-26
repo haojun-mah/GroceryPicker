@@ -41,7 +41,7 @@ export async function saveUserGroceryList(
     quantity: item.quantity,
     unit: item.unit,
     purchased: false,
-    rag_product_id: item.rag_product_id || null, // direct mapping to products table
+    product_id: item.product_id || null, // direct mapping to products table
     amount: item.amount !== undefined ? item.amount : null, // recommended amount
   }));
 
@@ -101,7 +101,7 @@ export async function getAllUserLists(
       *,
       grocery_list_items (
         *,
-        product:rag_product_id (
+        product:product_id (
           id, name, price, supermarket, quantity, product_url, image_url
         )
       )

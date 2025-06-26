@@ -15,8 +15,8 @@ export const updateListStatus: RequestHandler<
       res.status(401).json(new ControllerError(401, 'User not authenticated.'));
       return;
     }
-    const { id, list_status } = req.body;
-    if (!id || !list_status) {
+    const { list_id, list_status } = req.body;
+    if (!list_id || !list_status) {
       res
         .status(400)
         .json(
@@ -27,7 +27,7 @@ export const updateListStatus: RequestHandler<
         );
       return;
     }
-    const result = await updateGroceryListStatus(userId, id, list_status);
+    const result = await updateGroceryListStatus(userId, list_id, list_status);
     if (result instanceof ControllerError) {
       res.status(result.statusCode).json(result);
       return;

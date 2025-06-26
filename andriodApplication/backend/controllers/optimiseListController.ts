@@ -106,7 +106,7 @@ export const findBestPricesForGroceryList: RequestHandler<
       name: result.item,
       quantity: items.find((item) => item.name === result.item)?.quantity || 1,
       unit: items.find((item) => item.name === result.item)?.unit || 'piece',
-      rag_product_id: result.selectedProduct?.id,
+      product_id: result.selectedProduct?.product_id,
       amount: result.amount,
     }));
 
