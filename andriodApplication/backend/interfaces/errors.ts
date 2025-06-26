@@ -9,4 +9,13 @@ export class ControllerError extends Error {
     this.name = "ControllerError";
     Object.setPrototypeOf(this, ControllerError.prototype);
   }
+
+  toJSON() {
+    return {
+      statusCode: this.statusCode,
+      name: this.name,
+      message: this.message,
+      details: this.details,
+    };
+  }
 }
