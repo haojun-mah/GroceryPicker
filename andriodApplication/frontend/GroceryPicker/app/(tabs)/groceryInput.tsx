@@ -8,8 +8,11 @@ import { useSession } from '@/context/authContext';
 import { useGroceryRefinementContext } from '@/context/groceryRefinement';
 import { router } from 'expo-router';
 import { DropdownSelector } from '@/components/DropDownSelector';
-import { GroceryMetadataTitleOutput } from '@/context/groceryContext';
-import { groceryShops } from './groceryHistory';
+import {
+  groceryShops,
+  AiPromptRequestBody,
+  GroceryMetadataTitleOutput,
+} from './interface';
 
 /*
   Initial grocery input page where user can key in unstructred grocrey list to receive structured grocery list.
@@ -17,28 +20,28 @@ import { groceryShops } from './groceryHistory';
 */
 
 // postData req type
-export interface AiPromptRequestBody {
-  message: string;
-  supermarketFilter: string[]; // excluded supermarkets
-}
-
-
 const groceryInput = () => {
   const [groceryTextArea, setGroceryTextArea] = useState<string>('');
   const [selectedGroceryShop, setSelectedGroceryShop] = useState<string[]>([]);
   const { session } = useSession();
-  const { setIsLoading, setError, setGroceryRefinement, setGroceryShop } = useGroceryRefinementContext();
+  const {
+    setIsLoading,
+    groceryRefinement,
+    setGroceryRefinement,
+    setGroceryShop,
+  } = useGroceryRefinementContext();
 
   const postData = async () => {
     try {
       if (groceryTextArea.length === 0) return;
 
       setIsLoading(true);
-      setError(null);
-      const req : AiPromptRequestBody = {
+      const req: AiPromptRequestBody = {
         message: groceryTextArea,
-        supermarketFilter: groceryShops.filter(x => !selectedGroceryShop.includes(x)),
-      }
+        supermarketFilter: groceryShops.filter(
+          (x) => !selectedGroceryShop.includes(x),
+        ),
+      };
       console.log(req); // debug
       const response = await fetch(`${backend_url}/lists/generate`, {
         method: 'POST',
@@ -52,11 +55,21 @@ const groceryInput = () => {
       const output: GroceryMetadataTitleOutput = await response.json();
 
       if (response.ok && output.title !== '!@#$%^') {
+        console.log(
+          'Check receive first grocery list from generateGroceryList: \n',
+          output,
+        );
         setGroceryRefinement(output);
         setGroceryShop(selectedGroceryShop);
+        console.log(
+          'Check grocery input data is set in groceryRefinement var: \n',
+          groceryRefinement,
+        );
         router.push('/groceryRefinement');
       } else if (response.status === 403) {
-        alert('You are not authorized to perform this action. Please log in again.');
+        alert(
+          'You are not authorized to perform this action. Please log in again.',
+        );
       } else {
         alert('Your Grocery List Contains Invalid Items!');
       }
@@ -67,15 +80,24 @@ const groceryInput = () => {
   };
 
   return (
-    <ScrollView contentContainerStyle={{ paddingTop: 52}} className="bg-blue-700 dark:bg-black min-h-screen">
+    <ScrollView
+      contentContainerStyle={{ paddingTop: 52 }}
+      className="bg-blue-700 dark:bg-black min-h-screen"
+    >
       <View className="flex items-center mt-10 gap-10">
         <View className="gap-5 items-center">
-          <Text className="font-roboto text-white text-5xl font-bold text-center">Create Grocery List</Text>
-          <View className='items-center'>
-            <Text className="text-blue-200 text-sm">Unsure of what groceries?</Text>
-            <Text className="text-blue-200 text-sm">Describe it and we will do the work!</Text>
+          <Text className="font-roboto text-white text-5xl font-bold text-center">
+            Create Grocery List
+          </Text>
+          <View className="items-center">
+            <Text className="text-blue-200 text-sm">
+              Unsure of what groceries?
+            </Text>
+            <Text className="text-blue-200 text-sm">
+              Describe it and we will do the work!
+            </Text>
           </View>
-       </View>
+        </View>
 
         <View className="gap-4 bg-[#EEEEEE] dark:bg-gray-800 rounded-xl min-h-[100%] px-4 py-6 w-full left-0 right-0">
           <View className="bg-white dark:bg-gray-700 rounded-xl px-3 pt-2 pb-3">
@@ -86,7 +108,7 @@ const groceryInput = () => {
                 placeholderTextColor="white"
                 value={groceryTextArea}
                 onChangeText={setGroceryTextArea}
-                textAlignVertical='top'
+                textAlignVertical="top"
               />
             </Textarea>
           </View>
@@ -108,7 +130,10 @@ const groceryInput = () => {
               "
               onPress={postData}
             >
-              <ButtonText pointerEvents='none' className="text-white dark:text-white active:text-white dark:active:text-black">
+              <ButtonText
+                pointerEvents="none"
+                className="text-white dark:text-white active:text-white dark:active:text-black"
+              >
                 Generate Grocery List!
               </ButtonText>
             </Button>

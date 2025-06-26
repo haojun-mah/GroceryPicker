@@ -11,19 +11,19 @@ export default function TabsLayout() {
   return (
     <GroceryRefinementContextProvider>
       <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: 'blue',
-        tabBarInactiveTintColor: tabTextColor,
-        tabBarLabelStyle: { color: tabTextColor },
-        tabBarStyle: {
-          backgroundColor: tabBgColor,
-          borderTopWidth: 0,
-          elevation: 0,
-          shadowOpacity: 0,
-        },
-      }}
-    >
+        screenOptions={{
+          headerShown: false,
+          tabBarActiveTintColor: 'blue',
+          tabBarInactiveTintColor: tabTextColor,
+          tabBarLabelStyle: { color: tabTextColor },
+          tabBarStyle: {
+            backgroundColor: tabBgColor,
+            borderTopWidth: 0,
+            elevation: 0,
+            shadowOpacity: 0,
+          },
+        }}
+      >
         <Tabs.Screen
           name="Home"
           options={{
@@ -35,14 +35,21 @@ export default function TabsLayout() {
         />
         <Tabs.Screen
           name="groceryInput"
-          options={{ headerShown: false, tabBarLabel: 'Grocery List' }}
+          options={{ headerShown: false, tabBarLabel: 'Create List' }}
         />
         <Tabs.Screen
           name="groceryHistory"
-          options={{ headerShown: false, tabBarLabel: 'Grocery History' }}
+          options={{ headerShown: false, tabBarLabel: 'History' }}
+        />
+        <Tabs.Screen
+          name="groceryRefinement"
+          options={{ headerShown: false, href: null }}
+        />
+        <Tabs.Screen
+          name="groceryDisplay/[id]"
+          options={{ headerShown: false, href: null }}
         />
       </Tabs>
     </GroceryRefinementContextProvider>
-
   );
 }

@@ -12,7 +12,7 @@ app.use(cors()); // for dev all origins allowed. before pushing to prod, modify 
 app.use(express.json());
 
 app.use('/lists', groceryListRouter);
-app.use('/products', productRouter); 
+app.use('/products', productRouter);
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Backend server is running.');

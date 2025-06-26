@@ -8,14 +8,15 @@ export const ColorModeSwitch = () => {
   return (
     <View className="flex-row items-center gap-2 p-4">
       <ButtonGroup>
-        {colorScheme === 'light' ? 
-        (<Button className='bg-black w-10 h-10' onPress={toggleColorScheme}>
-          <Feather name="moon" size={24} color="white" />
-        </Button>) :
-        (<Button className='bg-white w-10 h-10' onPress={toggleColorScheme}>
-          <Feather name="sun" size={24} color="black" />
-        </Button>)
-}
+        {colorScheme === 'light' ? (
+          <Button className="bg-black w-10 h-10" onPress={toggleColorScheme}>
+            <Feather name="moon" size={24} color="white" />
+          </Button>
+        ) : (
+          <Button className="bg-white w-10 h-10" onPress={toggleColorScheme}>
+            <Feather name="sun" size={24} color="black" />
+          </Button>
+        )}
       </ButtonGroup>
     </View>
   );

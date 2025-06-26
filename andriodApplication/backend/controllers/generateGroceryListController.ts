@@ -45,10 +45,13 @@ export const generateGroceryList: RequestHandler<
   Title/Groceries Summary
   Apples/6/pieces
   Milk/1/liter
-  Bread/1/loaf`
+  Bread/1/loaf`;
 
   if (typeof input !== 'string' || input.trim().length === 0) {
-    const err = new ControllerError(400, 'Request body is empty or not a string');
+    const err = new ControllerError(
+      400,
+      'Request body is empty or not a string',
+    );
     res.status(400).json(err);
     return;
   }
@@ -56,7 +59,7 @@ export const generateGroceryList: RequestHandler<
   // this entire paragraph is me trying to convert LLM information into JSON
   try {
     const llmOutputString: string = await generate(input, instruction);
-    console.log('LLM Raw Output (CSV-like):', llmOutputString); // Log raw output for debugging
+    console.log('Generate GroceryList LLM Output:\n', llmOutputString); // Log raw output for debugging
 
     try {
       // --- NEW PARSING LOGIC FOR CSV-LIKE STRING ---
@@ -72,7 +75,7 @@ export const generateGroceryList: RequestHandler<
       // 4. Obtain metadata (date, time created)
       const date = new Date();
       const metadata: string = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()} ${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
-      
+
       // 5. Obtain grocery
       const arrayGrocery: GroceryItem[] = [];
       for (let i = 1; i < lines.length; i++) {
@@ -97,7 +100,15 @@ export const generateGroceryList: RequestHandler<
         supermarketFilter: req.body.supermarketFilter,
       };
 
-      res.status(200).json(output);
+      if (output.items.length === 0) {
+        const err = new ControllerError(
+          500,
+          'Grocery Refinement converting LLM into structured form failed.',
+        );
+        res.status(400).json(err);
+      } else {
+        res.status(200).json(output);
+      }
     } catch (parseError) {
       console.error(
         'Error parsing LLM output (CSV) or validating structure:',
@@ -106,7 +117,9 @@ export const generateGroceryList: RequestHandler<
       const err = new ControllerError(
         500,
         'Failed to parse LLM response into a valid grocery list format.',
-        parseError instanceof Error ? parseError.message : 'Invalid LLM output format.'
+        parseError instanceof Error
+          ? parseError.message
+          : 'Invalid LLM output format.',
       );
       res.status(500).json(err);
       return;
@@ -117,7 +130,11 @@ export const generateGroceryList: RequestHandler<
       error instanceof Error
         ? error.message
         : 'Unknown error from LLM api integration caused';
-    const err = new ControllerError(500, 'Failed to process string input', errorMessage);
+    const err = new ControllerError(
+      500,
+      'Failed to process string input',
+      errorMessage,
+    );
     res.status(500).json(err);
   }
 };

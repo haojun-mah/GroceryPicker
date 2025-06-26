@@ -31,7 +31,12 @@ export default function Register() {
 
   async function signUpWithEmail() {
     setLoading(true);
-    if (name.value.length === 0 || email.value.length === 0 || password.value.length === 0) return;
+    if (
+      name.value.length === 0 ||
+      email.value.length === 0 ||
+      password.value.length === 0
+    )
+      return;
 
     const { error } = await supabase.auth.signUp({
       email: email.value,
@@ -49,101 +54,115 @@ export default function Register() {
   }
 
   return (
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
-        className='bg-[#EEEEEE] dark:bg-gray-900'
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1 }}
+      className="bg-[#EEEEEE] dark:bg-gray-900"
+    >
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: 'center',
+          paddingHorizontal: 24,
+          paddingVertical: 48,
+        }}
       >
-        <ScrollView
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{
-            flexGrow: 1,
-            justifyContent: 'center',
-            paddingHorizontal: 24,
-            paddingVertical: 48,
-          }}
-        >
-          <BackButton goBack={() => router.back()} />
+        <BackButton goBack={() => router.back()} />
 
-          <Box className="gap-12 items-center">
-            <Heading size="4xl" className="text-black dark:text-white">
-              Create Account
-            </Heading>
+        <Box className="gap-12 items-center">
+          <Heading size="4xl" className="text-black dark:text-white">
+            Create Account
+          </Heading>
 
-            <VStack space="md" className="w-full">
-              <Input
-                className={`p-2 h-16 w-full bg-gray-100 dark:bg-gray-800 border ${
-                  colorScheme === 'dark' ? 'border-gray-400' : 'border-white'
-                }`}
-                isInvalid={!!name.error}
+          <VStack space="md" className="w-full">
+            <Input
+              className={`p-2 h-16 w-full bg-gray-100 dark:bg-gray-800 border ${
+                colorScheme === 'dark' ? 'border-gray-400' : 'border-white'
+              }`}
+              isInvalid={!!name.error}
+            >
+              <InputField
+                placeholder="Name"
+                value={name.value}
+                onChangeText={(text) => setName({ value: text, error: '' })}
+                className="text-black dark:text-white"
+              />
+            </Input>
+            {name.error && (
+              <Text className="text-red-500 text-xs">{name.error}</Text>
+            )}
+
+            <Input
+              className={`p-2 h-16 w-full bg-gray-100 dark:bg-gray-800 border ${
+                colorScheme === 'dark' ? 'border-gray-400' : 'border-white'
+              }`}
+              isInvalid={!!email.error}
+            >
+              <InputIcon
+                as={MailIcon}
+                className="w-6 h-6 text-gray-700 dark:text-gray-300"
+              />
+              <InputField
+                placeholder="Email"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                value={email.value}
+                onChangeText={(text) => setEmail({ value: text, error: '' })}
+                className="text-black dark:text-white"
+              />
+            </Input>
+            {email.error && (
+              <Text className="text-red-500 text-xs">{email.error}</Text>
+            )}
+
+            <Input
+              className={`p-2 h-16 w-full bg-gray-100 dark:bg-gray-800 border ${
+                colorScheme === 'dark' ? 'border-gray-400' : 'border-white'
+              }`}
+              isInvalid={!!password.error}
+            >
+              <InputIcon
+                as={LockIcon}
+                className="w-6 h-6 text-gray-700 dark:text-gray-300"
+              />
+              <InputField
+                placeholder="Password"
+                secureTextEntry
+                value={password.value}
+                onChangeText={(text) => setPassword({ value: text, error: '' })}
+                className="text-black dark:text-white"
+              />
+            </Input>
+            {password.error && (
+              <Text className="text-red-500 text-xs">{password.error}</Text>
+            )}
+
+            <ButtonGroup>
+              <Button
+                className="bg-blue-500 mt-2 active:bg-blue-600 dark:bg-gray-600 dark:active:bg-gray-400"
+                onPress={signUpWithEmail}
+                disabled={loading}
               >
-                <InputField
-                  placeholder="Name"
-                  value={name.value}
-                  onChangeText={(text) => setName({ value: text, error: '' })}
-                  className="text-black dark:text-white"
-                />
-              </Input>
-              {name.error && <Text className="text-red-500 text-xs">{name.error}</Text>}
+                <ButtonText className="text-black dark:text-white">
+                  {loading ? 'Signing Up...' : 'Sign Up'}
+                </ButtonText>
+              </Button>
+            </ButtonGroup>
 
-              <Input
-                className={`p-2 h-16 w-full bg-gray-100 dark:bg-gray-800 border ${
-                  colorScheme === 'dark' ? 'border-gray-400' : 'border-white'
-                }`}
-                isInvalid={!!email.error}
-              >
-                <InputIcon as={MailIcon} className="w-6 h-6 text-gray-700 dark:text-gray-300" />
-                <InputField
-                  placeholder="Email"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  value={email.value}
-                  onChangeText={(text) => setEmail({ value: text, error: '' })}
-                  className="text-black dark:text-white"
-                />
-              </Input>
-              {email.error && <Text className="text-red-500 text-xs">{email.error}</Text>}
-
-              <Input
-                className={`p-2 h-16 w-full bg-gray-100 dark:bg-gray-800 border ${
-                  colorScheme === 'dark' ? 'border-gray-400' : 'border-white'
-                }`}
-                isInvalid={!!password.error}
-              >
-                <InputIcon as={LockIcon} className="w-6 h-6 text-gray-700 dark:text-gray-300" />
-                <InputField
-                  placeholder="Password"
-                  secureTextEntry
-                  value={password.value}
-                  onChangeText={(text) => setPassword({ value: text, error: '' })}
-                  className="text-black dark:text-white"
-                />
-              </Input>
-              {password.error && <Text className="text-red-500 text-xs">{password.error}</Text>}
-
-              <ButtonGroup>
-                <Button
-                  className="bg-blue-500 mt-2 active:bg-blue-600 dark:bg-gray-600 dark:active:bg-gray-400"
-                  onPress={signUpWithEmail}
-                  disabled={loading}
-                >
-                  <ButtonText className="text-black dark:text-white">
-                    {loading ? 'Signing Up...' : 'Sign Up'}
-                  </ButtonText>
-                </Button>
-              </ButtonGroup>
-
-              <HStack className="mt-4 justify-center">
-                <Text className="text-gray-700 dark:text-gray-300">
-                  Already have an account?{' '}
+            <HStack className="mt-4 justify-center">
+              <Text className="text-gray-700 dark:text-gray-300">
+                Already have an account?{' '}
+              </Text>
+              <Pressable onPress={() => router.replace('/Login')}>
+                <Text className="text-blue-500 dark:text-blue-400 font-bold">
+                  Login
                 </Text>
-                <Pressable onPress={() => router.replace('/Login')}>
-                  <Text className="text-blue-500 dark:text-blue-400 font-bold">Login</Text>
-                </Pressable>
-              </HStack>
-            </VStack>
-          </Box>
-        </ScrollView>
-      </KeyboardAvoidingView>
+              </Pressable>
+            </HStack>
+          </VStack>
+        </Box>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

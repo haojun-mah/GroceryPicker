@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken'
+import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 
 declare global {
@@ -26,8 +26,11 @@ interface JwtUserPayload {
   [key: string]: any;
 }
 
-export default function verifyToken(req: Request, res: Response, next: NextFunction): void {  
-
+export default function verifyToken(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void {
   // const token : string = req.headers.authorization;
   // if (!token) {
   //   return res.status(401).json({ error: 'No JWT Provided' });
@@ -39,7 +42,8 @@ export default function verifyToken(req: Request, res: Response, next: NextFunct
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     res.status(401).json({
       statusCode: 401,
-      message: 'Authentication token is required and must be in "Bearer <token>" format.'
+      message:
+        'Authentication token is required and must be in "Bearer <token>" format.',
     });
     return;
   }
@@ -52,7 +56,7 @@ export default function verifyToken(req: Request, res: Response, next: NextFunct
       id: decodedPayload.sub,
       email: decodedPayload.email,
       role: decodedPayload.role,
-    };    // next param takes in the function that is supposed to be ran after this function. Is necessary if it is the middle function in the route stack
+    }; // next param takes in the function that is supposed to be ran after this function. Is necessary if it is the middle function in the route stack
     next();
   } catch (error) {
     res.status(403).json({ error: 'Invalid Token. JWT auth failed' });

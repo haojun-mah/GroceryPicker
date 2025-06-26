@@ -41,65 +41,68 @@ export default function ResetPasswordScreen() {
   }
 
   return (
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1 }}
+    >
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: 'center',
+          paddingHorizontal: 24,
+          paddingVertical: 48,
+        }}
+        className="bg-[#EEEEEE] dark:bg-gray-900"
       >
-        <ScrollView
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{
-            flexGrow: 1,
-            justifyContent: 'center',
-            paddingHorizontal: 24,
-            paddingVertical: 48,
-          }}
-          className='bg-[#EEEEEE] dark:bg-gray-900'
-        >
-          <BackButton goBack={() => router.back()} />
+        <BackButton goBack={() => router.back()} />
 
-          <Box className="items-center gap-6 w-full">
-            <Heading size="3xl" className="text-center text-black dark:text-white">
-              Restore Password
-            </Heading>
+        <Box className="items-center gap-6 w-full">
+          <Heading
+            size="3xl"
+            className="text-center text-black dark:text-white"
+          >
+            Restore Password
+          </Heading>
 
-            <VStack space="md" className="w-full">
-              <Input
-                isInvalid={!!email.error}
-                size="xl"
-                className={`p-2 h-16 w-full bg-gray-100 dark:bg-gray-800 border ${
-                  colorScheme === 'dark' ? 'border-gray-400' : 'border-white'
-                }`}
-              >
-                <InputField
-                  placeholder="E-mail address"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  value={email.value}
-                  onChangeText={(text) => setEmail({ value: text, error: '' })}
-                  className="text-black dark:text-white"
-                />
-              </Input>
+          <VStack space="md" className="w-full">
+            <Input
+              isInvalid={!!email.error}
+              size="xl"
+              className={`p-2 h-16 w-full bg-gray-100 dark:bg-gray-800 border ${
+                colorScheme === 'dark' ? 'border-gray-400' : 'border-white'
+              }`}
+            >
+              <InputField
+                placeholder="E-mail address"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                value={email.value}
+                onChangeText={(text) => setEmail({ value: text, error: '' })}
+                className="text-black dark:text-white"
+              />
+            </Input>
 
-              {email.error ? (
-                <Text className="text-red-500 text-xs">{email.error}</Text>
-              ) : (
-                <Text className="text-gray-500 dark:text-gray-300 text-xs">
-                  You will receive an email with a password reset link.
-                </Text>
-              )}
+            {email.error ? (
+              <Text className="text-red-500 text-xs">{email.error}</Text>
+            ) : (
+              <Text className="text-gray-500 dark:text-gray-300 text-xs">
+                You will receive an email with a password reset link.
+              </Text>
+            )}
 
-              <Button
-                className="mt-4 bg-blue-500 active:bg-blue-600 dark:bg-gray-600 dark:active:bg-gray-400"
-                onPress={sendResetPasswordEmail}
-                disabled={loading}
-              >
-                <ButtonText className="text-black dark:text-white">
-                  {loading ? 'Sending...' : 'Send Instructions'}
-                </ButtonText>
-              </Button>
-            </VStack>
-          </Box>
-        </ScrollView>
-      </KeyboardAvoidingView>
+            <Button
+              className="mt-4 bg-blue-500 active:bg-blue-600 dark:bg-gray-600 dark:active:bg-gray-400"
+              onPress={sendResetPasswordEmail}
+              disabled={loading}
+            >
+              <ButtonText className="text-black dark:text-white">
+                {loading ? 'Sending...' : 'Send Instructions'}
+              </ButtonText>
+            </Button>
+          </VStack>
+        </Box>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

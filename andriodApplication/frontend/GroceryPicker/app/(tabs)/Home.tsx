@@ -21,7 +21,7 @@ export default function HomePage() {
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
       <View className="flex-1 justify-center items-center bg-white dark:bg-black? gap-6 p-6">
-        <ColorModeSwitch/>
+        <ColorModeSwitch />
         <Text className="text-2xl">Welcome to Grocery Picker</Text>
         <ButtonGroup>
           <Button

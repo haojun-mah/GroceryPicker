@@ -1,11 +1,18 @@
-import { Pressable, ScrollView, View } from "react-native"
-import { Text } from "@/components/ui/text"
-import { Card } from "@/components/ui/card"
-import { backend_url } from "@/lib/api"
-import { useGroceryContext } from "@/context/groceryContext"
-import { useEffect } from "react"
-import { useSession } from "@/context/authContext"
-import { router } from "expo-router"
+import { Pressable, ScrollView, View } from 'react-native';
+import { Text } from '@/components/ui/text';
+import { Card } from '@/components/ui/card';
+import { backend_url } from '@/lib/api';
+import { useGroceryContext } from '@/context/groceryContext';
+import { useEffect } from 'react';
+import { useSession } from '@/context/authContext';
+import { router } from 'expo-router';
+import {
+  ControllerError,
+  GROCERY_LIST_STATUS_COLORS,
+  GROCERY_LIST_STATUS_LABELS,
+  GROCERY_LIST_STATUSES,
+  SavedGroceryList,
+} from './interface';
 
 /*
   Page host grocery list history for each user.
@@ -13,49 +20,6 @@ import { router } from "expo-router"
 
   GET request to /lists/getAll return SavedGroceryList[] type.
   */
-
-// Below are types for Res. IMO quite messy to put here. Unsure of putting it in
-// a separate interface file.
-// Grocery Item Typesc
-export interface SavedGroceryListItem {
-  id: string;
-  name: string;
-  price: number | null;
-  supermarket: string | null;
-  quantity: string | null;
-  similarity?: number | null;
-  product_url?: string | null;
-  image_url?: string | null;
-  embedding?: number[] | null;
-}
-
-// Grocery List Status
-export const GROCERY_LIST_STATUSES = [
-  'incomplete',
-  'purchased',
-  'archived',
-] as const;
-export type GroceryListStatus = typeof GROCERY_LIST_STATUSES[number] | string;
-
-// Grocery List Types. 
-export interface SavedGroceryList {
-  id: string;
-  user_id: string;
-  title: string;
-  metadata: string | null;
-  created_at: string;
-  grocery_list_items: SavedGroceryListItem[];
-  list_status: string;
-}
-
-// Controller Error Types
-interface ControllerError {
-  statusCode: number;
-  message: string;
-  details?: string;
-}
-
-export const groceryShops = [ "Fairprice", "Cold Storage", "Sheng Shiong"]; // to change
 
 const GroceryListHistoryPage = () => {
   const { groceryListHistory, setGroceryListHistory } = useGroceryContext();
@@ -80,9 +44,9 @@ const GroceryListHistoryPage = () => {
         throw new Error(`Error ${error.statusCode}: ${error.message}`);
       }
     } catch (error) {
-      console.error("Failed to fetch grocery history:", error);
+      console.error('Failed to fetch grocery history:', error);
     }
-  }
+  };
 
   // Runs fetchGroceryHistory on component mount/render
   useEffect(() => {
@@ -94,41 +58,58 @@ const GroceryListHistoryPage = () => {
   // Displays nothing when groceryListHistory is null or empty
   if (!groceryListHistory || groceryListHistory.length === 0) {
     return (
-      <ScrollView contentContainerStyle={{ paddingTop: 60 }} className="bg-[#EEEEEE] dark:bg-black">
+      <ScrollView
+        contentContainerStyle={{ paddingTop: 60 }}
+        className="bg-[#EEEEEE] dark:bg-black"
+      >
         <View className="px-6">
-          <Text className="text-4xl font-bold text-dark dark:text-white">History</Text>
+          <Text className="text-4xl font-bold text-dark dark:text-white">
+            History
+          </Text>
         </View>
       </ScrollView>
     );
   }
 
-  return(
-    <ScrollView contentContainerStyle={{ paddingTop: 60 }} className="bg-[#EEEEEE] dark:bg-black">
-      <View className="px-6">
-        <Text className="text-4xl font-bold text-dark dark:text-white">History</Text>
-        <View>
+  return (
+    <ScrollView
+      contentContainerStyle={{ paddingTop: 60 }}
+      className="bg-[#EEEEEE] dark:bg-black"
+    >
+      <View className="px-6 gap-4">
+        <Text className="text-4xl font-bold text-dark dark:text-white">
+          History
+        </Text>
+        <View className="gap-4">
           {groceryListHistory.map((list, idx) => {
-            return ( 
-              <Pressable key={idx} onPress={() => router.push(`/groceryDisplay/${list.id}`)}>
+            return (
+              <Pressable
+                key={idx}
+                onPress={() => router.push(`/groceryDisplay/${list.id}`)}
+              >
                 <Card className="bg-white dark:bg-gray-700 rounded-md">
                   <Text className="text-xl font-semibold text-black dark:text-white">
                     {list.title}
                   </Text>
                   <Text className="text-xs font-normal text-gray-500 dark:text-gray-300">
-                    {list.metadata ? list.metadata : ""}  
+                    {list.metadata ? list.metadata : ''}
                   </Text>
-                  <Text className="text-md font-normal">
-                    {list.list_status}
+                  <Text
+                    className={`text-md font-normal ${
+                      GROCERY_LIST_STATUS_COLORS[list.list_status] ??
+                      'text-blackdark:text-white'
+                    }`}
+                  >
+                    {GROCERY_LIST_STATUS_LABELS[list.list_status]}
                   </Text>
                 </Card>
               </Pressable>
             );
           })}
-       </View>
+        </View>
       </View>
     </ScrollView>
-  )
-}
+  );
+};
 
 export default GroceryListHistoryPage;
- 

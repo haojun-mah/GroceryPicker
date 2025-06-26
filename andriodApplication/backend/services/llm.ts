@@ -19,11 +19,10 @@ async function generate(prompt: string, instruction: string) {
   const response = await model.generateContent({
     contents: [{ role: 'user', parts: [{ text: prompt }] }],
     systemInstruction: instruction,
-    
   });
 
   const textResponse = await response.response.text();
-  
+
   return textResponse;
 }
 export default generate;

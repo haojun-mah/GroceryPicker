@@ -11,7 +11,7 @@ export class ControllerError extends Error {
     super(message);
     this.statusCode = statusCode;
     this.details = details;
-    this.name = "ControllerError";
+    this.name = 'ControllerError';
     Object.setPrototypeOf(this, ControllerError.prototype);
   }
 }
@@ -37,7 +37,7 @@ export interface GroceryItem {
 }
 
 export interface SupermarketFilter {
-  exclude?: string[];  // Exclude these supermarkets
+  exclude?: string[]; // Exclude these supermarkets
 }
 
 export interface GroceryListRequest {
