@@ -75,7 +75,7 @@ export async function getGroceryListById(
       grocery_list_items ( * )
     `,
     )
-    .eq('id', listId)
+    .eq('list_id', listId)
     .eq('user_id', userId)
     .single();
 
@@ -102,7 +102,7 @@ export async function getAllUserLists(
       grocery_list_items (
         *,
         product:product_id (
-          id, name, price, supermarket, quantity, product_url, image_url
+          product_id, name, price, supermarket, quantity, product_url, image_url
         )
       )
     `,
@@ -130,7 +130,7 @@ export async function updateGroceryListStatus(
   const { error } = await supabase
     .from('grocery_lists')
     .update({ list_status: newStatus })
-    .eq('id', listId)
+    .eq('list_id', listId)
     .eq('user_id', userId);
 
   if (error) {
