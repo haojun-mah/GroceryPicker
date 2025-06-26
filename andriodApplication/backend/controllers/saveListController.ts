@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 import { saveUserGroceryList } from '../models/groceryListModel';
-import { SaveGroceryListRequestBody } from '../interfaces';
+import { SaveGroceryListRequestBody, ControllerError } from '../interfaces';
 
 export const saveGroceryList: RequestHandler<
   {},
@@ -14,7 +14,7 @@ export const saveGroceryList: RequestHandler<
     if (!userId) {
       res
         .status(401)
-        .json({ statusCode: 401, message: 'User not authenticated.' });
+        .json(new ControllerError(401, 'User not authenticated.').toJSON());
       return;
     }
 
@@ -29,10 +29,12 @@ export const saveGroceryList: RequestHandler<
     ) {
       res
         .status(400)
-        .json({
-          statusCode: 400,
-          message: 'Missing or invalid required fields (title, items).',
-        });
+        .json(
+          new ControllerError(
+            400,
+            'Missing or invalid required fields (title, items).'
+          ).toJSON()
+        );
       return;
     }
 
@@ -46,22 +48,22 @@ export const saveGroceryList: RequestHandler<
       ) {
         res
           .status(400)
-          .json({
-            statusCode: 400,
-            message: 'Invalid item format within the list.',
-          });
+          .json(
+            new ControllerError(400, 'Invalid item format within the list.')
+              .toJSON()
+          );
         return;
       }
       if (item.product_id && typeof item.product_id !== 'string') {
         res
           .status(400)
-          .json({ statusCode: 400, message: 'Invalid product_id format.' });
+          .json(new ControllerError(400, 'Invalid product_id format.').toJSON());
         return;
       }
       if (item.amount !== undefined && typeof item.amount !== 'number') {
         res
           .status(400)
-          .json({ statusCode: 400, message: 'Invalid amount format.' });
+          .json(new ControllerError(400, 'Invalid amount format.').toJSON());
         return;
       }
     }
@@ -75,16 +77,21 @@ export const saveGroceryList: RequestHandler<
     const result = await saveUserGroceryList(userId, listDataToSave);
 
     if ('message' in result) {
-      res.status(result.statusCode || 500).json(result);
+      res
+        .status(result.statusCode || 500)
+        .json(
+          new ControllerError(result.statusCode || 500, result.message).toJSON()
+        );
       return;
     }
     res.status(201).json(result);
   } catch (error: any) {
     console.error('Save list error:', error.message);
-    res.status(500).json({
-      statusCode: 500,
-      message: 'Failed to save grocery list.',
-      details: error.message,
-    });
+    res
+      .status(500)
+      .json(
+        new ControllerError(500, 'Failed to save grocery list.', error.message)
+          .toJSON()
+      );
   }
 };
