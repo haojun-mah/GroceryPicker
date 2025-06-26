@@ -1,5 +1,5 @@
 import supabase from '../config/supabase';
-import { ControllerError } from '../interfaces/fetchPricesInterface';
+import { ControllerError } from '../interfaces';
 
 /*
   Handles pushing scraped grocery data into DB.

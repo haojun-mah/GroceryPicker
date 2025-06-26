@@ -3,7 +3,7 @@ import { getAllUserLists } from '../models/groceryListModel';
 import {
   SavedGroceryList,
   ControllerError,
-} from '../interfaces/groceryListInterface';
+} from '../interfaces';
 
 export const getAllUserGroceryLists: RequestHandler<
   {},

@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 import { saveUserGroceryList } from '../models/groceryListModel';
-import { SaveGroceryListRequestBody } from '../interfaces/groceryListInterface';
+import { SaveGroceryListRequestBody } from '../interfaces';
 
 export const saveGroceryList: RequestHandler<
   {},

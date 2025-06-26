@@ -2,15 +2,14 @@ import { RequestHandler } from 'express';
 import { findBestProductsForGroceryListEnhanced } from '../services/ragGenerationService';
 import { saveUserGroceryList } from '../models/groceryListModel';
 import { generateGroceryList } from './generateGroceryListController';
-import { ControllerError } from '../interfaces/fetchPricesInterface';
-import {
+import { 
+  ControllerError, 
   GeneratedGroceryItem,
   SavedGroceryList,
-} from '../interfaces/groceryListInterface';
-import {
   AiPromptRequestBody,
   GroceryMetadataTitleOutput,
-} from '../interfaces/generateGroceryListInterface';
+  EnhancedGroceryPriceResponse,
+} from '../interfaces';
 
 export const findBestPricesForGroceryList: RequestHandler<
   {},
@@ -64,12 +63,7 @@ export const findBestPricesForGroceryList: RequestHandler<
     }
 
     const items = generatedResult.items;
-    // Extract supermarket filter from the generated result
-    const excludedSupermarkets = generatedResult.supermarketFilter || [];
-    const supermarketFilter =
-      excludedSupermarkets.length > 0
-        ? { exclude: excludedSupermarkets }
-        : undefined;
+    const supermarketFilter = generatedResult.supermarketFilter;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       const err = new ControllerError(
@@ -92,7 +86,7 @@ export const findBestPricesForGroceryList: RequestHandler<
       }
     }
 
-    const results = await findBestProductsForGroceryListEnhanced(
+    const results: EnhancedGroceryPriceResponse[] | ControllerError = await findBestProductsForGroceryListEnhanced(
       items,
       supermarketFilter,
     );

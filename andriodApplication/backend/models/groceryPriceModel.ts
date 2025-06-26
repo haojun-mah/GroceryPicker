@@ -2,7 +2,7 @@ import supabase from '../config/supabase';
 import {
   ProductRow,
   ControllerError,
-} from '../interfaces/fetchPricesInterface';
+} from '../interfaces';
 import { getEmbedding } from '../services/embeddingService';
 
 export async function getProductsByNames(
