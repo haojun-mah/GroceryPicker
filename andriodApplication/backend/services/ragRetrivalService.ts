@@ -4,7 +4,7 @@ import {
   ProductRow,
   ControllerError,
   SupermarketFilter,
-} from '../interfaces/fetchPricesInterface';
+} from '../interfaces';
 
 export async function fetchProductPrices(
   userQuery: string,

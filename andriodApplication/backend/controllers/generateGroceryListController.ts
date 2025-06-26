@@ -2,10 +2,10 @@ import generate from '../services/llm';
 import { RequestHandler } from 'express-serve-static-core';
 import {
   AiPromptRequestBody,
+  GroceryMetadataTitleOutput,
   ControllerError,
   GroceryItem,
-} from '../interfaces/generateGroceryListInterface';
-import { GroceryMetadataTitleOutput } from '../interfaces/generateGroceryListInterface';
+} from '../interfaces';
 
 /*
   Handles the logic where it converts users unstructured grocery

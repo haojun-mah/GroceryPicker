@@ -7,7 +7,7 @@ import {
   ControllerError,
   SupermarketFilter,
   EnhancedGroceryPriceResponse,
-} from '../interfaces/fetchPricesInterface';
+} from '../interfaces';
 import Groq from 'groq-sdk';
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY;

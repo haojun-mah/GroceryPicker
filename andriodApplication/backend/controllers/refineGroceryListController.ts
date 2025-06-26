@@ -4,7 +4,7 @@ import {
   GroceryItem,
   AiPromptRequestBody,
   ControllerError,
-} from '../interfaces/generateGroceryListInterface';
+} from '../interfaces';
 import generate from '../services/llm';
 
 /*

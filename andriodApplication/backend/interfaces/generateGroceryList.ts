@@ -1,16 +1,17 @@
-import { GroceryItem } from './fetchPricesInterface';
-export { ControllerError, GroceryItem } from './fetchPricesInterface';
+// Interfaces for LLM and grocery list generation
+
+import { GroceryItem, SupermarketFilter } from './groceryList';
 
 export interface AiPromptRequestBody {
   message: string;
-  supermarketFilter: string[]; // excluded supermarkets
+  supermarketFilter?: SupermarketFilter;
 }
 
 export interface GroceryMetadataTitleOutput {
   title: string;
   metadata: string;
   items: GroceryItem[];
-  supermarketFilter: string[];
+  supermarketFilter?: SupermarketFilter;
 }
 
 export type GeneratedGroceryListResponse = GroceryItem[];
