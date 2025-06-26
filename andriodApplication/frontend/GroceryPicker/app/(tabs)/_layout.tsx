@@ -11,19 +11,19 @@ export default function TabsLayout() {
   return (
     <GroceryRefinementContextProvider>
       <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: 'blue',
-        tabBarInactiveTintColor: tabTextColor,
-        tabBarLabelStyle: { color: tabTextColor },
-        tabBarStyle: {
-          backgroundColor: tabBgColor,
-          borderTopWidth: 0,
-          elevation: 0,
-          shadowOpacity: 0,
-        },
-      }}
-    >
+        screenOptions={{
+          headerShown: false,
+          tabBarActiveTintColor: 'blue',
+          tabBarInactiveTintColor: tabTextColor,
+          tabBarLabelStyle: { color: tabTextColor },
+          tabBarStyle: {
+            backgroundColor: tabBgColor,
+            borderTopWidth: 0,
+            elevation: 0,
+            shadowOpacity: 0,
+          },
+        }}
+      >
         <Tabs.Screen
           name="Home"
           options={{
@@ -51,6 +51,5 @@ export default function TabsLayout() {
         />
       </Tabs>
     </GroceryRefinementContextProvider>
-
   );
 }

@@ -1,5 +1,8 @@
 import React, { useContext, useState, Dispatch, SetStateAction } from 'react';
-import { SavedGroceryList, GroceryMetadataTitleOutput } from '@/app/(tabs)/interface';
+import {
+  SavedGroceryList,
+  GroceryMetadataTitleOutput,
+} from '@/app/(tabs)/interface';
 
 export interface ErrorResponse {
   statusCode: number;
@@ -16,7 +19,6 @@ interface GroceryContextType {
   setGroceryListHistory: Dispatch<SetStateAction<SavedGroceryList[] | null>>;
 }
 
-
 const GroceryContext = React.createContext<GroceryContextType | undefined>(
   undefined,
 ); // necessary to pass types to createcontext so that the handler of context can know what to expect
@@ -28,7 +30,8 @@ export const GroceryContextProvider: any = ({ children }: any) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<ErrorResponse | null>(null);
   const [groceryListHistory, setGroceryListHistory] = useState<
-    SavedGroceryList[] | null>(null);
+    SavedGroceryList[] | null
+  >(null);
 
   const value: GroceryContextType = {
     grocery,
@@ -51,8 +54,3 @@ export const useGroceryContext = () => {
   }
   return context;
 };
-
-
-
-
-

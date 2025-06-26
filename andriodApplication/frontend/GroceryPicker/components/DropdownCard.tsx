@@ -12,7 +12,12 @@ import Entypo from '@expo/vector-icons/Entypo';
 import { Text } from './ui/text';
 import { useColorScheme } from 'nativewind';
 import { Image } from './ui/image';
-import { CheckboxIcon, CheckboxIndicator, CheckboxGroup, Checkbox } from './ui/checkbox';
+import {
+  CheckboxIcon,
+  CheckboxIndicator,
+  CheckboxGroup,
+  Checkbox,
+} from './ui/checkbox';
 import { CircleIcon } from './ui/icon';
 import { Pressable } from 'react-native';
 import { SavedGroceryListItem } from '@/app/(tabs)/interface';
@@ -25,7 +30,6 @@ if (
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-
 const DropdownCard = ({
   outsideText,
   insideText,
@@ -36,12 +40,12 @@ const DropdownCard = ({
   defaultOpen: boolean;
 }) => {
   const [expanded, setExpanded] = useState(defaultOpen);
-  const [purchased, setPurchased] = useState<boolean[]>([])
+  const [purchased, setPurchased] = useState<boolean[]>([]);
   const animation = useRef(new Animated.Value(0)).current;
   const { colorScheme } = useColorScheme();
 
   useEffect(() => {
-    setPurchased(insideText.map(item => item.purchased));
+    setPurchased(insideText.map((item) => item.purchased));
 
     // Optional: smooth layout changes for height
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -58,99 +62,125 @@ const DropdownCard = ({
     outputRange: [0, 1],
   });
 
-return (
-  <Pressable onPress={!expanded ? () => setExpanded(true) : undefined} className='w-full'>
-    <Card className="bg-white dark:bg-gray-700 w-full rounded-xl p-4">
-    <View className="flex-row items-start justify-between">
-      <View className="flex-1">
-        {!expanded && outsideText.map((e, i) => (
-          <Text key={i} size="xs" className="text:black dark:text-white text-md">
-            {e.product?.name} - {e.amount}  ({e.quantity} {e.unit}/{e.product?.price})
-          </Text>
-        ))}
-        {expanded && (
-          <Text className="text-base font-semibold text-black dark:text-white">
-            Detailed Groceries
-          </Text>
-        )}
-      </View>
-      <ButtonGroup>
-        <Button onPress={() => setExpanded(!expanded)} variant="link">
-          <Entypo
-            name="chevron-up"
-            size={24}
-            color={colorScheme === 'light' ? 'black' : 'white'}
-            className={`transition-transform duration-300 ease-in-out ${expanded ? 'rotate-180' : 'rotate-0'}`}
-          />
-        </Button>
-      </ButtonGroup>
-    </View>
-
-    <Animated.View
-      style={{
-        opacity: opacityInterpolation,
-        overflow: 'hidden',
-        maxHeight: expanded ? undefined : 0,
-      }}
+  return (
+    <Pressable
+      onPress={!expanded ? () => setExpanded(true) : undefined}
+      className="w-full"
     >
-
-      <View className="mt-2 space-y-2">
-        {insideText.map((item, idx) => (
-          <Pressable
-      key={idx}
-      onPress={() => {
-        const updated = [...purchased];
-        updated[idx] = !updated[idx];
-        setPurchased(updated);
-      }}
-      className="flex-row items-center gap-3 m-2"
-    >
-            <Image source={{ uri: !item.product?.image_url? "" : item.product.image_url}} alt='Image of grocer' className="w-20 h-20 rounded-md bg-gray-300" />
-            <View className="flex-1">
-              <Text
-          className={`text-black text-xl dark:text-white font-semibold ${
-            purchased[idx] ? 'line-through text-gray-400 dark:text-gray-500' : ''
-          }`}
-        >{item.product?.name}</Text>
-              <Text className={`text-md ${
-            purchased[idx]
-              ? 'line-through text-gray-400 dark:text-gray-500'
-              : 'text-gray-600 dark:text-gray-300'
-          }`}>
-                {item.product?.quantity} per pax, {item.amount} pax needed ({item.quantity}{item.unit})
+      <Card className="bg-white dark:bg-gray-700 w-full rounded-xl p-4">
+        <View className="flex-row items-start justify-between">
+          <View className="flex-1">
+            {!expanded &&
+              outsideText.map((e, i) => (
+                <Text
+                  key={i}
+                  size="xs"
+                  className="text:black dark:text-white text-md"
+                >
+                  {e.product?.name} - {e.amount} ({e.quantity} {e.unit}/
+                  {e.product?.price})
+                </Text>
+              ))}
+            {expanded && (
+              <Text className="text-base font-semibold text-black dark:text-white">
+                Detailed Groceries
               </Text>
-              <Text className={`text-md text-red-600 dark:text-red-400 ${
-            purchased[idx]
-              ? 'line-through text-gray-400 dark:text-gray-500'
-              : 'text-red-600 dark:text-red-400'
-          }`}>
-                {item.product?.price}
-              </Text>
-            </View>
-      <Checkbox
-        value={`item-${idx}`}
-        isChecked={purchased[idx]}
-        onChange={() => {
-          const updated = [...purchased];
-          updated[idx] = !updated[idx];
-          setPurchased(updated);
-        }}
-        className="rounded-full border border-gray-400 w-6 h-6 justify-center items-center"
-      >
-        <CheckboxIndicator className="w-full h-full rounded-full">
-          {purchased[idx] && (
-            <CheckboxIcon as={CircleIcon} className="border-none w-4 h-4 fill-black" />
-          )}
-        </CheckboxIndicator>
-      </Checkbox>
-          </Pressable>
-        ))}
-      </View>
-    </Animated.View>
-  </Card>
-  </Pressable>
+            )}
+          </View>
+          <ButtonGroup>
+            <Button onPress={() => setExpanded(!expanded)} variant="link">
+              <Entypo
+                name="chevron-up"
+                size={24}
+                color={colorScheme === 'light' ? 'black' : 'white'}
+                className={`transition-transform duration-300 ease-in-out ${expanded ? 'rotate-180' : 'rotate-0'}`}
+              />
+            </Button>
+          </ButtonGroup>
+        </View>
 
-);
-}
+        <Animated.View
+          style={{
+            opacity: opacityInterpolation,
+            overflow: 'hidden',
+            maxHeight: expanded ? undefined : 0,
+          }}
+        >
+          <View className="mt-2 space-y-2">
+            {insideText.map((item, idx) => (
+              <Pressable
+                key={idx}
+                onPress={() => {
+                  const updated = [...purchased];
+                  updated[idx] = !updated[idx];
+                  setPurchased(updated);
+                }}
+                className="flex-row items-center gap-3 m-2"
+              >
+                <Image
+                  source={{
+                    uri: !item.product?.image_url ? '' : item.product.image_url,
+                  }}
+                  alt="Image of grocer"
+                  className="w-20 h-20 rounded-md bg-gray-300"
+                />
+                <View className="flex-1">
+                  <Text
+                    className={`text-black text-xl dark:text-white font-semibold ${
+                      purchased[idx]
+                        ? 'line-through text-gray-400 dark:text-gray-500'
+                        : ''
+                    }`}
+                  >
+                    {item.product?.name}
+                  </Text>
+                  <Text
+                    className={`text-md ${
+                      purchased[idx]
+                        ? 'line-through text-gray-400 dark:text-gray-500'
+                        : 'text-gray-600 dark:text-gray-300'
+                    }`}
+                  >
+                    {item.product?.quantity} per pax, {item.amount} pax needed (
+                    {item.quantity}
+                    {item.unit})
+                  </Text>
+                  <Text
+                    className={`text-md text-red-600 dark:text-red-400 ${
+                      purchased[idx]
+                        ? 'line-through text-gray-400 dark:text-gray-500'
+                        : 'text-red-600 dark:text-red-400'
+                    }`}
+                  >
+                    {item.product?.price}
+                  </Text>
+                </View>
+                <Checkbox
+                  value={`item-${idx}`}
+                  isChecked={purchased[idx]}
+                  onChange={() => {
+                    const updated = [...purchased];
+                    updated[idx] = !updated[idx];
+                    setPurchased(updated);
+                  }}
+                  className="rounded-full border border-gray-400 w-6 h-6 justify-center items-center"
+                >
+                  <CheckboxIndicator className="w-full h-full rounded-full">
+                    {purchased[idx] && (
+                      <CheckboxIcon
+                        as={CircleIcon}
+                        className="border-none w-4 h-4 fill-black"
+                      />
+                    )}
+                  </CheckboxIndicator>
+                </Checkbox>
+              </Pressable>
+            ))}
+          </View>
+        </Animated.View>
+      </Card>
+    </Pressable>
+  );
+};
 
 export default DropdownCard;

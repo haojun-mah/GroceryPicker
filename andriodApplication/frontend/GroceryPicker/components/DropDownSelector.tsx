@@ -60,11 +60,15 @@ export const DropdownSelector = ({
         className="flex-row justify-between items-center"
         onPress={toggleOpen}
       >
-      <Text className="text-md font-semibold text-center font-roboto text-gray-800 dark:text-white">
-        {title}
-      </Text>
+        <Text className="text-md font-semibold text-center font-roboto text-gray-800 dark:text-white">
+          {title}
+        </Text>
         <Animated.View style={animatedChevronStyle}>
-          <Entypo name="chevron-down" size={24} color={colorScheme === 'light' ? "black" : "white"} />
+          <Entypo
+            name="chevron-down"
+            size={24}
+            color={colorScheme === 'light' ? 'black' : 'white'}
+          />
         </Animated.View>
       </TouchableOpacity>
       <Animated.View style={animatedHeightStyle} className="mt-2">
@@ -76,13 +80,13 @@ export const DropdownSelector = ({
               onPress={() => toggleSelection(item)}
               className={clsx(
                 'p-2 rounded-md my-1',
-                isSelected ? 'bg-blue-500' : 'bg-gray-100 dark:bg-gray-500'
+                isSelected ? 'bg-blue-500' : 'bg-gray-100 dark:bg-gray-500',
               )}
             >
               <Text
                 className={clsx(
                   'text-sm',
-                  isSelected ? 'text-white' : 'text-gray-800 dark:text-white'
+                  isSelected ? 'text-white' : 'text-gray-800 dark:text-white',
                 )}
               >
                 {item}

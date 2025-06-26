@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Pressable, Alert, ScrollView } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Pressable,
+  Alert,
+  ScrollView,
+} from 'react-native';
 import { supabase } from '@/lib/supabase';
 import { Box } from '@/components/ui/box';
 import { Text } from '@/components/ui/text';
@@ -38,23 +43,39 @@ export default function Login() {
   }
 
   return (
-      <ScrollView className='bg-[#EEEEEE} dark:bg-gray-900' contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <ScrollView
+      className="bg-[#EEEEEE} dark:bg-gray-900"
+      contentContainerStyle={{
+        flexGrow: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
       <Box className="flex-1 px-6 bg-white dark:bg-gray-900 justify-center">
         <Box className="items-center mb-16">
           <Image source={Logo} size="2xl" alt="Logo" />
         </Box>
 
         <VStack space="md">
-          <Heading size="4xl" className="w-full text-center mb-8 text-black dark:text-white">
+          <Heading
+            size="4xl"
+            className="w-full text-center mb-8 text-black dark:text-white"
+          >
             GroceryPicker
           </Heading>
 
           <KeyboardAvoidingView>
             <Box>
-              <Input className={`p-2 h-16 w-full bg-gray-100 dark:bg-gray-800 border ${
+              <Input
+                className={`p-2 h-16 w-full bg-gray-100 dark:bg-gray-800 border ${
                   colorScheme === 'dark' ? 'border-gray-400' : 'border-white'
-                }`} isInvalid={!!email.error}>
-                <InputIcon as={MailIcon} className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+                }`}
+                isInvalid={!!email.error}
+              >
+                <InputIcon
+                  as={MailIcon}
+                  className="w-6 h-6 text-gray-700 dark:text-gray-300"
+                />
                 <InputField
                   placeholder="Email"
                   keyboardType="email-address"
@@ -71,20 +92,30 @@ export default function Login() {
             </Box>
 
             <Box className="mt-4">
-              <Input className={`p-2 h-16 w-full bg-gray-100 dark:bg-gray-800 border ${
+              <Input
+                className={`p-2 h-16 w-full bg-gray-100 dark:bg-gray-800 border ${
                   colorScheme === 'dark' ? 'border-gray-400' : 'border-white'
-                }`} isInvalid={!!password.error}>
-                <InputIcon as={LockIcon} className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+                }`}
+                isInvalid={!!password.error}
+              >
+                <InputIcon
+                  as={LockIcon}
+                  className="w-6 h-6 text-gray-700 dark:text-gray-300"
+                />
                 <InputField
                   placeholder="Password"
                   secureTextEntry
                   value={password.value}
                   className="m-0 text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
-                  onChangeText={(text) => setPassword({ value: text, error: '' })}
+                  onChangeText={(text) =>
+                    setPassword({ value: text, error: '' })
+                  }
                 />
               </Input>
               {password.error ? (
-                <Text className="text-red-500 text-xs mt-1">{password.error}</Text>
+                <Text className="text-red-500 text-xs mt-1">
+                  {password.error}
+                </Text>
               ) : null}
             </Box>
           </KeyboardAvoidingView>
@@ -107,13 +138,17 @@ export default function Login() {
           </ButtonGroup>
 
           <Box className="flex-row justify-center mt-4">
-            <Text className="text-sm text-gray-700 dark:text-gray-300">Don’t have an account? </Text>
+            <Text className="text-sm text-gray-700 dark:text-gray-300">
+              Don’t have an account?{' '}
+            </Text>
             <Pressable onPress={() => router.push('/Register')}>
-              <Text className="text-sm text-blue-600 dark:text-blue-400 font-bold">Sign up</Text>
+              <Text className="text-sm text-blue-600 dark:text-blue-400 font-bold">
+                Sign up
+              </Text>
             </Pressable>
           </Box>
         </VStack>
       </Box>
-      </ScrollView>
+    </ScrollView>
   );
 }

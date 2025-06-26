@@ -13,7 +13,7 @@ export class ControllerError extends Error {
     super(message);
     this.statusCode = statusCode;
     this.details = details;
-    this.name = "ControllerError";
+    this.name = 'ControllerError';
     Object.setPrototypeOf(this, ControllerError.prototype);
   }
 }
@@ -39,7 +39,7 @@ export interface GroceryItem {
 }
 
 export interface SupermarketFilter {
-  exclude?: string[];  // Exclude these supermarkets
+  exclude?: string[]; // Exclude these supermarkets
 }
 
 export interface GroceryListRequest {
@@ -73,18 +73,18 @@ export const GROCERY_LIST_STATUSES = [
   'purchased',
   'archived',
 ] as const;
-export type GroceryListStatus = typeof GROCERY_LIST_STATUSES[number] | string;
+export type GroceryListStatus = (typeof GROCERY_LIST_STATUSES)[number] | string;
 
 export const GROCERY_LIST_STATUS_LABELS: Record<GroceryListStatus, string> = {
-  incomplete: "Not Purchased Yet",
-  purchased: "Purchased",
-  archived: "Archived",
+  incomplete: 'Not Purchased Yet',
+  purchased: 'Purchased',
+  archived: 'Archived',
 };
 
 export const GROCERY_LIST_STATUS_COLORS: Record<GroceryListStatus, string> = {
-  incomplete: "text-red-500 dark:text-red-400",
-  purchased: "text-green-600 dark:text-green-400",
-  archived: "text-gray-500 dark:text-gray-300",
+  incomplete: 'text-red-500 dark:text-red-400',
+  purchased: 'text-green-600 dark:text-green-400',
+  archived: 'text-gray-500 dark:text-gray-300',
 };
 
 export interface SavedGroceryList {
@@ -103,7 +103,7 @@ export interface SavedGroceryListItem {
   quantity: number;
   unit: string;
   purchased: boolean;
-  rag_product_id?: string; 
+  rag_product_id?: string;
   amount?: number;
   product?: ProductRow;
 }
@@ -113,6 +113,6 @@ export interface AiPromptRequestBody {
   supermarketFilter: string[]; // excluded supermarkets
 }
 
-export const groceryShops = ["Fairprice", "Cold Storage", "Sheng Siong"]; // to change
+export const groceryShops = ['Fairprice', 'Cold Storage', 'Sheng Siong']; // to change
 
-export const compareGroceryShops = ["FairPrice", "Cold Storage", "Sheng Siong"]; // to change
+export const compareGroceryShops = ['FairPrice', 'Cold Storage', 'Sheng Siong']; // to change
