@@ -6,7 +6,7 @@ import {
   Platform,
   UIManager,
 } from 'react-native';
-import { Button, ButtonGroup, ButtonIcon } from './ui/button';
+import { Button, ButtonGroup } from './ui/button';
 import { Card } from './ui/card';
 import Entypo from '@expo/vector-icons/Entypo';
 import { Text } from './ui/text';
@@ -15,8 +15,7 @@ import { Image } from './ui/image';
 import { CheckboxIcon, CheckboxIndicator, CheckboxGroup, Checkbox } from './ui/checkbox';
 import { CircleIcon } from './ui/icon';
 import { Pressable } from 'react-native';
-import { SavedGroceryListItem } from '@/app/(tabs)/groceryHistory';
-
+import { SavedGroceryListItem } from '@/app/(tabs)/interface';
 
 // Enable LayoutAnimation for Android
 if (
@@ -60,12 +59,13 @@ const DropdownCard = ({
   });
 
 return (
+  <Pressable onPress={!expanded ? () => setExpanded(true) : undefined} className='w-full'>
     <Card className="bg-white dark:bg-gray-700 w-full rounded-xl p-4">
-    <View className="flex-row items-center justify-between">
+    <View className="flex-row items-start justify-between">
       <View className="flex-1">
         {!expanded && outsideText.map((e, i) => (
           <Text key={i} size="xs" className="text:black dark:text-white text-md">
-            {e.name} - {e.quantity} {e.price}
+            {e.product?.name} - {e.amount}  ({e.quantity} {e.unit}/{e.product?.price})
           </Text>
         ))}
         {expanded && (
@@ -105,26 +105,26 @@ return (
       }}
       className="flex-row items-center gap-3 m-2"
     >
-            <Image source={{ uri: !item.image_url ? "" : item.image_url }} alt='Image of grocer' className="w-20 h-20 rounded-md bg-gray-300" />
+            <Image source={{ uri: !item.product?.image_url? "" : item.product.image_url}} alt='Image of grocer' className="w-20 h-20 rounded-md bg-gray-300" />
             <View className="flex-1">
               <Text
           className={`text-black text-xl dark:text-white font-semibold ${
             purchased[idx] ? 'line-through text-gray-400 dark:text-gray-500' : ''
           }`}
-        >{item.name}</Text>
+        >{item.product?.name}</Text>
               <Text className={`text-md ${
             purchased[idx]
               ? 'line-through text-gray-400 dark:text-gray-500'
               : 'text-gray-600 dark:text-gray-300'
           }`}>
-                {item.quantity}
+                {item.product?.quantity} per pax, {item.amount} pax needed ({item.quantity}{item.unit})
               </Text>
               <Text className={`text-md text-red-600 dark:text-red-400 ${
             purchased[idx]
               ? 'line-through text-gray-400 dark:text-gray-500'
-              : 'text-gray-600 dark:text-gray-300'
+              : 'text-red-600 dark:text-red-400'
           }`}>
-                {item.price}
+                {item.product?.price}
               </Text>
             </View>
       <Checkbox
@@ -148,9 +148,9 @@ return (
       </View>
     </Animated.View>
   </Card>
+  </Pressable>
 
 );
 }
-
 
 export default DropdownCard;

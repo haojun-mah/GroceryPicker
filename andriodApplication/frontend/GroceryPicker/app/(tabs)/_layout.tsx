@@ -35,11 +35,19 @@ export default function TabsLayout() {
         />
         <Tabs.Screen
           name="groceryInput"
-          options={{ headerShown: false, tabBarLabel: 'Grocery List' }}
+          options={{ headerShown: false, tabBarLabel: 'Create List' }}
         />
         <Tabs.Screen
           name="groceryHistory"
-          options={{ headerShown: false, tabBarLabel: 'Grocery History' }}
+          options={{ headerShown: false, tabBarLabel: 'History' }}
+        />
+        <Tabs.Screen
+          name="groceryRefinement"
+          options={{ headerShown: false, href: null }}
+        />
+        <Tabs.Screen
+          name="groceryDisplay/[id]"
+          options={{ headerShown: false, href: null }}
         />
       </Tabs>
     </GroceryRefinementContextProvider>

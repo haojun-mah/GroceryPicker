@@ -5,16 +5,13 @@ import { View, ScrollView } from "react-native";
 import { Button, ButtonGroup, ButtonText} from "@/components/ui/button";
 import { useLocalSearchParams } from "expo-router";
 import { useGroceryContext } from "@/context/groceryContext";
-import { SavedGroceryList } from "../groceryHistory";
-import { groceryShops } from "../groceryHistory";
+import { SavedGroceryList, compareGroceryShops } from "../interface";
 
 const GroceryDisplay = () => {
   const { id } = useLocalSearchParams(); // id of grocerylist
   const { groceryListHistory } = useGroceryContext();
   const [currGroceryList, setCurrGroceryList] = useState<SavedGroceryList | null>(null);
 
-  console.log(id); // debug
-  console.log(groceryListHistory); // debug
 
   // Check ID exist and groceryListHistory is successfully fetched before calling for fetchDisplayInfo
   useEffect(() => {
@@ -27,7 +24,10 @@ const GroceryDisplay = () => {
     const fetchDisplayInfo = async () => {
       const list = groceryListHistory?.find(list => String(list.id) === String(id));
       setCurrGroceryList(list ?? null);
+      console.log("Check displayid page. Expecting JSON containing singular grocery list");
+      console.log("Check display if it has target grocery list mounted:\n", currGroceryList);
     };
+
     if (!currGroceryList) {
       return (
         <ScrollView contentContainerStyle={{ paddingTop: 52}}>
@@ -41,14 +41,14 @@ const GroceryDisplay = () => {
 return (
 <ScrollView className='bg-[#EEEEEE] dark:bg-black' contentContainerStyle={{ paddingTop: 52}}>
   <View className="px-4 gap-4">
-    <Text className="text-4xl font-bold mb-2 text-black dark:text-white">Optimized Grocery List</Text>
+    <Text className="text-4xl font-bold mb-2 text-black dark:text-white">{currGroceryList.title}</Text>
 
-    {groceryShops.map((shops, idx)=> {
-      const items = currGroceryList.grocery_list_items.filter(item => item.supermarket === shops);
+    {compareGroceryShops.map((shops, idx)=> {
+      const items = currGroceryList.grocery_list_items.filter(item => item.product?.supermarket === shops);
       if (items.length === 0) return null;
           return (
             <View key={idx} className="items-start w-full">
-              <Text className="text-xl font-bold mb-1 ml-[2.5%] text-black dark:text-white">{shops}</Text>
+              <Text className="text-xl font-semibold mb-1 text-black dark:text-white">{shops}</Text>
               <DropdownCard
               outsideText={items}
               insideText={items}

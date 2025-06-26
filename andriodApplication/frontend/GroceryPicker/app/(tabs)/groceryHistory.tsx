@@ -6,7 +6,7 @@ import { useGroceryContext } from "@/context/groceryContext"
 import { useEffect } from "react"
 import { useSession } from "@/context/authContext"
 import { router } from "expo-router"
-import { ControllerError, SavedGroceryList } from "./interface"
+import { ControllerError, GROCERY_LIST_STATUS_COLORS, GROCERY_LIST_STATUS_LABELS, GROCERY_LIST_STATUSES, SavedGroceryList } from "./interface"
 
 /*
   Page host grocery list history for each user.
@@ -62,9 +62,9 @@ const GroceryListHistoryPage = () => {
 
   return(
     <ScrollView contentContainerStyle={{ paddingTop: 60 }} className="bg-[#EEEEEE] dark:bg-black">
-      <View className="px-6">
+      <View className="px-6 gap-4">
         <Text className="text-4xl font-bold text-dark dark:text-white">History</Text>
-        <View>
+        <View className="gap-4">
           {groceryListHistory.map((list, idx) => {
             return ( 
               <Pressable key={idx} onPress={() => router.push(`/groceryDisplay/${list.id}`)}>
@@ -75,8 +75,9 @@ const GroceryListHistoryPage = () => {
                   <Text className="text-xs font-normal text-gray-500 dark:text-gray-300">
                     {list.metadata ? list.metadata : ""}  
                   </Text>
-                  <Text className="text-md font-normal">
-                    {list.list_status}
+                  <Text className={`text-md font-normal ${
+                  GROCERY_LIST_STATUS_COLORS[list.list_status] ?? "text-blackdark:text-white"}`}>
+                    {GROCERY_LIST_STATUS_LABELS[list.list_status]}
                   </Text>
                 </Card>
               </Pressable>

@@ -105,7 +105,7 @@ export const findBestPricesForGroceryList: RequestHandler<
       res.status(savedList.statusCode).json(err);
       return;
     }
-
+    console.log("Optimise Successful: ", savedList);
     res.status(201).json(savedList);
   } catch (error: any) {
     console.error('Product optimization and save error:', error.message);

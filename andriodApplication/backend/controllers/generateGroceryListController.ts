@@ -56,7 +56,7 @@ export const generateGroceryList: RequestHandler<
   // this entire paragraph is me trying to convert LLM information into JSON
   try {
     const llmOutputString: string = await generate(input, instruction);
-    console.log('LLM Raw Output (CSV-like):', llmOutputString); // Log raw output for debugging
+    console.log('Generate GroceryList LLM Output:\n', llmOutputString); // Log raw output for debugging
 
     try {
       // --- NEW PARSING LOGIC FOR CSV-LIKE STRING ---
@@ -97,7 +97,13 @@ export const generateGroceryList: RequestHandler<
         supermarketFilter: req.body.supermarketFilter,
       };
 
-      res.status(200).json(output);
+      if (output.items.length === 0) {
+        const err = new ControllerError(500, 'Grocery Refinement converting LLM into structured form failed.');
+        res.status(400).json(err)
+      } else {
+        res.status(200).json(output);
+      }
+
     } catch (parseError) {
       console.error(
         'Error parsing LLM output (CSV) or validating structure:',

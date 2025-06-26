@@ -25,7 +25,6 @@ export const getAllUserGroceryLists: RequestHandler<
       return;
     }
     res.status(200).json(result);
-    console.log(result[0].grocery_list_items);
   } catch (error: any) {
     console.error('Get lists error:', error.message);
     const err = new ControllerError(500, 'Failed to fetch grocery lists.', error.message);

@@ -8,8 +8,7 @@ import { useSession } from '@/context/authContext';
 import { useGroceryRefinementContext } from '@/context/groceryRefinement';
 import { router } from 'expo-router';
 import { DropdownSelector } from '@/components/DropDownSelector';
-import { GroceryMetadataTitleOutput } from '@/context/groceryContext';
-import { groceryShops, AiPromptRequestBody } from './interface';
+import { groceryShops, AiPromptRequestBody, GroceryMetadataTitleOutput } from './interface';
 
 /*
   Initial grocery input page where user can key in unstructred grocrey list to receive structured grocery list.
@@ -21,14 +20,13 @@ const groceryInput = () => {
   const [groceryTextArea, setGroceryTextArea] = useState<string>('');
   const [selectedGroceryShop, setSelectedGroceryShop] = useState<string[]>([]);
   const { session } = useSession();
-  const { setIsLoading, setError, setGroceryRefinement, setGroceryShop } = useGroceryRefinementContext();
+  const { setIsLoading, groceryRefinement, setGroceryRefinement, setGroceryShop } = useGroceryRefinementContext();
 
   const postData = async () => {
     try {
       if (groceryTextArea.length === 0) return;
 
       setIsLoading(true);
-      setError(null);
       const req : AiPromptRequestBody = {
         message: groceryTextArea,
         supermarketFilter: groceryShops.filter(x => !selectedGroceryShop.includes(x)),
@@ -46,8 +44,10 @@ const groceryInput = () => {
       const output: GroceryMetadataTitleOutput = await response.json();
 
       if (response.ok && output.title !== '!@#$%^') {
+        console.log("Check receive first grocery list from generateGroceryList: \n", output);
         setGroceryRefinement(output);
         setGroceryShop(selectedGroceryShop);
+        console.log("Check grocery input data is set in groceryRefinement var: \n", groceryRefinement);
         router.push('/groceryRefinement');
       } else if (response.status === 403) {
         alert('You are not authorized to perform this action. Please log in again.');

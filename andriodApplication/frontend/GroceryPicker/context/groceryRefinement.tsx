@@ -1,5 +1,5 @@
 import { createContext, Dispatch, SetStateAction, useContext, useState } from "react";
-import { ErrorResponse, GroceryMetadataTitleOutput } from "./groceryContext";
+import { GroceryMetadataTitleOutput } from "@/app/(tabs)/interface";
 
 interface GroceryRefinementList {
     groceryRefinement: GroceryMetadataTitleOutput | null,
@@ -7,9 +7,7 @@ interface GroceryRefinementList {
     groceryShop: string[],
     setGroceryShop: (shop: string[]) => void,
     isLoading: boolean,
-    error: ErrorResponse | null;
     setIsLoading: (loading: boolean) => void;
-    setError: (error: ErrorResponse | null) => void;
 }
 
 const GroceryRefinementContext = createContext<GroceryRefinementList | undefined>(undefined);
@@ -18,7 +16,6 @@ export const GroceryRefinementContextProvider: any = ({ children }: any) => {
     const [groceryRefinement, setGroceryRefinement] = useState<GroceryMetadataTitleOutput | null>(null);
     const [groceryShop, setGroceryShop] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [error, setError] = useState<ErrorResponse | null>(null);
 
     const value : GroceryRefinementList = {
         groceryRefinement,
@@ -26,9 +23,7 @@ export const GroceryRefinementContextProvider: any = ({ children }: any) => {
         groceryShop,
         setGroceryShop,
         isLoading,
-        error,
         setIsLoading,
-        setError,
     }
     return (
         <GroceryRefinementContext.Provider value={value}>

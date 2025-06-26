@@ -52,7 +52,7 @@ AiPromptRequestBody,
   // this entire paragraph is me trying to convert LLM information into JSON
   try {
     const llmOutputString: string = await generate(input, instruction);
-    console.log('LLM Raw Output (CSV-like):', llmOutputString); // Log raw output for debugging
+    console.log('Refinement LLM output:\n', llmOutputString); // Log raw output for debugging
 
     try {
       // --- NEW PARSING LOGIC FOR CSV-LIKE STRING ---
