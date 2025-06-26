@@ -1,5 +1,5 @@
 import { ProductRow, GroceryItem } from './fetchPricesInterface';
-export { ControllerError } from "./fetchPricesInterface";
+export { ControllerError } from './fetchPricesInterface';
 
 // For saving a list - extends GroceryItem with additional optional fields
 export interface GeneratedGroceryItem extends GroceryItem {
@@ -19,7 +19,7 @@ export const GROCERY_LIST_STATUSES = [
   'purchased',
   'archived',
 ] as const;
-export type GroceryListStatus = typeof GROCERY_LIST_STATUSES[number] | string;
+export type GroceryListStatus = (typeof GROCERY_LIST_STATUSES)[number] | string;
 
 export interface SavedGroceryList {
   id: string;
@@ -37,7 +37,7 @@ export interface SavedGroceryListItem {
   quantity: number;
   unit: string;
   purchased: boolean;
-  rag_product_id?: string; 
+  rag_product_id?: string;
   amount?: number;
   product?: ProductRow;
 }

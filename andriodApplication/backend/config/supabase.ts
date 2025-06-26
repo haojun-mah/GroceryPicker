@@ -18,7 +18,7 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
     persistSession: false,
     autoRefreshToken: false,
     detectSessionInUrl: false,
-  }
+  },
 });
 
 export default supabase;

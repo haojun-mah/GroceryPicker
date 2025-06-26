@@ -1,5 +1,5 @@
-import { GroceryItem } from "./fetchPricesInterface";
-export { ControllerError, GroceryItem } from "./fetchPricesInterface";
+import { GroceryItem } from './fetchPricesInterface';
+export { ControllerError, GroceryItem } from './fetchPricesInterface';
 
 export interface AiPromptRequestBody {
   message: string;

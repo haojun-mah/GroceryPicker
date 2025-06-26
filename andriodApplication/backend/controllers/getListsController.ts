@@ -1,6 +1,9 @@
 import { RequestHandler } from 'express';
 import { getAllUserLists } from '../models/groceryListModel';
-import { SavedGroceryList, ControllerError } from '../interfaces/groceryListInterface';
+import {
+  SavedGroceryList,
+  ControllerError,
+} from '../interfaces/groceryListInterface';
 
 export const getAllUserGroceryLists: RequestHandler<
   {},
@@ -20,14 +23,22 @@ export const getAllUserGroceryLists: RequestHandler<
     const result = await getAllUserLists(userId);
 
     if ('message' in result) {
-      const err = new ControllerError(result.statusCode || 500, result.message, result.details);
+      const err = new ControllerError(
+        result.statusCode || 500,
+        result.message,
+        result.details,
+      );
       res.status(result.statusCode || 500).json(err);
       return;
     }
     res.status(200).json(result);
   } catch (error: any) {
     console.error('Get lists error:', error.message);
-    const err = new ControllerError(500, 'Failed to fetch grocery lists.', error.message);
+    const err = new ControllerError(
+      500,
+      'Failed to fetch grocery lists.',
+      error.message,
+    );
     res.status(500).json(err);
   }
 };

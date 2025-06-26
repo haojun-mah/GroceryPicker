@@ -1,6 +1,11 @@
-import { RequestHandler } from "express-serve-static-core";
-import { GroceryMetadataTitleOutput, GroceryItem, AiPromptRequestBody, ControllerError } from "../interfaces/generateGroceryListInterface";
-import generate from "../services/llm";
+import { RequestHandler } from 'express-serve-static-core';
+import {
+  GroceryMetadataTitleOutput,
+  GroceryItem,
+  AiPromptRequestBody,
+  ControllerError,
+} from '../interfaces/generateGroceryListInterface';
+import generate from '../services/llm';
 
 /*
   Handles grocery lists refined and modified by user. Below code will regenerate
@@ -11,13 +16,13 @@ import generate from "../services/llm";
 */
 
 export const refineGroceryListController: RequestHandler<
-{},
-GroceryMetadataTitleOutput | ControllerError,
-AiPromptRequestBody,
-{}
+  {},
+  GroceryMetadataTitleOutput | ControllerError,
+  AiPromptRequestBody,
+  {}
 > = async (req, res) => {
-    const input : string = req.body.message;
-    const instruction = `You are a grocery generator. You have previously
+  const input: string = req.body.message;
+  const instruction = `You are a grocery generator. You have previously
     generated a grocery list with given prompts and information. You are
     given a refined grocery list by the user. The refined grocery list contains
     users edit or even prompts on how to better improve the grocery list. You
@@ -42,12 +47,15 @@ AiPromptRequestBody,
     Apples/6/pieces  
     Milk/1/liter  
     Bread/1/loaf
-    `
+    `;
   if (typeof input !== 'string' || input.trim().length === 0) {
-      const err = new ControllerError(400, 'Request body is empty or not a string');
-      res.status(400).json(err);
-      return;
-    }
+    const err = new ControllerError(
+      400,
+      'Request body is empty or not a string',
+    );
+    res.status(400).json(err);
+    return;
+  }
 
   // this entire paragraph is me trying to convert LLM information into JSON
   try {
@@ -103,7 +111,11 @@ AiPromptRequestBody,
         parseError instanceof Error
           ? parseError.message
           : 'Invalid LLM output format.';
-      const err = new ControllerError(500, 'Failed to parse LLM response into a valid grocery list format.', errorMessage);
+      const err = new ControllerError(
+        500,
+        'Failed to parse LLM response into a valid grocery list format.',
+        errorMessage,
+      );
       res.status(500).json(err);
       return;
     }
@@ -113,9 +125,11 @@ AiPromptRequestBody,
       error instanceof Error
         ? error.message
         : 'Unknown error from LLM api integration caused';
-    const err = new ControllerError(500, 'Failed to process string input', errorMessage);
+    const err = new ControllerError(
+      500,
+      'Failed to process string input',
+      errorMessage,
+    );
     res.status(500).json(err);
   }
-}
-
-
+};

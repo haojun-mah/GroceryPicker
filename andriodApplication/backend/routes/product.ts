@@ -19,7 +19,6 @@ import { scraperUploadController } from '../controllers/uploadProductController'
 
 const productRouter = Router();
 
-
 // generated embed, called by price scraper
 productRouter.post('/embed-text', embedTextController);
 
