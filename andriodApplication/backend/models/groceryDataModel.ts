@@ -10,7 +10,7 @@ export interface ScrapedProductData {
   id?: string;
   name: string;
   supermarket: string;
-  price: number;
+  price: string;
   quantity: string;
   promotion_description?: string | null;
   promotion_end_date_text?: string | null;
