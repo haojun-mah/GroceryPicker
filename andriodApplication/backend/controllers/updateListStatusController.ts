@@ -1,12 +1,12 @@
 import { RequestHandler } from 'express';
 import { updateGroceryListStatus } from '../models/groceryListModel';
-import { SavedGroceryList, ControllerError } from '../interfaces';
+import { SavedGroceryList, ControllerSuccess, ControllerError } from '../interfaces';
 import supabase from '../config/supabase';
 
 // Accept any subset of SavedGroceryList properties
 export const updateListStatus: RequestHandler<
   {},
-  any,
+  ControllerSuccess | ControllerError,
   Partial<SavedGroceryList>,
   {}
 > = async (req, res) => {
@@ -50,7 +50,7 @@ export const updateListStatus: RequestHandler<
       res.status(result.statusCode).json(result);
       return;
     }
-    res.status(200).json(result);
+    res.status(200).json(new ControllerSuccess('Grocery list status updated successfully.'));
   } catch (error: any) {
     console.error('Update list status error:', error.message);
     res

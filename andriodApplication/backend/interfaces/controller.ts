@@ -19,3 +19,23 @@ export class ControllerError extends Error {
     };
   }
 }
+
+export class ControllerSuccess {
+  success: boolean;
+  message: string;
+  details?: any;
+
+  constructor(message: string, details?: any) {
+    this.success = true;
+    this.message = message;
+    this.details = details;
+  }
+
+  toJSON() {
+    return {
+      success: this.success,
+      message: this.message,
+      details: this.details,
+    };
+  }
+}
