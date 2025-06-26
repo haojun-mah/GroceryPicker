@@ -21,7 +21,7 @@ export async function saveUserGroceryList(
 
   if (listError) {
     console.error('Model: Error inserting grocery list:', listError);
-    return { statusCode: 500, message: 'Failed to save grocery list.', details: listError.message };
+    return new ControllerError(500, 'Failed to save grocery list.', listError.message);
   }
 
   const savedListId = list.id;
@@ -41,7 +41,7 @@ export async function saveUserGroceryList(
 
   if (itemsError) {
     console.error('Model: Error inserting grocery list items:', itemsError);
-    return { statusCode: 500, message: 'Failed to save grocery list items.', details: itemsError.message };
+    return new ControllerError(500, 'Failed to save grocery list items.', itemsError.message);
   }
 
   // Refetch the complete list with its items to return to the client
@@ -62,7 +62,7 @@ export async function getGroceryListById(listId: string, userId: string): Promis
 
   if (error) {
     console.error('Model: Error fetching single list:', error);
-    return { statusCode: 404, message: 'List not found or you do not have permission to view it.', details: error.message };
+    return new ControllerError(404, 'List not found or you do not have permission to view it.', error.message);
   }
   return data;
 }
@@ -85,7 +85,7 @@ export async function getAllUserLists(userId: string): Promise<SavedGroceryList[
 
   if (error) {
     console.error('Model: Error fetching all user lists:', error);
-    return { statusCode: 500, message: 'Failed to fetch grocery lists.', details: error.message };
+    return new ControllerError(500, 'Failed to fetch grocery lists.', error.message);
   }
   return data || [];
 }

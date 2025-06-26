@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import { findBestProductsForGroceryListEnhanced } from '../services/ragGenerationService';
 import { saveUserGroceryList } from '../models/groceryListModel';
-import { refineGroceryListController } from './refineGroceryListController';
+import { generateGroceryList } from './generateGroceryListController';
 import { ControllerError } from '../interfaces/fetchPricesInterface';
 import { GeneratedGroceryItem, SavedGroceryList } from '../interfaces/groceryListInterface';
 import { AiPromptRequestBody, GroceryMetadataTitleOutput } from '../interfaces/generateGroceryListInterface';
@@ -21,10 +21,10 @@ export const findBestPricesForGroceryList: RequestHandler<
       return;
     }
 
-    // Refine the input using refineGroceryListController
-    let refinedResult: GroceryMetadataTitleOutput;
+    // Generate the structured grocery list from user input
+    let generatedResult: GroceryMetadataTitleOutput;
     try {
-      refinedResult = await new Promise<GroceryMetadataTitleOutput>((resolve, reject) => {
+      generatedResult = await new Promise<GroceryMetadataTitleOutput>((resolve, reject) => {
         const mockRes = {
           status: (code: number) => ({
             json: (data: any) => {
@@ -36,23 +36,23 @@ export const findBestPricesForGroceryList: RequestHandler<
             }
           })
         };
-        refineGroceryListController(
+        generateGroceryList(
           { body: req.body } as any,
           mockRes as any,
           () => {} // next function
         );
       });
-    } catch (refinementError: any) {
-      const err = refinementError instanceof ControllerError
-        ? refinementError
-        : new ControllerError(refinementError.statusCode || 500, refinementError.message || 'Refinement failed', refinementError.details);
+    } catch (generationError: any) {
+      const err = generationError instanceof ControllerError
+        ? generationError
+        : new ControllerError(generationError.statusCode || 500, generationError.message || 'Generation failed', generationError.details);
       res.status(err.statusCode).json(err);
       return;
     }
 
-    const items = refinedResult.items;
-    // Extract supermarket filter from the refined result
-    const excludedSupermarkets = refinedResult.supermarketFilter || [];
+    const items = generatedResult.items;
+    // Extract supermarket filter from the generated result
+    const excludedSupermarkets = generatedResult.supermarketFilter || [];
     const supermarketFilter = excludedSupermarkets.length > 0 
       ? { exclude: excludedSupermarkets }
       : undefined;
@@ -89,9 +89,9 @@ export const findBestPricesForGroceryList: RequestHandler<
       amount: result.amount
     }));
 
-    // Use the title and metadata from refinedResult
-    const title =  refinedResult.title;
-    const metadata = refinedResult.metadata;
+    // Use the title and metadata from generatedResult
+    const title =  generatedResult.title;
+    const metadata = generatedResult.metadata;
 
     // Save the optimized list to the database
     const savedList = await saveUserGroceryList(userId, {

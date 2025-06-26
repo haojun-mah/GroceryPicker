@@ -24,7 +24,7 @@ export async function upsertScrapedProducts(
   products: ScrapedProductData[]
 ): Promise<{ count: number } | ControllerError> {
   if (!products || products.length === 0) {
-    return { statusCode: 400, message: 'No product data provided for upsertion.' };
+    return new ControllerError(400, 'No product data provided for upsertion.');
   }
 
   const validProducts = products.filter(p =>
@@ -36,7 +36,7 @@ export async function upsertScrapedProducts(
   );
 
   if (validProducts.length === 0) {
-    return { statusCode: 400, message: 'Provided product data is invalid or missing required fields (name, supermarket, quantity, price, embedding).' };
+    return new ControllerError(400, 'Provided product data is invalid or missing required fields (name, supermarket, quantity, price, embedding).');
   }
 
   try {
@@ -67,11 +67,7 @@ export async function upsertScrapedProducts(
 
     if (error) {
       console.error('Model: Error upserting scraped products:', error.message);
-      return {
-        statusCode: 500,
-        message: 'Failed to upsert scraped products into database.',
-        details: error.message,
-      };
+      return new ControllerError(500, 'Failed to upsert scraped products into database.', error.message);
     }
 
     return { count: (data ? data.length : 0) };
@@ -79,10 +75,6 @@ export async function upsertScrapedProducts(
   } catch (unexpectedError: any) {
     const errorMessage = unexpectedError instanceof Error ? unexpectedError.message : 'An unknown internal error occurred.';
     console.error(`[Model Error] upsertScrapedProducts: ${errorMessage}`);
-    return {
-      statusCode: 500,
-      message: 'An unexpected error occurred during product data upsertion.',
-      details: errorMessage,
-    };
+    return new ControllerError(500, 'An unexpected error occurred during product data upsertion.', errorMessage);
   }
 }
