@@ -3,6 +3,7 @@ import {
   SaveGroceryListRequestBody,
   SavedGroceryList,
   ControllerError,
+  SavedGroceryListItem,
 } from '../interfaces';
 
 // Function to save a new grocery list and its items
@@ -108,6 +109,7 @@ export async function getAllUserLists(
     `,
     )
     .eq('user_id', userId)
+    .neq('list_status', 'deleted')
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -127,6 +129,19 @@ export async function updateGroceryListStatus(
   listId: string,
   newStatus: string,
 ): Promise<{ success: boolean; message: string } | ControllerError> {
+  // Check ownership: ensure the list belongs to the user
+  const { data: list, error: listError } = await supabase
+    .from('grocery_lists')
+    .select('user_id')
+    .eq('list_id', listId)
+    .single();
+  if (listError || !list) {
+    return new ControllerError(404, 'List not found or access denied.');
+  }
+  if (list.user_id !== userId) {
+    return new ControllerError(403, 'Forbidden: You do not own this list.');
+  }
+
   const { error } = await supabase
     .from('grocery_lists')
     .update({ list_status: newStatus })
@@ -145,4 +160,37 @@ export async function updateGroceryListStatus(
     success: true,
     message: 'Grocery list status updated successfully.',
   };
+}
+
+// Function to update the status of a grocery list item
+export async function updateGroceryListItemStatus(
+  userId: string,
+  listId: string,
+  itemId: string,
+  fieldsToUpdate: Partial<SavedGroceryListItem>,
+): Promise<{ success: boolean; item?: any } | ControllerError> {
+  // Check ownership: ensure the list belongs to the user
+  const { data: list, error: listError } = await supabase
+    .from('grocery_lists')
+    .select('user_id')
+    .eq('list_id', listId)
+    .single();
+  if (listError || !list) {
+    return new ControllerError(404, 'List not found or access denied');
+  }
+  if (list.user_id !== userId) {
+    return new ControllerError(403, 'Forbidden');
+  }
+  // Update the specified fields for the item
+  const { data: item, error: itemError } = await supabase
+    .from('grocery_list_items')
+    .update(fieldsToUpdate)
+    .eq('list_id', listId)
+    .eq('item_id', itemId)
+    .select()
+    .single();
+  if (itemError || !item) {
+    return new ControllerError(404, 'Item not found or update failed');
+  }
+  return { success: true, item };
 }

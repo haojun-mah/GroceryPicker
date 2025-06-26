@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 import { ControllerSuccess, ControllerError, SavedGroceryListItem } from '../interfaces';
-import supabase from '../config/supabase';
+import { updateGroceryListItemStatus } from '../models/groceryListModel';
 
 /**
  * PATCH /groceryList/item/updateStatus
@@ -40,7 +40,6 @@ export const updateItemStatus: RequestHandler<
       'purchased',
       'product_id',
       'amount',
-      'product',
     ];
     const invalidFields = Object.keys(fieldsToUpdate).filter(
       key => !allowedFields.includes(key),
@@ -55,37 +54,12 @@ export const updateItemStatus: RequestHandler<
       return;
     }
 
-    // Check ownership: ensure the list belongs to the user
-    const { data: list, error: listError } = await supabase
-      .from('grocery_lists')
-      .select('user_id')
-      .eq('list_id', list_id)
-      .single();
-    if (listError || !list) {
-      res
-        .status(404)
-        .json(new ControllerError(404, 'List not found or access denied'));
+    const result = await updateGroceryListItemStatus(userId, list_id, item_id, fieldsToUpdate);
+    if (result instanceof ControllerError) {
+      res.status(result.statusCode).json(result);
       return;
     }
-    if (list.user_id !== userId) {
-      res.status(403).json(new ControllerError(403, 'Forbidden'));
-      return;
-    }
-    // Update the specified fields for the item
-    const { data: item, error: itemError } = await supabase
-      .from('grocery_list_items')
-      .update(fieldsToUpdate)
-      .eq('list_id', list_id)
-      .eq('item_id', item_id)
-      .select()
-      .single();
-    if (itemError || !item) {
-      res
-        .status(404)
-        .json(new ControllerError(404, 'Item not found or update failed'));
-      return;
-    }
-    res.status(200).json(new ControllerSuccess('Grocery list item updated successfully.', item));
+    res.status(200).json(new ControllerSuccess('Grocery list item updated successfully.', result.item));
   } catch (error: any) {
     console.error('Update item status error:', error.message);
     res

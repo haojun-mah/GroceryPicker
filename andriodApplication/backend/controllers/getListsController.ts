@@ -21,19 +21,11 @@ export const getAllUserGroceryLists: RequestHandler<
     }
 
     const result = await getAllUserLists(userId);
-
-    if ('message' in result) {
-      const err = new ControllerError(
-        result.statusCode || 500,
-        result.message,
-        result.details,
-      );
-      res.status(result.statusCode || 500).json(err);
+    if (result instanceof ControllerError) {
+      res.status(result.statusCode).json(result);
       return;
     }
-    // Filter out lists with list_status === 'deleted'
-    const filtered = (result as SavedGroceryList[]).filter(list => list.list_status !== 'deleted');
-    res.status(200).json(filtered);
+    res.status(200).json(result);
   } catch (error: any) {
     console.error('Get lists error:', error.message);
     const err = new ControllerError(
