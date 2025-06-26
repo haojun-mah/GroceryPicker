@@ -5,6 +5,7 @@ import { findBestPricesForGroceryList } from '../controllers/optimiseListControl
 import { saveGroceryList } from '../controllers/saveListController';
 import { getAllUserGroceryLists } from '../controllers/getListsController';
 import verifyToken from '../middleware/auth';
+import { updateListStatus } from '../controllers/updateListStatusController';
 
 const groceryListRouter = Router();
 
@@ -22,5 +23,8 @@ groceryListRouter.post('/save', verifyToken, saveGroceryList);
 
 // fetching all lists for the logged-in user
 groceryListRouter.get('/getAll', verifyToken, getAllUserGroceryLists);
+
+// updating the status of a grocery list
+groceryListRouter.patch('/updateStatus', verifyToken, updateListStatus);
 
 export default groceryListRouter;

@@ -1,8 +1,8 @@
 import supabase from '../config/supabase';
-import { 
+import {
   SaveGroceryListRequestBody,
   SavedGroceryList,
-  ControllerError 
+  ControllerError,
 } from '../interfaces';
 
 // Function to save a new grocery list and its items
@@ -119,4 +119,30 @@ export async function getAllUserLists(
     );
   }
   return data || [];
+}
+
+// Function to update the status of a grocery list
+export async function updateGroceryListStatus(
+  userId: string,
+  listId: string,
+  newStatus: string,
+): Promise<{ success: boolean; message: string } | ControllerError> {
+  const { error } = await supabase
+    .from('grocery_lists')
+    .update({ list_status: newStatus })
+    .eq('id', listId)
+    .eq('user_id', userId);
+
+  if (error) {
+    console.error('Model: Error updating grocery list status:', error);
+    return new ControllerError(
+      500,
+      'Failed to update grocery list status.',
+      error.message,
+    );
+  }
+  return {
+    success: true,
+    message: 'Grocery list status updated successfully.',
+  };
 }

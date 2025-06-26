@@ -1,3 +1,5 @@
+import { ProductRow } from './product';
+
 export interface GroceryItem {
   name: string;
   quantity: number;
@@ -19,9 +21,9 @@ export interface GroceryListResponse {
 
 export interface EnhancedGroceryPriceResponse {
   item: string;
-  selectedProduct?: import('./product').ProductRow;
+  selectedProduct?: ProductRow;
   amount?: number;
-  allProducts?: import('./product').ProductRow[];
+  allProducts?: ProductRow[];
   error?: string;
   query?: string;
 }
@@ -43,6 +45,7 @@ export const GROCERY_LIST_STATUSES = [
   'incomplete',
   'purchased',
   'archived',
+  'deleted',
 ] as const;
 export type GroceryListStatus = (typeof GROCERY_LIST_STATUSES)[number] | string;
 
@@ -64,5 +67,5 @@ export interface SavedGroceryListItem {
   purchased: boolean;
   rag_product_id?: string;
   amount?: number;
-  product?: import('./product').ProductRow;
+  product?: ProductRow;
 }
