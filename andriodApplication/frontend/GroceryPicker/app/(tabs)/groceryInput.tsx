@@ -10,7 +10,7 @@ import { router } from 'expo-router';
 import { DropdownSelector } from '@/components/DropDownSelector';
 import { Alert, AlertIcon, AlertText } from '@/components/ui/alert';
 import {
-  groceryShops,
+  groceryShop,
   AiPromptRequestBody,
   GroceryMetadataTitleOutput,
 } from './interface';
@@ -46,7 +46,7 @@ const groceryInput = () => {
       setIsLoading(true);
       const req: AiPromptRequestBody = {
         message: groceryTextArea,
-        supermarketFilter: groceryShops.filter(
+        supermarketFilter: groceryShop.filter(
           (x) => !selectedGroceryShop.includes(x),
         ),
       };
@@ -126,7 +126,7 @@ const groceryInput = () => {
           <View className="bg-white dark:bg-gray-700 rounded-xl px-3 pt-2 pb-3">
             <DropdownSelector
               title="Select Grocery Shops"
-              items={groceryShops}
+              items={groceryShop}
               selectedItems={selectedGroceryShop}
               onSelectionChange={setSelectedGroceryShop}
             />

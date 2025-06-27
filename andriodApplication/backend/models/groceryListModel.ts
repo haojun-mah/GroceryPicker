@@ -33,7 +33,7 @@ export async function saveUserGroceryList(
     );
   }
 
-  const savedListId = list.id;
+  const savedListId = list.list_id;
 
   // Prepare the items to be inserted, linking them to the new list's ID
   const itemsToInsert = items.map((item) => ({
@@ -45,6 +45,8 @@ export async function saveUserGroceryList(
     product_id: item.product_id || null, // direct mapping to products table
     amount: item.amount !== undefined ? item.amount : null, // recommended amount
   }));
+  console.log("flag");
+  console.log(itemsToInsert);
 
   const { error: itemsError } = await supabase
     .from('grocery_list_items')

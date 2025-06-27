@@ -15,7 +15,6 @@ import { Image } from './ui/image';
 import {
   CheckboxIcon,
   CheckboxIndicator,
-  CheckboxGroup,
   Checkbox,
 } from './ui/checkbox';
 import { CircleIcon } from './ui/icon';

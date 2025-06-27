@@ -103,7 +103,7 @@ const ModalPage = () => {
       const allList: SavedGroceryList[] = await responseAllList.json();
 
       setGroceryListHistory(allList);
-      router.push(`/groceryDisplay/${optimisedList.id}`);
+      router.push(`/groceryDisplay/${optimisedList.list_id}`);
       // Handle output
     } catch (error) {
       console.log(error);

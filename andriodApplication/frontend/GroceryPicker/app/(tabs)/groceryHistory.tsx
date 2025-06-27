@@ -65,6 +65,9 @@ const GroceryListHistoryPage = () => {
           <Text className="text-4xl font-bold text-dark dark:text-white">
             History
           </Text>
+          <Text className='text-xl'>
+            History is Empty.
+          </Text>
         </View>
       </ScrollView>
     );
@@ -84,7 +87,7 @@ const GroceryListHistoryPage = () => {
             return (
               <Pressable
                 key={idx}
-                onPress={() => router.push(`/groceryDisplay/${list.id}`)}
+                onPress={() => router.push(`/groceryDisplay/${list.list_id}`)}
               >
                 <Card className="bg-white dark:bg-gray-700 rounded-md">
                   <Text className="text-xl font-semibold text-black dark:text-white">
