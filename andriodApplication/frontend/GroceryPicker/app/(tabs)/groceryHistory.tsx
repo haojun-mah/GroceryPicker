@@ -10,7 +10,6 @@ import {
   ControllerError,
   GROCERY_LIST_STATUS_COLORS,
   GROCERY_LIST_STATUS_LABELS,
-  GROCERY_LIST_STATUSES,
   SavedGroceryList,
 } from './interface';
 
