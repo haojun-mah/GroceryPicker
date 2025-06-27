@@ -7,10 +7,10 @@ import { ControllerError } from '../interfaces';
 */
 
 export interface ScrapedProductData {
-  id?: string;
+  product_id?: string;
   name: string;
   supermarket: string;
-  price: number;
+  price: string;
   quantity: string;
   promotion_description?: string | null;
   promotion_end_date_text?: string | null;
@@ -64,8 +64,8 @@ export async function upsertScrapedProducts(
         embedding: p.embedding,
       };
 
-      if (p.id) {
-        payload.id = p.id;
+      if (p.product_id) {
+        payload.id = p.product_id;
       }
       return payload;
     });
@@ -73,7 +73,7 @@ export async function upsertScrapedProducts(
     const { data, count, error } = await supabase
       .from('products')
       .upsert(productsToUpsert, { onConflict: 'product_url', count: 'exact' })
-      .select('id')
+      .select('product_id')
       .limit(1);
 
     if (error) {

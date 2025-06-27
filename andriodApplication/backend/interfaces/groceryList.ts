@@ -1,3 +1,5 @@
+import { ProductRow } from './product';
+
 export interface GroceryItem {
   name: string;
   quantity: number;
@@ -19,16 +21,16 @@ export interface GroceryListResponse {
 
 export interface EnhancedGroceryPriceResponse {
   item: string;
-  selectedProduct?: import('./product').ProductRow;
+  selectedProduct?: ProductRow;
   amount?: number;
-  allProducts?: import('./product').ProductRow[];
+  allProducts?: ProductRow[];
   error?: string;
   query?: string;
 }
 
 // For saving a list - extends GroceryItem with additional optional fields
 export interface GeneratedGroceryItem extends GroceryItem {
-  rag_product_id?: string; // direct mapping to products table
+  product_id?: string; // direct mapping to products table
   amount?: number; // recommended amount from LLM/RAG
 }
 
@@ -43,11 +45,12 @@ export const GROCERY_LIST_STATUSES = [
   'incomplete',
   'purchased',
   'archived',
+  'deleted',
 ] as const;
 export type GroceryListStatus = (typeof GROCERY_LIST_STATUSES)[number] | string;
 
 export interface SavedGroceryList {
-  id: string;
+  list_id: string;
   user_id: string;
   title: string;
   metadata: string | null;
@@ -56,13 +59,13 @@ export interface SavedGroceryList {
 }
 
 export interface SavedGroceryListItem {
-  id: string;
+  item_id: string;
   list_id: string;
   name: string;
   quantity: number;
   unit: string;
   purchased: boolean;
-  rag_product_id?: string;
+  product_id?: string;
   amount?: number;
-  product?: import('./product').ProductRow;
+  product?: ProductRow;
 }
