@@ -146,4 +146,18 @@ export const GROCERY_LIST_STATUS_COLORS: Record<GroceryListStatus, string> = {
   archived: 'text-gray-500 dark:text-gray-300',
 };
 
-export const groceryShop = ["FairPrice", "Cold Storage", "Sheng Siong"];
+  export const ALLOWED_SUPERMARKETS = [
+  'FairPrice',
+  'Cold Storage',
+  'Giant',
+  'Sheng Siong',
+] as const;
+export type SupermarketName = typeof ALLOWED_SUPERMARKETS[number];
+
+
+export const SUPERMARKET = [
+  'FairPrice',
+  'Cold Storage',
+  'Giant',
+  'Sheng Siong',
+] 

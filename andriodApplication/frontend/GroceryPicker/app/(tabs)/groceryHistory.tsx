@@ -1,19 +1,17 @@
 import { Pressable, ScrollView, View } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { Card } from '@/components/ui/card';
-import { backend_url } from '@/lib/api';
 import { useGroceryContext } from '@/context/groceryContext';
-import { useEffect, useState } from 'react';
-import { useSession } from '@/context/authContext';
+import { useState, useEffect } from 'react';
 import { router } from 'expo-router';
 import {
-  ControllerError,
   GROCERY_LIST_STATUS_COLORS,
   GROCERY_LIST_STATUS_LABELS,
-  SavedGroceryList,
 } from './interface';
 import { GroceryListModal } from '@/components/GroceryListModal';
-import { Modal, ModalBackdrop, ModalHeader, ModalCloseButton, ModalFooter, ModalContent, ModalBody } from '@/components/ui/modal';
+import { backend_url } from '@/lib/api';
+import { useSession } from '@/context/authContext';
+import { SavedGroceryList, ControllerError  } from './interface';
 
 /*
   Page host grocery list history for each user.
@@ -23,9 +21,11 @@ import { Modal, ModalBackdrop, ModalHeader, ModalCloseButton, ModalFooter, Modal
   */
 
 const GroceryListHistoryPage = () => {
-  const { groceryListHistory, setGroceryListHistory } = useGroceryContext();
+  const { groceryListHistory , setGroceryListHistory, refreshVersion } = useGroceryContext();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [modalListID, setModalListID] = useState<string>("");
   const { session } = useSession();
+
 
   // Fetch grocery history from backend and cache into context
   const fetchGroceryHistory = async () => {
@@ -41,6 +41,9 @@ const GroceryListHistoryPage = () => {
       if (response.ok) {
         const data: SavedGroceryList[] = await response.json();
         setGroceryListHistory(data);
+        console.log(groceryListHistory)
+        console.log(data);
+
       } else {
         const error: ControllerError = await response.json();
         throw new Error(`Error ${error.statusCode}: ${error.message}`);
@@ -55,8 +58,10 @@ const GroceryListHistoryPage = () => {
     if (session) {
       fetchGroceryHistory();
     }
-  }, [session]);
+  }, [refreshVersion]); // when refreshVersion changes, useEffect will trigger code inside
 
+
+  
   // Displays nothing when groceryListHistory is null or empty
   if (!groceryListHistory || groceryListHistory.length === 0) {
     return (
@@ -91,8 +96,11 @@ const GroceryListHistoryPage = () => {
             return (
               <Pressable
                 key={idx}
-                onLongPress={() => router.push(`/groceryDisplay/${list.list_id}`)}
-                onPress={() => setIsModalOpen(true)}
+                onPress={() => router.push(`/groceryDisplay/${list.list_id}`)}
+                onLongPress={() => {
+                  setModalListID(list.list_id);
+                  setIsModalOpen(true);
+                }}
               >
                 <Card className="bg-white dark:bg-gray-700 rounded-md">
                   <Text className="text-xl font-semibold text-black dark:text-white">
@@ -117,7 +125,7 @@ const GroceryListHistoryPage = () => {
       </View>
 
     </ScrollView>
-    <GroceryListModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}/>
+    <GroceryListModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} id={modalListID}/>
     </>
   );
 };

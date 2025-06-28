@@ -5,14 +5,14 @@ import { View, ScrollView } from 'react-native';
 import { Button, ButtonGroup, ButtonText } from '@/components/ui/button';
 import { useLocalSearchParams } from 'expo-router';
 import { useGroceryContext } from '@/context/groceryContext';
-import { SavedGroceryList, groceryShop } from '../interface';
+import { ALLOWED_SUPERMARKETS, SavedGroceryList } from '../interface';
 
 const GroceryDisplay = () => {
   const { id } = useLocalSearchParams(); // id of grocerylist
   const { groceryListHistory } = useGroceryContext();
   const [currGroceryList, setCurrGroceryList] =
     useState<SavedGroceryList | null>(null);
-
+    
   // Check ID exist and groceryListHistory is successfully fetched before calling for fetchDisplayInfo
   useEffect(() => {
     if (id && groceryListHistory && groceryListHistory?.length > 0) {
@@ -57,11 +57,16 @@ const GroceryDisplay = () => {
           {currGroceryList.title}
         </Text>
 
-        {groceryShop.map((shops, idx) => {
+        {ALLOWED_SUPERMARKETS.map((shops, idx) => {
           const items = currGroceryList.grocery_list_items.filter(
-            (item) => item.product?.supermarket === shops,
+            (item) => {
+              return item.product?.supermarket === shops;
+            }
           );
-          if (items.length === 0) return null;
+          if (items.length === 0) {
+            console.log("Length 0");
+            return null;
+          }
           return (
             <View key={idx} className="items-start w-full">
               <Text className="text-xl font-semibold mb-1 text-black dark:text-white">

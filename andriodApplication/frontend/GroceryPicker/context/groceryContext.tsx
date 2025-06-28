@@ -1,14 +1,8 @@
-import React, { useContext, useState, Dispatch, SetStateAction } from 'react';
+import React, { useContext, useState, Dispatch, SetStateAction, useEffect } from 'react';
 import {
   SavedGroceryList,
   GroceryMetadataTitleOutput,
 } from '@/app/(tabs)/interface';
-
-export interface ErrorResponse {
-  statusCode: number;
-  message: string;
-  details?: string;
-}
 
 interface GroceryContextType {
   grocery: GroceryMetadataTitleOutput[] | null;
@@ -17,6 +11,8 @@ interface GroceryContextType {
   setIsLoading: (loading: boolean) => void;
   groceryListHistory: SavedGroceryList[] | null;
   setGroceryListHistory: Dispatch<SetStateAction<SavedGroceryList[] | null>>;
+  refreshVersion: number;
+  setRefreshVersion: Dispatch<SetStateAction<number>>;
 }
 
 const GroceryContext = React.createContext<GroceryContextType | undefined>(
@@ -28,7 +24,7 @@ export const GroceryContextProvider: any = ({ children }: any) => {
     null,
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<ErrorResponse | null>(null);
+  const [refreshVersion, setRefreshVersion] = useState<number>(0);
   const [groceryListHistory, setGroceryListHistory] = useState<
     SavedGroceryList[] | null
   >(null);
@@ -40,9 +36,11 @@ export const GroceryContextProvider: any = ({ children }: any) => {
     setIsLoading,
     groceryListHistory,
     setGroceryListHistory,
+    refreshVersion,
+    setRefreshVersion,
   };
 
-  return (
+    return (
     <GroceryContext.Provider value={value}>{children}</GroceryContext.Provider>
   );
 };
