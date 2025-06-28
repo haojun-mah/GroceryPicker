@@ -8,13 +8,26 @@ import { updateGroceryListsAndItems } from '../models/groceryListModel';
 
 /**
  * PATCH /lists/update
- * Accepts a full SavedGroceryList object (with updated items array)
- * Updates list status and any changed items in a single request
+ * Accepts an array of PartialSavedGroceryList objects for batch updates.
+ * Each object requires:
+ * - list_id: string (required)
+ * - Optionally, list_status (will be updated if present and valid)
+ * - Optionally, grocery_list_items: array of { item_id: string, purchased: boolean } (only purchased is updated per item)
+ *
+ * Minimal requests can be:
+ * 1. Just list status: { "list_id": "...", "list_status": "deleted" }
+ * 2. Just items: { "list_id": "...", "grocery_list_items": [...] }
+ * 3. Both
+ *
+ * Notes:
+ * - Only list_status and the purchased field of items are updated. Any extra fields in the payload are ignored.
+ * - Returns the full updated SavedGroceryList objects with all fields populated.
+ * - If any list fails to update, a 207 is returned with error details for those lists.
  */
 export const updateGroceryList: RequestHandler<
   {},
   ControllerSuccess | ControllerError,
-  SavedGroceryList[],
+  (Partial<SavedGroceryList> & { list_id: string })[],
   {}
 > = async (req, res) => {
   try {

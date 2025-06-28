@@ -198,10 +198,16 @@ export async function updateGroceryListItemStatus(
   return { success: true, item };
 }
 
-// Function to update multiple lists and their items
+// Batch update grocery lists and their items.
+// Accepts an array of objects with at least list_id, and optionally list_status and grocery_list_items.
+// For each list:
+//   - If list_status is present, updates the list's status.
+//   - If grocery_list_items is present, only updates the 'purchased' field for each item (if both item_id and purchased are provided).
+//   - Ignores other fields in grocery_list_items for now.
+// Returns all updated lists and any errors.
 export async function updateGroceryListsAndItems(
   userId: string,
-  lists: SavedGroceryList[],
+  lists: (Partial<SavedGroceryList> & { list_id: string })[],
 ): Promise<
   | {
       updatedLists: SavedGroceryList[];
@@ -266,7 +272,7 @@ export async function updateGroceryListsAndItems(
     }
 
     // Update each item if present
-    if (Array.isArray(list.grocery_list_items)) {
+    if (Array.isArray(list.grocery_list_items) && list.grocery_list_items.length > 0) {
       for (const item of list.grocery_list_items) {
         const { item_id, purchased } = item;
         if (!item_id || typeof purchased === 'undefined') continue;

@@ -137,93 +137,130 @@ describe('updateGroceryList Controller', () => {
     expect(response.body.message).toBe('Database error');
   });
 
-  it('should accept minimal valid requests: only list_id and grocery_list_items, or list_id, list_status, and grocery_list_items', async () => {
-    // Minimal payload 1: only list_id and grocery_list_items
-    const minimalList1 = [
-      {
-        list_id: 'd4e5f2ed-35aa-48e9-9cb2-9e914dc15199',
-        grocery_list_items: [
-          {
-            item_id: 'ed76202d-37e7-45e3-bc03-23b46ffe0502',
-            purchased: false
-          }
-        ]
-      }
-    ];
-    // Minimal payload 2: list_id, list_status, and grocery_list_items
-    const minimalList2 = [
-      {
-        list_id: 'f41d4f0b-732f-4df9-bf5d-6783c5f05ed0',
-        list_status: 'deleted',
-        grocery_list_items: [
-          {
-            item_id: '2098193b-db13-4884-b27a-e65ca89da1d4',
-            purchased: false
-          }
-        ]
-      }
-    ];
-
-    // Mock the model to return a plausible response for both, with all required fields for SavedGroceryListItem
-    mockedUpdateGroceryListsAndItems.mockResolvedValue({
-      updatedLists: [
+  describe('minimal valid requests', () => {
+    /**
+     * These tests cover the minimal valid payloads accepted by the updateGroceryList controller:
+     * 1. Only list_id and grocery_list_items
+     * 2. list_id, list_status, and grocery_list_items
+     * 3. Only list_id and list_status
+     */
+    it('should accept only list_id and grocery_list_items', async () => {
+      const minimalList1 = [
         {
-          list_id: minimalList1[0].list_id,
-          user_id: 'test-user-id',
-          title: '',
-          metadata: null,
-          list_status: 'incomplete',
+          list_id: 'd4e5f2ed-35aa-48e9-9cb2-9e914dc15199',
           grocery_list_items: [
             {
               item_id: 'ed76202d-37e7-45e3-bc03-23b46ffe0502',
-              list_id: minimalList1[0].list_id,
-              name: 'Test Item 1',
-              quantity: 1,
-              unit: 'pcs',
-              purchased: false
-            }
-          ]
-        },
-        {
-          list_id: minimalList2[0].list_id,
-          user_id: 'test-user-id',
-          title: '',
-          metadata: null,
-          list_status: 'deleted',
-          grocery_list_items: [
-            {
-              item_id: '2098193b-db13-4884-b27a-e65ca89da1d4',
-              list_id: minimalList2[0].list_id,
-              name: 'Test Item 2',
-              quantity: 2,
-              unit: 'pcs',
               purchased: false
             }
           ]
         }
-      ],
-      errors: []
+      ];
+      mockedUpdateGroceryListsAndItems.mockResolvedValue({
+        updatedLists: [
+          {
+            list_id: minimalList1[0].list_id,
+            user_id: 'test-user-id',
+            title: '',
+            metadata: null,
+            list_status: 'incomplete',
+            grocery_list_items: [
+              {
+                item_id: 'ed76202d-37e7-45e3-bc03-23b46ffe0502',
+                list_id: minimalList1[0].list_id,
+                name: 'Test Item 1',
+                quantity: 1,
+                unit: 'pcs',
+                purchased: false
+              }
+            ]
+          }
+        ],
+        errors: []
+      });
+      const response = await request(app)
+        .patch('/test')
+        .send(minimalList1);
+      expect(response.status).toBe(200);
+      expect(response.body.message).toBe('Batch grocery list and item update complete.');
+      expect(response.body.details[0].list_id).toBe(minimalList1[0].list_id);
+      expect(response.body.details[0].grocery_list_items[0].item_id).toBe(minimalList1[0].grocery_list_items[0].item_id);
+      expect(response.body.details[0].grocery_list_items[0].purchased).toBe(false);
     });
 
-    // Test minimalList1
-    let response = await request(app)
-      .patch('/test')
-      .send(minimalList1);
-    expect(response.status).toBe(200);
-    expect(response.body.message).toBe('Batch grocery list and item update complete.');
-    expect(response.body.details[0].list_id).toBe(minimalList1[0].list_id);
-    expect(response.body.details[0].grocery_list_items[0].item_id).toBe(minimalList1[0].grocery_list_items[0].item_id);
-    expect(response.body.details[0].grocery_list_items[0].purchased).toBe(false);
+    it('should accept list_id, list_status, and grocery_list_items', async () => {
+      const minimalList2 = [
+        {
+          list_id: 'f41d4f0b-732f-4df9-bf5d-6783c5f05ed0',
+          list_status: 'deleted',
+          grocery_list_items: [
+            {
+              item_id: '2098193b-db13-4884-b27a-e65ca89da1d4',
+              purchased: false
+            }
+          ]
+        }
+      ];
+      mockedUpdateGroceryListsAndItems.mockResolvedValue({
+        updatedLists: [
+          {
+            list_id: minimalList2[0].list_id,
+            user_id: 'test-user-id',
+            title: '',
+            metadata: null,
+            list_status: 'deleted',
+            grocery_list_items: [
+              {
+                item_id: '2098193b-db13-4884-b27a-e65ca89da1d4',
+                list_id: minimalList2[0].list_id,
+                name: 'Test Item 2',
+                quantity: 2,
+                unit: 'pcs',
+                purchased: false
+              }
+            ]
+          }
+        ],
+        errors: []
+      });
+      const response = await request(app)
+        .patch('/test')
+        .send(minimalList2);
+      expect(response.status).toBe(200);
+      expect(response.body.message).toBe('Batch grocery list and item update complete.');
+      expect(response.body.details[0].list_id).toBe(minimalList2[0].list_id);
+      expect(response.body.details[0].list_status).toBe('deleted');
+      expect(response.body.details[0].grocery_list_items[0].item_id).toBe(minimalList2[0].grocery_list_items[0].item_id);
+      expect(response.body.details[0].grocery_list_items[0].purchased).toBe(false);
+    });
 
-    // Test minimalList2
-    response = await request(app)
-      .patch('/test')
-      .send(minimalList2);
-    expect(response.status).toBe(200);
-    expect(response.body.message).toBe('Batch grocery list and item update complete.');
-    expect(response.body.details[1].list_id).toBe(minimalList2[0].list_id);
-    expect(response.body.details[1].list_status).toBe('deleted');
-    expect(response.body.details[1].grocery_list_items[0].item_id).toBe(minimalList2[0].grocery_list_items[0].item_id);
-    expect(response.body.details[1].grocery_list_items[0].purchased).toBe(false);
+    it('should accept only list_id and list_status', async () => {
+      const minimalListStatusOnly = [
+        {
+          list_id: 'f41d4f0b-732f-4df9-bf5d-6783c5f05ed0',
+          list_status: 'deleted'
+        }
+      ];
+      mockedUpdateGroceryListsAndItems.mockResolvedValue({
+        updatedLists: [
+          {
+            list_id: minimalListStatusOnly[0].list_id,
+            user_id: 'test-user-id',
+            title: 'Test List',
+            metadata: null,
+            list_status: 'deleted',
+            grocery_list_items: []
+          }
+        ],
+        errors: []
+      });
+      const response = await request(app)
+        .patch('/test')
+        .send(minimalListStatusOnly);
+      expect(response.status).toBe(200);
+      expect(response.body.message).toBe('Batch grocery list and item update complete.');
+      expect(response.body.details[0].list_id).toBe(minimalListStatusOnly[0].list_id);
+      expect(response.body.details[0].list_status).toBe('deleted');
+    });
   });
 });
