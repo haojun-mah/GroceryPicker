@@ -5,7 +5,7 @@ import { View, ScrollView } from 'react-native';
 import { Button, ButtonGroup, ButtonText } from '@/components/ui/button';
 import { useLocalSearchParams } from 'expo-router';
 import { useGroceryContext } from '@/context/groceryContext';
-import { SavedGroceryList, compareGroceryShops } from '../interface';
+import { ALLOWED_SUPERMARKETS, SavedGroceryList } from '../interface';
 
 const GroceryDisplay = () => {
   const { id } = useLocalSearchParams(); // id of grocerylist
@@ -23,7 +23,7 @@ const GroceryDisplay = () => {
   // filter target grocery list from context with ID
   const fetchDisplayInfo = async () => {
     const list = groceryListHistory?.find(
-      (list) => String(list.id) === String(id),
+      (list) => String(list.list_id) === String(id),
     );
     setCurrGroceryList(list ?? null);
     console.log(
@@ -57,11 +57,14 @@ const GroceryDisplay = () => {
           {currGroceryList.title}
         </Text>
 
-        {compareGroceryShops.map((shops, idx) => {
-          const items = currGroceryList.grocery_list_items.filter(
-            (item) => item.product?.supermarket === shops,
-          );
-          if (items.length === 0) return null;
+        {ALLOWED_SUPERMARKETS.map((shops, idx) => {
+          const items = currGroceryList.grocery_list_items.filter((item) => {
+            return item.product?.supermarket === shops;
+          });
+          if (items.length === 0) {
+            console.log('Length 0');
+            return null;
+          }
           return (
             <View key={idx} className="items-start w-full">
               <Text className="text-xl font-semibold mb-1 text-black dark:text-white">

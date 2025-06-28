@@ -12,15 +12,13 @@ import Entypo from '@expo/vector-icons/Entypo';
 import { Text } from './ui/text';
 import { useColorScheme } from 'nativewind';
 import { Image } from './ui/image';
-import {
-  CheckboxIcon,
-  CheckboxIndicator,
-  CheckboxGroup,
-  Checkbox,
-} from './ui/checkbox';
+import { CheckboxIcon, CheckboxIndicator, Checkbox } from './ui/checkbox';
 import { CircleIcon } from './ui/icon';
 import { Pressable } from 'react-native';
 import { SavedGroceryListItem } from '@/app/(tabs)/interface';
+import { useSession } from '@/context/authContext';
+import { backend_url } from '@/lib/api';
+import { useGroceryContext } from '@/context/groceryContext';
 
 // Enable LayoutAnimation for Android
 if (
@@ -42,6 +40,8 @@ const DropdownCard = ({
   const [expanded, setExpanded] = useState(defaultOpen);
   const [purchased, setPurchased] = useState<boolean[]>([]);
   const animation = useRef(new Animated.Value(0)).current;
+  const { session } = useSession();
+  const { refreshVersion, setRefreshVersion } = useGroceryContext();
   const { colorScheme } = useColorScheme();
 
   useEffect(() => {
@@ -61,6 +61,59 @@ const DropdownCard = ({
     inputRange: [0, 1],
     outputRange: [0, 1],
   });
+
+  // Handle logic when individual item is pressed to be purchased
+  const handleItemPurchase = async (
+    item_id: string,
+    itemPurchased: boolean,
+    idx: number,
+  ) => {
+    // Check list is not empty
+    if (outsideText.length === 0) return;
+
+    // Check if all items are ticked. If so, mark list as fully purchased
+    const updated = [...purchased];
+    updated[idx] = itemPurchased;
+    setPurchased(updated);
+
+    // check if all items are now true
+    const allSetToPurchased = updated.every(Boolean);
+    const list_purchased = allSetToPurchased ? 'purchased' : 'incomplete';
+
+    // create req package
+    const purchasedItem = [
+      {
+        list_id: outsideText[0].list_id,
+        list_status: list_purchased,
+        grocery_list_items: [
+          {
+            item_id: item_id,
+            purchased: itemPurchased,
+          },
+        ],
+      },
+    ];
+
+    const response = await fetch(`${backend_url}/lists/update`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${session?.access_token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(purchasedItem),
+    });
+
+    // Res Validation
+    const output = await response.json();
+
+    if (output.name === 'ControllerError') {
+      console.log('Update failed');
+      console.log(output.statusCode, output.message, output.details);
+    } else {
+      console.log(output.message, output.details); // debug. Msg for successful
+      setRefreshVersion(v => v + 1); // refresh history page
+    }
+  };
 
   return (
     <Pressable
@@ -110,10 +163,9 @@ const DropdownCard = ({
             {insideText.map((item, idx) => (
               <Pressable
                 key={idx}
-                onPress={() => {
-                  const updated = [...purchased];
-                  updated[idx] = !updated[idx];
-                  setPurchased(updated);
+                onPress={(e) => {
+                  e.stopPropagation();
+                  handleItemPurchase(item.item_id, !purchased[idx], idx);
                 }}
                 className="flex-row items-center gap-3 m-2"
               >
@@ -121,7 +173,7 @@ const DropdownCard = ({
                   source={{
                     uri: !item.product?.image_url ? '' : item.product.image_url,
                   }}
-                  alt="Image of grocer"
+                  alt="Image of grocery"
                   className="w-20 h-20 rounded-md bg-gray-300"
                 />
                 <View className="flex-1">
@@ -159,9 +211,7 @@ const DropdownCard = ({
                   value={`item-${idx}`}
                   isChecked={purchased[idx]}
                   onChange={() => {
-                    const updated = [...purchased];
-                    updated[idx] = !updated[idx];
-                    setPurchased(updated);
+                    handleItemPurchase(item.item_id, !purchased[idx], idx);
                   }}
                   className="rounded-full border border-gray-400 w-6 h-6 justify-center items-center"
                 >

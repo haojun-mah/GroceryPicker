@@ -19,7 +19,6 @@ export const getAllUserGroceryLists: RequestHandler<
       res.status(401).json(err);
       return;
     }
-
     const result = await getAllUserLists(userId);
     if (result instanceof ControllerError) {
       res.status(result.statusCode).json(result);

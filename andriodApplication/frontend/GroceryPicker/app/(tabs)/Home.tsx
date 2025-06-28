@@ -3,11 +3,12 @@ import { ScrollView, Text, View } from 'react-native';
 import { Button, ButtonGroup, ButtonText } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
 import { ColorModeSwitch } from '@/components/ColorModeSwitch';
+import { useSession } from '@/context/authContext';
 
 export default function HomePage() {
   // likewise have no idea why setting w-max is not working. unable to
   // standardise button width
-
+  const { session } = useSession();
   async function signOut() {
     const { error } = await supabase.auth.signOut();
 
@@ -17,6 +18,8 @@ export default function HomePage() {
       router.replace('/(auth)/Login');
     }
   }
+
+  console.log(session?.access_token);
 
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }}>

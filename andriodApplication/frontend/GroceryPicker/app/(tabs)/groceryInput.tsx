@@ -8,11 +8,14 @@ import { useSession } from '@/context/authContext';
 import { useGroceryRefinementContext } from '@/context/groceryRefinement';
 import { router } from 'expo-router';
 import { DropdownSelector } from '@/components/DropDownSelector';
+import { Alert, AlertIcon, AlertText } from '@/components/ui/alert';
 import {
-  groceryShops,
   AiPromptRequestBody,
   GroceryMetadataTitleOutput,
+  ALLOWED_SUPERMARKETS,
+  SUPERMARKET,
 } from './interface';
+import { InfoIcon } from '@/components/ui/icon';
 
 /*
   Initial grocery input page where user can key in unstructred grocrey list to receive structured grocery list.
@@ -23,6 +26,8 @@ import {
 const groceryInput = () => {
   const [groceryTextArea, setGroceryTextArea] = useState<string>('');
   const [selectedGroceryShop, setSelectedGroceryShop] = useState<string[]>([]);
+  const [selectGroceryShopAlert, setSelectGroceryShopAlert] =
+    useState<boolean>(false);
   const { session } = useSession();
   const {
     setIsLoading,
@@ -35,10 +40,15 @@ const groceryInput = () => {
     try {
       if (groceryTextArea.length === 0) return;
 
+      if (selectedGroceryShop.length === 0) {
+        setSelectGroceryShopAlert(true);
+        return;
+      }
+
       setIsLoading(true);
       const req: AiPromptRequestBody = {
         message: groceryTextArea,
-        supermarketFilter: groceryShops.filter(
+        supermarketFilter: ALLOWED_SUPERMARKETS.filter(
           (x) => !selectedGroceryShop.includes(x),
         ),
       };
@@ -116,11 +126,19 @@ const groceryInput = () => {
           <View className="bg-white dark:bg-gray-700 rounded-xl px-3 pt-2 pb-3">
             <DropdownSelector
               title="Select Grocery Shops"
-              items={groceryShops}
+              items={SUPERMARKET}
               selectedItems={selectedGroceryShop}
               onSelectionChange={setSelectedGroceryShop}
             />
           </View>
+
+          {selectGroceryShopAlert ? (
+            <Alert action="error" variant="solid">
+              <AlertIcon as={InfoIcon} />
+              <AlertText>Please select a grocery shop</AlertText>
+            </Alert>
+          ) : null}
+
           <ButtonGroup className="rounded-xl overflow-hidden w-full">
             <Button
               className="

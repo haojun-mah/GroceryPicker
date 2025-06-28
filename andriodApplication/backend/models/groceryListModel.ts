@@ -46,7 +46,7 @@ export async function saveUserGroceryList(
     product_id: item.product_id || null, // direct mapping to products table
     amount: item.amount !== undefined ? item.amount : null, // recommended amount
   }));
-  console.log('flag');
+  
   console.log(itemsToInsert);
 
   const { error: itemsError } = await supabase
