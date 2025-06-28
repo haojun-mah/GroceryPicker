@@ -1,4 +1,4 @@
-// Set up environment variables before importing controller
+// Set environment variables before importing the controller
 process.env.JWT_SECRET = 'test-api-key';
 
 import request from 'supertest';
@@ -56,18 +56,19 @@ describe('embeddingController', () => {
       expect(mockGetEmbedding).toHaveBeenCalledWith(validRequestBody.text);
     });
 
-    it('should return 401 when API key is missing', async () => {
-      const response = await request(app)
-        .post('/embed-text')
-        .send(validRequestBody);
+  it('should return 401 when API key is missing', async () => {
+    const response = await request(app)
+      .post('/embed-text')
+      .send(validRequestBody);
 
-      expect(response.status).toBe(401);
-      expect(response.body).toEqual({
-        statusCode: 401,
-        message: 'Unauthorized: Invalid API Key.'
-      });
-      expect(mockGetEmbedding).not.toHaveBeenCalled();
+    expect(response.status).toBe(401);
+    expect(response.body).toEqual({
+      statusCode: 401,
+      name: 'ControllerError',
+      message: 'Unauthorized: Invalid API Key.'
     });
+    expect(mockGetEmbedding).not.toHaveBeenCalled();
+  });
 
     it('should return 401 when API key is invalid', async () => {
       const response = await request(app)
@@ -78,6 +79,7 @@ describe('embeddingController', () => {
       expect(response.status).toBe(401);
       expect(response.body).toEqual({
         statusCode: 401,
+        name: 'ControllerError',
         message: 'Unauthorized: Invalid API Key.'
       });
       expect(mockGetEmbedding).not.toHaveBeenCalled();
@@ -92,6 +94,7 @@ describe('embeddingController', () => {
       expect(response.status).toBe(400);
       expect(response.body).toEqual({
         statusCode: 400,
+        name: 'ControllerError',
         message: 'Request body must contain a non-empty string "text".'
       });
       expect(mockGetEmbedding).not.toHaveBeenCalled();
@@ -106,6 +109,7 @@ describe('embeddingController', () => {
       expect(response.status).toBe(400);
       expect(response.body).toEqual({
         statusCode: 400,
+        name: 'ControllerError',
         message: 'Request body must contain a non-empty string "text".'
       });
       expect(mockGetEmbedding).not.toHaveBeenCalled();
@@ -120,6 +124,7 @@ describe('embeddingController', () => {
       expect(response.status).toBe(400);
       expect(response.body).toEqual({
         statusCode: 400,
+        name: 'ControllerError',
         message: 'Request body must contain a non-empty string "text".'
       });
       expect(mockGetEmbedding).not.toHaveBeenCalled();
@@ -134,6 +139,7 @@ describe('embeddingController', () => {
       expect(response.status).toBe(400);
       expect(response.body).toEqual({
         statusCode: 400,
+        name: 'ControllerError',
         message: 'Request body must contain a non-empty string "text".'
       });
       expect(mockGetEmbedding).not.toHaveBeenCalled();
@@ -150,6 +156,7 @@ describe('embeddingController', () => {
       expect(response.status).toBe(500);
       expect(response.body).toEqual({
         statusCode: 500,
+        name: 'ControllerError',
         message: 'Failed to generate embedding.'
       });
       expect(mockGetEmbedding).toHaveBeenCalledWith(validRequestBody.text);
@@ -167,6 +174,7 @@ describe('embeddingController', () => {
       expect(response.status).toBe(500);
       expect(response.body).toEqual({
         statusCode: 500,
+        name: 'ControllerError',
         message: 'Internal server error during embedding generation.'
       });
       expect(mockGetEmbedding).toHaveBeenCalledWith(validRequestBody.text);
@@ -183,6 +191,7 @@ describe('embeddingController', () => {
       expect(response.status).toBe(500);
       expect(response.body).toEqual({
         statusCode: 500,
+        name: 'ControllerError',
         message: 'Internal server error during embedding generation.'
       });
     });

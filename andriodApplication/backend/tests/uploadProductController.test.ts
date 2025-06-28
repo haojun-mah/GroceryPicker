@@ -80,6 +80,7 @@ describe('uploadProductController', () => {
       expect(response.status).toBe(401);
       expect(response.body).toEqual({
         statusCode: 401,
+        name: 'ControllerError',
         message: 'Unauthorized: Invalid Scraper API Key.'
       });
       expect(mockUpsertScrapedProducts).not.toHaveBeenCalled();
@@ -94,6 +95,7 @@ describe('uploadProductController', () => {
       expect(response.status).toBe(401);
       expect(response.body).toEqual({
         statusCode: 401,
+        name: 'ControllerError',
         message: 'Unauthorized: Invalid Scraper API Key.'
       });
       expect(mockUpsertScrapedProducts).not.toHaveBeenCalled();
@@ -117,6 +119,7 @@ describe('uploadProductController', () => {
       expect(response.status).toBe(400);
       expect(response.body).toEqual({
         statusCode: 400,
+        name: "ControllerError",
         message: 'Request body must be a non-empty array of product data.'
       });
       expect(mockUpsertScrapedProducts).not.toHaveBeenCalled();
@@ -131,6 +134,7 @@ describe('uploadProductController', () => {
       expect(response.status).toBe(400);
       expect(response.body).toEqual({
         statusCode: 400,
+        name: "ControllerError",
         message: 'Request body must be a non-empty array of product data.'
       });
       expect(mockUpsertScrapedProducts).not.toHaveBeenCalled();
@@ -152,6 +156,7 @@ describe('uploadProductController', () => {
       expect(response.status).toBe(400);
       expect(response.body).toEqual({
         statusCode: 400,
+        name: "ControllerError",
         message: 'At least one product is missing required fields (name, supermarket, quantity, price, embedding).'
       });
       expect(mockUpsertScrapedProducts).not.toHaveBeenCalled();
@@ -176,6 +181,7 @@ describe('uploadProductController', () => {
       expect(response.status).toBe(400);
       expect(response.body).toEqual({
         statusCode: 400,
+        name: "ControllerError",
         message: 'At least one product is missing required fields (name, supermarket, quantity, price, embedding).'
       });
       expect(mockUpsertScrapedProducts).not.toHaveBeenCalled();
@@ -200,6 +206,7 @@ describe('uploadProductController', () => {
       expect(response.status).toBe(400);
       expect(response.body).toEqual({
         statusCode: 400,
+        name: "ControllerError",
         message: 'At least one product is missing required fields (name, supermarket, quantity, price, embedding).'
       });
       expect(mockUpsertScrapedProducts).not.toHaveBeenCalled();
@@ -224,6 +231,7 @@ describe('uploadProductController', () => {
       expect(response.status).toBe(400);
       expect(response.body).toEqual({
         statusCode: 400,
+        name: "ControllerError",
         message: 'At least one product is missing required fields (name, supermarket, quantity, price, embedding).'
       });
       expect(mockUpsertScrapedProducts).not.toHaveBeenCalled();
@@ -248,6 +256,7 @@ describe('uploadProductController', () => {
       expect(response.status).toBe(400);
       expect(response.body).toEqual({
         statusCode: 400,
+        name: "ControllerError",
         message: 'At least one product is missing required fields (name, supermarket, quantity, price, embedding).'
       });
       expect(mockUpsertScrapedProducts).not.toHaveBeenCalled();
@@ -272,6 +281,7 @@ describe('uploadProductController', () => {
       expect(response.status).toBe(400);
       expect(response.body).toEqual({
         statusCode: 400,
+        name: "ControllerError",
         message: 'At least one product is missing required fields (name, supermarket, quantity, price, embedding).'
       });
       expect(mockUpsertScrapedProducts).not.toHaveBeenCalled();
@@ -289,9 +299,9 @@ describe('uploadProductController', () => {
       expect(response.status).toBe(500);
       expect(response.body).toEqual({
         statusCode: 500,
+        name: 'ControllerError',
         message: 'Database connection failed',
-        details: 'Connection timeout',
-        name: 'ControllerError'
+        details: 'Connection timeout'
       });
       expect(mockUpsertScrapedProducts).toHaveBeenCalledWith(validProductData);
     });
@@ -307,6 +317,7 @@ describe('uploadProductController', () => {
       expect(response.status).toBe(500);
       expect(response.body).toEqual({
         statusCode: 500,
+        name: "ControllerError",
         message: 'Internal server error during scraper product processing.'
       });
     });
@@ -322,6 +333,7 @@ describe('uploadProductController', () => {
       expect(response.status).toBe(500);
       expect(response.body).toEqual({
         statusCode: 500,
+        name: "ControllerError",
         message: 'Internal server error during scraper product processing.'
       });
     });
