@@ -62,7 +62,12 @@ export const GROCERY_LIST_STATUSES = [
   'archived',
   'deleted',
 ] as const;
-export type GroceryListStatus = (typeof GROCERY_LIST_STATUSES)[number] | string;
+export type GroceryListStatus = typeof GROCERY_LIST_STATUSES[number];
+
+// Helper to validate list_status at runtime
+export function isValidGroceryListStatus(status: any): status is GroceryListStatus {
+  return GROCERY_LIST_STATUSES.includes(status);
+}
 
 export interface SavedGroceryList {
   list_id: string;
