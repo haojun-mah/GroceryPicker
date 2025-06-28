@@ -6,8 +6,23 @@ export interface GroceryItem {
   unit: string;
 }
 
+export const ALLOWED_SUPERMARKETS = [
+  'FairPrice',
+  'Cold Storage',
+  'Giant',
+  'Sheng Siong',
+] as const;
+export type SupermarketName = typeof ALLOWED_SUPERMARKETS[number];
+
 export interface SupermarketFilter {
-  exclude?: string[];
+  exclude?: SupermarketName[];
+}
+
+// Helper to sanitize/validate supermarket filter
+export function sanitizeSupermarketFilter(filter: SupermarketFilter): SupermarketFilter {
+  return {
+    exclude: filter.exclude?.filter((s) => ALLOWED_SUPERMARKETS.includes(s as SupermarketName)),
+  };
 }
 
 export interface GroceryListRequest {
