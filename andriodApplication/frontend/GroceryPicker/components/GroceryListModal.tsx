@@ -98,7 +98,7 @@ export const GroceryListModal = ({
       console.log(output.statusCode, output.message, output.details);
     } else {
       console.log(output.message, output.details); // debug. Msg for successful
-      setRefreshVersion(refreshVersion + 1);
+      setRefreshVersion(v => v + 1);
       setIsConfirmOpen(false);
       onClose();
     }
