@@ -123,7 +123,19 @@ export async function getAllUserLists(
       error.message,
     );
   }
-  return data || [];
+
+  // Sort grocery list items by product name
+  const sortedData = (data || []).map(list => ({
+    ...list,
+    grocery_list_items: list.grocery_list_items.sort((a: any, b: any) => {
+      // Get product names, fallback to item name if no product
+      const nameA = a.product?.name || a.name || '';
+      const nameB = b.product?.name || b.name || '';
+      return nameA.localeCompare(nameB, undefined, { sensitivity: 'accent' });
+    })
+  }));
+
+  return sortedData || [];
 }
 
 // Function to update the status of a grocery list
