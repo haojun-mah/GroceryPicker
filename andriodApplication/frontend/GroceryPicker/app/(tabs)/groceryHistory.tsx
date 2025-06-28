@@ -3,7 +3,7 @@ import { Text } from '@/components/ui/text';
 import { Card } from '@/components/ui/card';
 import { backend_url } from '@/lib/api';
 import { useGroceryContext } from '@/context/groceryContext';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSession } from '@/context/authContext';
 import { router } from 'expo-router';
 import {
@@ -12,6 +12,8 @@ import {
   GROCERY_LIST_STATUS_LABELS,
   SavedGroceryList,
 } from './interface';
+import { GroceryListModal } from '@/components/GroceryListModal';
+import { Modal, ModalBackdrop, ModalHeader, ModalCloseButton, ModalFooter, ModalContent, ModalBody } from '@/components/ui/modal';
 
 /*
   Page host grocery list history for each user.
@@ -22,6 +24,7 @@ import {
 
 const GroceryListHistoryPage = () => {
   const { groceryListHistory, setGroceryListHistory } = useGroceryContext();
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const { session } = useSession();
 
   // Fetch grocery history from backend and cache into context
@@ -74,6 +77,7 @@ const GroceryListHistoryPage = () => {
   }
 
   return (
+    <>
     <ScrollView
       contentContainerStyle={{ paddingTop: 60 }}
       className="bg-[#EEEEEE] dark:bg-black"
@@ -87,7 +91,8 @@ const GroceryListHistoryPage = () => {
             return (
               <Pressable
                 key={idx}
-                onPress={() => router.push(`/groceryDisplay/${list.list_id}`)}
+                onLongPress={() => router.push(`/groceryDisplay/${list.list_id}`)}
+                onPress={() => setIsModalOpen(true)}
               >
                 <Card className="bg-white dark:bg-gray-700 rounded-md">
                   <Text className="text-xl font-semibold text-black dark:text-white">
@@ -110,7 +115,10 @@ const GroceryListHistoryPage = () => {
           })}
         </View>
       </View>
+
     </ScrollView>
+    <GroceryListModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}/>
+    </>
   );
 };
 
