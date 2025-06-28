@@ -111,7 +111,7 @@ const DropdownCard = ({
       console.log(output.statusCode, output.message, output.details);
     } else {
       console.log(output.message, output.details); // debug. Msg for successful
-      setRefreshVersion(refreshVersion + 1); // refresh history page
+      setRefreshVersion(v => v + 1); // refresh history page
     }
   };
 
