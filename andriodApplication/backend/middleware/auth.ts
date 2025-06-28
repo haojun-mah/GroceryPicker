@@ -41,9 +41,7 @@ export default function verifyToken(
   // Check if token is present and correctly formatted.
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     res.status(401).json({
-      statusCode: 401,
-      message:
-        'Authentication token is required and must be in "Bearer <token>" format.',
+      error: 'Authentication token is required and must be in "Bearer <token>" format.'
     });
     return;
   }

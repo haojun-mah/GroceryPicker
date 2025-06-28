@@ -69,8 +69,8 @@ export const generateGroceryList: RequestHandler<
       // 2. Split into lines
       const lines = cleanedOutput.split('\n');
 
-      // 3. Obtain title
-      const title: string = lines[0];
+      // 3. Obtain title (trim whitespace)
+      const title: string = lines[0].trim();
 
       // 4. Obtain metadata (date, time created)
       const date = new Date();
@@ -88,10 +88,16 @@ export const generateGroceryList: RequestHandler<
           const unit = parts[2];
 
           if (!name || isNaN(quantity) || !unit) {
-            throw new Error(`Invalid data in line: "${line}"`);
+            console.warn(`Skipping invalid line: "${line}"`);
+            continue; // Skip malformed lines instead of throwing error
           }
-          arrayGrocery[i - 1] = { name, quantity, unit };
+          arrayGrocery.push({ name, quantity, unit }); // Use push to avoid gaps
         }
+      }
+
+      // Check if we have any valid items
+      if (arrayGrocery.length === 0 && lines.length > 1) {
+        throw new Error('No valid grocery items found in LLM output');
       }
       const output: GroceryMetadataTitleOutput = {
         title: title,

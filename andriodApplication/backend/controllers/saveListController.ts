@@ -14,7 +14,7 @@ export const saveGroceryList: RequestHandler<
     if (!userId) {
       res
         .status(401)
-        .json(new ControllerError(401, 'User not authenticated.').toJSON());
+        .json(new ControllerError(401, 'User not authenticated.'));
       return;
     }
 
@@ -33,7 +33,7 @@ export const saveGroceryList: RequestHandler<
           new ControllerError(
             400,
             'Missing or invalid required fields (title, items).'
-          ).toJSON()
+          )
         );
       return;
     }
@@ -50,20 +50,19 @@ export const saveGroceryList: RequestHandler<
           .status(400)
           .json(
             new ControllerError(400, 'Invalid item format within the list.')
-              .toJSON()
           );
         return;
       }
       if (item.product_id && typeof item.product_id !== 'string') {
         res
           .status(400)
-          .json(new ControllerError(400, 'Invalid product_id format.').toJSON());
+          .json(new ControllerError(400, 'Invalid product_id format.'));
         return;
       }
       if (item.amount !== undefined && typeof item.amount !== 'number') {
         res
           .status(400)
-          .json(new ControllerError(400, 'Invalid amount format.').toJSON());
+          .json(new ControllerError(400, 'Invalid amount format.'));
         return;
       }
     }
@@ -80,7 +79,7 @@ export const saveGroceryList: RequestHandler<
       res
         .status(result.statusCode || 500)
         .json(
-          new ControllerError(result.statusCode || 500, result.message).toJSON()
+          new ControllerError(result.statusCode || 500, result.message)
         );
       return;
     }
@@ -91,7 +90,6 @@ export const saveGroceryList: RequestHandler<
       .status(500)
       .json(
         new ControllerError(500, 'Failed to save grocery list.', error.message)
-          .toJSON()
       );
   }
 };
