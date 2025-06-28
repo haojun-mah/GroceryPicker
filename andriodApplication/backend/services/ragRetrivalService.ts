@@ -42,12 +42,12 @@ export async function fetchProductPrices(
     }
 
     // Results are already filtered and limited at database level
-    const products = (data as ProductRow[]) || [];
+    const products = Array.isArray(data) ? (data as ProductRow[]) : [];
     // Remove duplicates (though this should be rare with proper database design)
     const uniqueProducts: ProductRow[] = [];
     const seenIds = new Set<string>();
     for (const product of products) {
-      if (!seenIds.has(product.product_id)) {
+      if (product && typeof product === 'object' && product.product_id && !seenIds.has(product.product_id)) {
         uniqueProducts.push(product);
         seenIds.add(product.product_id);
       }
