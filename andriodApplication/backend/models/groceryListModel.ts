@@ -33,7 +33,7 @@ export async function saveUserGroceryList(
     );
   }
 
-  const savedListId = list.id;
+  const savedListId = list.list_id;
 
   // Prepare the items to be inserted, linking them to the new list's ID
   const itemsToInsert = items.map((item) => ({
@@ -45,6 +45,8 @@ export async function saveUserGroceryList(
     product_id: item.product_id || null, // direct mapping to products table
     amount: item.amount !== undefined ? item.amount : null, // recommended amount
   }));
+  console.log('flag');
+  console.log(itemsToInsert);
 
   const { error: itemsError } = await supabase
     .from('grocery_list_items')
@@ -193,4 +195,107 @@ export async function updateGroceryListItemStatus(
     return new ControllerError(404, 'Item not found or update failed');
   }
   return { success: true, item };
+}
+
+// Function to update multiple lists and their items
+export async function updateGroceryListsAndItems(
+  userId: string,
+  lists: SavedGroceryList[],
+): Promise<
+  | {
+      updatedLists: SavedGroceryList[];
+      errors: { list_id: string; error: ControllerError }[];
+    }
+  | ControllerError
+> {
+  const updatedLists: SavedGroceryList[] = [];
+  const errors: { list_id: string; error: ControllerError }[] = [];
+
+  for (const list of lists) {
+    // Check ownership
+    const { data: foundList, error: listError } = await supabase
+      .from('grocery_lists')
+      .select('user_id')
+      .eq('list_id', list.list_id)
+      .single();
+    if (listError || !foundList) {
+      errors.push({
+        list_id: list.list_id,
+        error: new ControllerError(404, 'List not found or access denied'),
+      });
+      continue;
+    }
+    if (foundList.user_id !== userId) {
+      errors.push({
+        list_id: list.list_id,
+        error: new ControllerError(403, 'Forbidden: You do not own this list.'),
+      });
+      continue;
+    }
+
+    // Update list status if provided
+    if (list.list_status) {
+      const { error: updateListError } = await supabase
+        .from('grocery_lists')
+        .update({ list_status: list.list_status })
+        .eq('list_id', list.list_id)
+        .eq('user_id', userId);
+      if (updateListError) {
+        errors.push({
+          list_id: list.list_id,
+          error: new ControllerError(
+            500,
+            'Failed to update grocery list status.',
+            updateListError.message,
+          ),
+        });
+        continue;
+      }
+    }
+
+    // Update each item if present
+    if (Array.isArray(list.grocery_list_items)) {
+      for (const item of list.grocery_list_items) {
+        const { item_id, ...fieldsToUpdate } = item;
+        if (!item_id) continue;
+        const { error: itemError } = await supabase
+          .from('grocery_list_items')
+          .update(fieldsToUpdate)
+          .eq('item_id', item_id)
+          .eq('list_id', list.list_id);
+        if (itemError) {
+          errors.push({
+            list_id: list.list_id,
+            error: new ControllerError(
+              500,
+              `Failed to update item ${item_id}.`,
+              itemError.message,
+            ),
+          });
+          continue;
+        }
+      }
+    }
+
+    // Refetch and add the updated list
+    const { data: updatedList, error: fetchError } = await supabase
+      .from('grocery_lists')
+      .select(`*, grocery_list_items ( * )`)
+      .eq('list_id', list.list_id)
+      .single();
+    if (fetchError || !updatedList) {
+      errors.push({
+        list_id: list.list_id,
+        error: new ControllerError(
+          500,
+          'Failed to fetch updated grocery list.',
+          fetchError?.message,
+        ),
+      });
+      continue;
+    }
+    updatedLists.push(updatedList);
+  }
+
+  return { updatedLists, errors };
 }
