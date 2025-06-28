@@ -6,8 +6,23 @@ export interface GroceryItem {
   unit: string;
 }
 
+export const ALLOWED_SUPERMARKETS = [
+  'FairPrice',
+  'Cold Storage',
+  'Giant',
+  'Sheng Siong',
+] as const;
+export type SupermarketName = typeof ALLOWED_SUPERMARKETS[number];
+
 export interface SupermarketFilter {
-  exclude?: string[];
+  exclude?: SupermarketName[];
+}
+
+// Helper to sanitize/validate supermarket filter
+export function sanitizeSupermarketFilter(filter: SupermarketFilter): SupermarketFilter {
+  return {
+    exclude: filter.exclude?.filter((s) => ALLOWED_SUPERMARKETS.includes(s as SupermarketName)),
+  };
 }
 
 export interface GroceryListRequest {
@@ -47,7 +62,12 @@ export const GROCERY_LIST_STATUSES = [
   'archived',
   'deleted',
 ] as const;
-export type GroceryListStatus = (typeof GROCERY_LIST_STATUSES)[number] | string;
+export type GroceryListStatus = typeof GROCERY_LIST_STATUSES[number];
+
+// Helper to validate list_status at runtime
+export function isValidGroceryListStatus(status: any): status is GroceryListStatus {
+  return GROCERY_LIST_STATUSES.includes(status);
+}
 
 export interface SavedGroceryList {
   list_id: string;
