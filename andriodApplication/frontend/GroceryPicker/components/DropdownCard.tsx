@@ -12,11 +12,7 @@ import Entypo from '@expo/vector-icons/Entypo';
 import { Text } from './ui/text';
 import { useColorScheme } from 'nativewind';
 import { Image } from './ui/image';
-import {
-  CheckboxIcon,
-  CheckboxIndicator,
-  Checkbox,
-} from './ui/checkbox';
+import { CheckboxIcon, CheckboxIndicator, Checkbox } from './ui/checkbox';
 import { CircleIcon } from './ui/icon';
 import { Pressable } from 'react-native';
 import { SavedGroceryListItem } from '@/app/(tabs)/interface';
@@ -45,7 +41,7 @@ const DropdownCard = ({
   const [purchased, setPurchased] = useState<boolean[]>([]);
   const animation = useRef(new Animated.Value(0)).current;
   const { session } = useSession();
-  const { refreshVersion, setRefreshVersion} = useGroceryContext();
+  const { refreshVersion, setRefreshVersion } = useGroceryContext();
   const { colorScheme } = useColorScheme();
 
   useEffect(() => {
@@ -67,54 +63,57 @@ const DropdownCard = ({
   });
 
   // Handle logic when individual item is pressed to be purchased
-  const handleItemPurchase = async (item_id: string, itemPurchased: boolean, idx: number) => {
+  const handleItemPurchase = async (
+    item_id: string,
+    itemPurchased: boolean,
+    idx: number,
+  ) => {
     // Check list is not empty
     if (outsideText.length === 0) return;
 
-  // Check if all items are ticked. If so, mark list as fully purchased
-  const updated = [...purchased];
-  updated[idx] = itemPurchased;
-  setPurchased(updated);
+    // Check if all items are ticked. If so, mark list as fully purchased
+    const updated = [...purchased];
+    updated[idx] = itemPurchased;
+    setPurchased(updated);
 
-  // check if all items are now true
-  const allSetToPurchased = updated.every(Boolean);
-  const list_purchased = allSetToPurchased ? "purchased" : "incomplete";
-
+    // check if all items are now true
+    const allSetToPurchased = updated.every(Boolean);
+    const list_purchased = allSetToPurchased ? 'purchased' : 'incomplete';
 
     // create req package
-    const purchasedItem = [{
-      list_id: outsideText[0].list_id,
-      list_status: list_purchased,
-      grocery_list_items: [
-        {
-          item_id: item_id,
-          purchased: itemPurchased,
-        }
-      ]
-    }];
+    const purchasedItem = [
+      {
+        list_id: outsideText[0].list_id,
+        list_status: list_purchased,
+        grocery_list_items: [
+          {
+            item_id: item_id,
+            purchased: itemPurchased,
+          },
+        ],
+      },
+    ];
 
     const response = await fetch(`${backend_url}/lists/update`, {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`,
-          'Content-Type': 'application/json',
-          },
-            body: JSON.stringify(purchasedItem),
-        });    
-      
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${session?.access_token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(purchasedItem),
+    });
 
-        // Res Validation
-      const output = await response.json();
+    // Res Validation
+    const output = await response.json();
 
-        if (output.name === "ControllerError") {
-            console.log("Update failed");
-            console.log(output.statusCode, output.message, output.details);
-        } else {
-            console.log(output.message, output.details); // debug. Msg for successful
-            setRefreshVersion(refreshVersion + 1); // refresh history page
-        }
+    if (output.name === 'ControllerError') {
+      console.log('Update failed');
+      console.log(output.statusCode, output.message, output.details);
+    } else {
+      console.log(output.message, output.details); // debug. Msg for successful
+      setRefreshVersion(refreshVersion + 1); // refresh history page
     }
-  
+  };
 
   return (
     <Pressable
@@ -166,7 +165,8 @@ const DropdownCard = ({
                 key={idx}
                 onPress={(e) => {
                   e.stopPropagation();
-                  handleItemPurchase(item.item_id, !purchased[idx], idx)}}
+                  handleItemPurchase(item.item_id, !purchased[idx], idx);
+                }}
                 className="flex-row items-center gap-3 m-2"
               >
                 <Image

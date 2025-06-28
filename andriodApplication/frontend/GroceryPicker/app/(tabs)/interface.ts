@@ -6,7 +6,7 @@ export class ControllerError extends Error {
     super(message);
     this.statusCode = statusCode;
     this.details = details;
-    this.name = "ControllerError";
+    this.name = 'ControllerError';
     Object.setPrototypeOf(this, ControllerError.prototype);
   }
 
@@ -58,7 +58,6 @@ export interface GroceryItem {
   unit: string;
 }
 
-
 export interface GroceryListRequest {
   items: GroceryItem[];
   supermarketFilter?: string[];
@@ -88,7 +87,6 @@ export interface SaveGroceryListRequestBody {
   metadata?: string;
   items: GeneratedGroceryItem[];
 }
-
 
 export interface SavedGroceryList {
   list_id: string;
@@ -146,18 +144,17 @@ export const GROCERY_LIST_STATUS_COLORS: Record<GroceryListStatus, string> = {
   archived: 'text-gray-500 dark:text-gray-300',
 };
 
-  export const ALLOWED_SUPERMARKETS = [
+export const ALLOWED_SUPERMARKETS = [
   'FairPrice',
   'Cold Storage',
   'Giant',
   'Sheng Siong',
 ] as const;
-export type SupermarketName = typeof ALLOWED_SUPERMARKETS[number];
-
+export type SupermarketName = (typeof ALLOWED_SUPERMARKETS)[number];
 
 export const SUPERMARKET = [
   'FairPrice',
   'Cold Storage',
   'Giant',
   'Sheng Siong',
-] 
+];

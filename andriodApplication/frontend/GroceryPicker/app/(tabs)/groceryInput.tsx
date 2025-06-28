@@ -26,7 +26,8 @@ import { InfoIcon } from '@/components/ui/icon';
 const groceryInput = () => {
   const [groceryTextArea, setGroceryTextArea] = useState<string>('');
   const [selectedGroceryShop, setSelectedGroceryShop] = useState<string[]>([]);
-  const [selectGroceryShopAlert, setSelectGroceryShopAlert] = useState<boolean>(false);
+  const [selectGroceryShopAlert, setSelectGroceryShopAlert] =
+    useState<boolean>(false);
   const { session } = useSession();
   const {
     setIsLoading,
@@ -41,7 +42,7 @@ const groceryInput = () => {
 
       if (selectedGroceryShop.length === 0) {
         setSelectGroceryShopAlert(true);
-        return 
+        return;
       }
 
       setIsLoading(true);
@@ -122,8 +123,6 @@ const groceryInput = () => {
             </Textarea>
           </View>
 
-          
-
           <View className="bg-white dark:bg-gray-700 rounded-xl px-3 pt-2 pb-3">
             <DropdownSelector
               title="Select Grocery Shops"
@@ -133,16 +132,12 @@ const groceryInput = () => {
             />
           </View>
 
-          {selectGroceryShopAlert ? 
-            <Alert action='error' variant='solid'>
-              <AlertIcon as={InfoIcon}/>
-              <AlertText>
-                Please select a grocery shop
-              </AlertText>
+          {selectGroceryShopAlert ? (
+            <Alert action="error" variant="solid">
+              <AlertIcon as={InfoIcon} />
+              <AlertText>Please select a grocery shop</AlertText>
             </Alert>
-          :
-            null
-          }
+          ) : null}
 
           <ButtonGroup className="rounded-xl overflow-hidden w-full">
             <Button

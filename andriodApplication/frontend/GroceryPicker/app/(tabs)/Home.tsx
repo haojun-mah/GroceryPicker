@@ -18,7 +18,7 @@ export default function HomePage() {
       router.replace('/(auth)/Login');
     }
   }
-  
+
   console.log(session?.access_token);
 
   return (

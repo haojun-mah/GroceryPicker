@@ -1,4 +1,10 @@
-import React, { useContext, useState, Dispatch, SetStateAction, useEffect } from 'react';
+import React, {
+  useContext,
+  useState,
+  Dispatch,
+  SetStateAction,
+  useEffect,
+} from 'react';
 import {
   SavedGroceryList,
   GroceryMetadataTitleOutput,
@@ -40,7 +46,7 @@ export const GroceryContextProvider: any = ({ children }: any) => {
     setRefreshVersion,
   };
 
-    return (
+  return (
     <GroceryContext.Provider value={value}>{children}</GroceryContext.Provider>
   );
 };

@@ -12,7 +12,7 @@ const GroceryDisplay = () => {
   const { groceryListHistory } = useGroceryContext();
   const [currGroceryList, setCurrGroceryList] =
     useState<SavedGroceryList | null>(null);
-    
+
   // Check ID exist and groceryListHistory is successfully fetched before calling for fetchDisplayInfo
   useEffect(() => {
     if (id && groceryListHistory && groceryListHistory?.length > 0) {
@@ -58,13 +58,11 @@ const GroceryDisplay = () => {
         </Text>
 
         {ALLOWED_SUPERMARKETS.map((shops, idx) => {
-          const items = currGroceryList.grocery_list_items.filter(
-            (item) => {
-              return item.product?.supermarket === shops;
-            }
-          );
+          const items = currGroceryList.grocery_list_items.filter((item) => {
+            return item.product?.supermarket === shops;
+          });
           if (items.length === 0) {
-            console.log("Length 0");
+            console.log('Length 0');
             return null;
           }
           return (
