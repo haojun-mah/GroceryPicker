@@ -3,6 +3,7 @@ import {
   upsertScrapedProducts,
   ScrapedProductData,
 } from '../models/groceryDataModel';
+import { ControllerError } from '../interfaces/controller';
 import dotenv from 'dotenv';
 
 /*
@@ -30,20 +31,14 @@ export const scraperUploadController = async (
   ) {
     res
       .status(401)
-      .json({
-        statusCode: 401,
-        message: 'Unauthorized: Invalid Scraper API Key.',
-      });
+      .json(new ControllerError(401, 'Unauthorized: Invalid Scraper API Key.'));
     return;
   }
 
   if (req.method !== 'POST') {
     res
       .status(405)
-      .json({
-        statusCode: 405,
-        message: 'Method Not Allowed. Only POST is supported.',
-      });
+      .json(new ControllerError(405, 'Method Not Allowed. Only POST is supported.'));
     return;
   }
 
@@ -52,10 +47,7 @@ export const scraperUploadController = async (
   if (!Array.isArray(products) || products.length === 0) {
     res
       .status(400)
-      .json({
-        statusCode: 400,
-        message: 'Request body must be a non-empty array of product data.',
-      });
+      .json(new ControllerError(400, 'Request body must be a non-empty array of product data.'));
     return;
   }
 
@@ -69,11 +61,7 @@ export const scraperUploadController = async (
     // inconsistency?
     res
       .status(400)
-      .json({
-        statusCode: 400,
-        message:
-          'At least one product is missing required fields (name, supermarket, quantity, price, embedding).',
-      });
+      .json(new ControllerError(400, 'At least one product is missing required fields (name, supermarket, quantity, price, embedding).'));
     return;
   }
 
@@ -103,9 +91,6 @@ export const scraperUploadController = async (
     console.error(`[Controller Error] scraperUploadController: ${e.message}`);
     res
       .status(500)
-      .json({
-        statusCode: 500,
-        message: 'Internal server error during scraper product processing.',
-      });
+      .json(new ControllerError(500, 'Internal server error during scraper product processing.'));
   }
 };

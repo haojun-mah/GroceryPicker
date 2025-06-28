@@ -3,6 +3,7 @@ import {
   getEmbedding,
   EMBEDDING_DIMENSION,
 } from '../services/embeddingService';
+import { ControllerError } from '../interfaces/controller';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -31,7 +32,7 @@ export const embedTextController = async (
   if (!incomingApiKey || incomingApiKey !== EMBEDDING_API_KEY) {
     res
       .status(401)
-      .json({ statusCode: 401, message: 'Unauthorized: Invalid API Key.' });
+      .json(new ControllerError(401, 'Unauthorized: Invalid API Key.'));
     return;
   }
 
@@ -39,10 +40,7 @@ export const embedTextController = async (
   if (req.method !== 'POST') {
     res
       .status(405)
-      .json({
-        statusCode: 405,
-        message: 'Method Not Allowed. Only POST is supported.',
-      });
+      .json(new ControllerError(405, 'Method Not Allowed. Only POST is supported.'));
     return;
   }
 
@@ -52,10 +50,7 @@ export const embedTextController = async (
   if (typeof text !== 'string' || text.trim().length === 0) {
     res
       .status(400)
-      .json({
-        statusCode: 400,
-        message: 'Request body must contain a non-empty string "text".',
-      });
+      .json(new ControllerError(400, 'Request body must contain a non-empty string "text".'));
     return;
   }
 
@@ -65,7 +60,7 @@ export const embedTextController = async (
     if (embedding === null) {
       res
         .status(500)
-        .json({ statusCode: 500, message: 'Failed to generate embedding.' });
+        .json(new ControllerError(500, 'Failed to generate embedding.'));
       return;
     }
 
@@ -81,9 +76,6 @@ export const embedTextController = async (
     console.error(`[Controller Error] embedTextController: ${e.message}`);
     res
       .status(500)
-      .json({
-        statusCode: 500,
-        message: 'Internal server error during embedding generation.',
-      });
+      .json(new ControllerError(500, 'Internal server error during embedding generation.'));
   }
 };
