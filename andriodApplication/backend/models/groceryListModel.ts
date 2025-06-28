@@ -4,6 +4,7 @@ import {
   SavedGroceryList,
   ControllerError,
   SavedGroceryListItem,
+  isValidGroceryListStatus,
 } from '../interfaces';
 
 // Function to save a new grocery list and its items
@@ -234,7 +235,18 @@ export async function updateGroceryListsAndItems(
     }
 
     // Update list status if provided
-    if (list.list_status) {
+    if (typeof list.list_status !== 'undefined') {
+      // Validate list_status strictly
+      if (!isValidGroceryListStatus(list.list_status)) {
+        errors.push({
+          list_id: list.list_id,
+          error: new ControllerError(
+            400,
+            `Invalid list_status: ${list.list_status}`,
+          ),
+        });
+        continue;
+      }
       const { error: updateListError } = await supabase
         .from('grocery_lists')
         .update({ list_status: list.list_status })
@@ -256,14 +268,15 @@ export async function updateGroceryListsAndItems(
     // Update each item if present
     if (Array.isArray(list.grocery_list_items)) {
       for (const item of list.grocery_list_items) {
-        const { item_id, ...fieldsToUpdate } = item;
-        if (!item_id) continue;
+        const { item_id, purchased } = item;
+        if (!item_id || typeof purchased === 'undefined') continue;
         const { error: itemError } = await supabase
           .from('grocery_list_items')
-          .update(fieldsToUpdate)
+          .update({ purchased })
           .eq('item_id', item_id)
           .eq('list_id', list.list_id);
         if (itemError) {
+          console.error(`Model: Error updating item ${item_id} in list ${list.list_id}:`, itemError);
           errors.push({
             list_id: list.list_id,
             error: new ControllerError(
