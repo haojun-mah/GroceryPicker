@@ -108,7 +108,7 @@ export default function HomePage() {
             <View className={`flex-1 ${isDark ? 'bg-white/5' : 'bg-white/10'} backdrop-blur-md rounded-2xl p-4 items-center border ${isDark ? 'border-white/10' : 'border-white/20'}`}>
               <Text className="text-lg mb-1">📝</Text>
               <Text className={`${isDark ? 'text-gray-100' : 'text-white'} font-bold text-xl`}>{noListCreated}</Text>
-              <Text className={`${isDark ? 'text-gray-300' : 'text-white/70'} text-sm`}>Lists Created</Text>
+              <Text className={`${isDark ? 'text-gray-300' : 'text-white/70'} text-sm text-center`}>Lists Created</Text>
             </View>
             
             <View className={`flex-1 ${isDark ? 'bg-white/5' : 'bg-white/10'} backdrop-blur-md rounded-2xl p-4 items-center border ${isDark ? 'border-white/10' : 'border-white/20'}`}>
