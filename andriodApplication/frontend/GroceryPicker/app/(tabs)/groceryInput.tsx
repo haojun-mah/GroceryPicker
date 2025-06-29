@@ -25,7 +25,7 @@ import { useGroceryContext } from '@/context/groceryContext';
 // postData req type
 const groceryInput = () => {
   const [groceryTextArea, setGroceryTextArea] = useState<string>('');
-  const [selectedGroceryShop, setSelectedGroceryShop] = useState<string[]>([]);
+  const [selectedGroceryShop, setSelectedGroceryShop] = useState<string[]>(["FairPrice"]);
   const [selectGroceryShopAlert, setSelectGroceryShopAlert] =
     useState<boolean>(false);
   const { session } = useSession();
