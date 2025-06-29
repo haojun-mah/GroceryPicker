@@ -10,6 +10,7 @@ import {
   GroceryMetadataTitleOutput,
   EnhancedGroceryPriceResponse,
 } from '../interfaces';
+import { SupermarketFilter } from '../interfaces';
 
 export const findBestPricesForGroceryList: RequestHandler<
   {},
