@@ -398,7 +398,7 @@ const DropdownCard = ({
                           : 'text-gray-600 dark:text-gray-300'
                       }`}
                     >
-                      {item.product?.quantity} per pax, {item.amount} pax needed (
+                      {item.product?.quantity} each, {item.amount} needed (
                       {item.quantity}
                       {item.unit})
                     </Text>
