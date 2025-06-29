@@ -9,25 +9,34 @@ import {
   GroceryMetadataTitleOutput,
   SavedGroceryList,
   SavedGroceryListItem,
+  AiPromptRequestBody,
 } from './interface';
 import { useSession } from '@/context/authContext';
 import { backend_url } from '../../lib/api';
 import { router } from 'expo-router';
-import { AiPromptRequestBody } from './interface';
 
 const { height: screenHeight } = Dimensions.get('window');
 
 const ModalPage = () => {
   const [generateRefinementGrocery, setGenerateRefinementGrocery] =
-    useState<AiPromptRequestBody>();
-  const { setIsLoading, groceryRefinement, setGroceryRefinement, setGroceryListHistory } = useGroceryContext();
+    useState<AiPromptRequestBody | undefined>(undefined);
+
+  const {
+    setIsLoading,
+    groceryRefinement,
+    setGroceryRefinement,
+    setGroceryListHistory,
+  } = useGroceryContext();
+
   const groceryList: GroceryItem[] | undefined = groceryRefinement?.items;
-  const supermarketFilter: string[] | undefined =
-    !groceryRefinement?.supermarketFilter
-      ? []
-      : groceryRefinement.supermarketFilter;
+  const supermarketFilter: string[] =
+    groceryRefinement?.supermarketFilter || [];
+
   const { session } = useSession();
 
+  /**
+   * Syncs generateRefinementGrocery state to reflect current groceryRefinement
+   */
   useEffect(() => {
     if (groceryList !== undefined) {
       let groceryListString = '';
@@ -38,15 +47,18 @@ const ModalPage = () => {
         message: groceryListString,
         supermarketFilter: supermarketFilter,
       });
+    } else {
+      setGenerateRefinementGrocery(undefined);
     }
-  }, []);
+  }, [groceryList, supermarketFilter]);
 
   const refineMyList = async () => {
     try {
-      if (generateRefinementGrocery?.message.length === 0) return;
+      if (!generateRefinementGrocery?.message?.length) return;
 
       setIsLoading(true);
-      console.log(generateRefinementGrocery); // debug
+      console.log(generateRefinementGrocery);
+
       const response = await fetch(`${backend_url}/lists/refine`, {
         method: 'POST',
         headers: {
@@ -56,30 +68,38 @@ const ModalPage = () => {
         body: JSON.stringify(generateRefinementGrocery),
       });
 
-      const output: GroceryMetadataTitleOutput = await response.json();
       setIsLoading(false);
+
       if (response.ok) {
+        const output: GroceryMetadataTitleOutput = await response.json();
+
         setGroceryRefinement(output);
+
         const refinedList = output.items
           .map((i) => `${i.name} - ${i.quantity}${i.unit}`)
           .join('\n');
+
         setGenerateRefinementGrocery({
           message: refinedList,
           supermarketFilter: supermarketFilter,
         });
+      } else {
+        console.log('Error refining list');
       }
     } catch (error) {
-      console.log(error);
-      alert(error);
+      console.error(error);
+      alert('An error occurred while refining your list.');
+      setIsLoading(false);
     }
   };
 
   const findCheapest = async () => {
     try {
-      if (generateRefinementGrocery?.message.length === 0) return;
+      if (!generateRefinementGrocery?.message?.length) return;
 
       setIsLoading(true);
-      console.log(generateRefinementGrocery); // debug
+      console.log(generateRefinementGrocery);
+
       const response = await fetch(`${backend_url}/lists/optimise`, {
         method: 'POST',
         headers: {
@@ -89,10 +109,9 @@ const ModalPage = () => {
         body: JSON.stringify(generateRefinementGrocery),
       });
 
-      // Optimise list obtained to get its list ID
       const optimisedList: SavedGroceryListItem = await response.json();
 
-      // All of users grocery lists retrieved. Contains newly generated optimised list as well
+      // All of user's grocery lists retrieved, includes newly generated optimised list
       const responseAllList = await fetch(`${backend_url}/lists/getAll`, {
         method: 'GET',
         headers: {
@@ -104,14 +123,32 @@ const ModalPage = () => {
       const allList: SavedGroceryList[] = await responseAllList.json();
 
       setGroceryListHistory(allList);
-      router.push(`/groceryDisplay/${optimisedList.list_id}`);
+      setGroceryRefinement(null);
       setIsLoading(false);
-      // Handle output
+
+      router.push(`/groceryDisplay/${optimisedList.list_id}`);
     } catch (error) {
-      console.log(error);
-      alert(error);
+      console.error(error);
+      alert('An error occurred while finding the cheapest route.');
+      setIsLoading(false);
     }
   };
+
+  // Prevent UI crashes if refinement data is null
+  if (groceryRefinement === null) {
+    return (
+      <ScrollView
+        contentContainerStyle={{ paddingTop: 60 }}
+        className="bg-[#EEEEEE] dark:bg-black min-h-screen px-4"
+      >
+        <View className="gap-6">
+          <Text className="text-2xl text-black dark:text-white">
+            No list loaded.
+          </Text>
+        </View>
+      </ScrollView>
+    );
+  }
 
   return (
     <ScrollView
@@ -136,7 +173,7 @@ const ModalPage = () => {
             <TextareaInput
               className="text-black dark:text-white"
               multiline
-              value={generateRefinementGrocery?.message}
+              value={generateRefinementGrocery?.message || ''}
               onChangeText={(e) =>
                 setGenerateRefinementGrocery({
                   message: e,
