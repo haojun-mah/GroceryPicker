@@ -76,7 +76,12 @@ export async function getGroceryListById(
     .select(
       `
       *,
-      grocery_list_items ( * )
+      grocery_list_items (
+        *,
+        product:product_id (
+          product_id, name, price, supermarket, quantity, product_url, image_url
+        )
+      )
     `,
     )
     .eq('list_id', listId)

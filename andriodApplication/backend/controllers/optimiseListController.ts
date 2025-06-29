@@ -124,6 +124,7 @@ export const findBestPricesForGroceryList: RequestHandler<
           unit: item.unit,
           product_id: result.selectedProduct.product_id,
           amount: result.amount,
+          product: result.selectedProduct, // Include full product data
         };
       } else {
         // Item couldn't be optimized (e.g., due to supermarket exclusion)
@@ -133,6 +134,7 @@ export const findBestPricesForGroceryList: RequestHandler<
           unit: item.unit,
           product_id: null, // Keep null for database integrity
           amount: 0, // Use 0 instead of null - means "no optimization data"
+          product: undefined, // No product data available
         };
       }
     });

@@ -47,6 +47,7 @@ export interface EnhancedGroceryPriceResponse {
 export interface GeneratedGroceryItem extends GroceryItem {
   product_id?: string | null; // direct mapping to products table, null if no product found
   amount?: number; // recommended amount from LLM/RAG, 0 if no data available
+  product?: ProductRow; // full product data from RAG pipeline
 }
 
 export interface SaveGroceryListRequestBody {

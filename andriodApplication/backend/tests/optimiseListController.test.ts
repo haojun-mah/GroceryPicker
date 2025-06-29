@@ -141,14 +141,28 @@ describe('optimiseListController', () => {
             quantity: 500,
             unit: 'grams',
             product_id: 'pasta-123',
-            amount: 2
+            amount: 2,
+            product: {
+              product_id: 'pasta-123',
+              name: 'Premium Pasta',
+              price: '3.50',
+              supermarket: 'FairPrice',
+              quantity: '500g'
+            }
           },
           {
             name: 'Tomatoes',
             quantity: 3,
             unit: 'pieces',
             product_id: 'tomato-456',
-            amount: 1
+            amount: 1,
+            product: {
+              product_id: 'tomato-456',
+              name: 'Fresh Tomatoes',
+              price: '2.80',
+              supermarket: 'FairPrice',
+              quantity: '3 pieces'
+            }
           }
         ]
       });
@@ -314,14 +328,22 @@ describe('optimiseListController', () => {
             quantity: 500,
             unit: 'grams',
             product_id: 'pasta-123',
-            amount: 2
+            amount: 2,
+            product: {
+              product_id: 'pasta-123',
+              name: 'Premium Pasta',
+              price: '3.50',
+              supermarket: 'FairPrice',
+              quantity: '500g'
+            }
           },
           {
             name: 'Tomatoes',
             quantity: 3,
             unit: 'pieces',
             product_id: null,
-            amount: 0
+            amount: 0,
+            product: undefined
           }
         ]
       });
@@ -354,14 +376,16 @@ describe('optimiseListController', () => {
             quantity: 500,
             unit: 'grams',
             product_id: null,
-            amount: 0
+            amount: 0,
+            product: undefined
           },
           {
             name: 'Tomatoes',
             quantity: 3,
             unit: 'pieces',
             product_id: null,
-            amount: 0
+            amount: 0,
+            product: undefined
           }
         ]
       });
