@@ -232,8 +232,8 @@ const DropdownCard = ({
                   size="xs"
                   className="text:black dark:text-white text-md"
                 >
-                  {e.product?.name} - {e.amount} ({e.quantity} {e.unit}/
-                  {e.product?.price})
+                  {e.product?.name || e.name} - {e.amount === 0 ? 'Not optimized' : e.amount} ({e.quantity} {e.unit}/
+                  {e.product?.price || 'No price'})
                 </Text>
               ))}
             {expanded && (
