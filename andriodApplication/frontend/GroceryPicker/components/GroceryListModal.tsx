@@ -120,8 +120,8 @@ export const GroceryListModal = ({
             className="bg-white dark:bg-gray-500 rounded-lg p-5 flex-col justify-between items-center"
             // stylesheets used instead of nativewind for granular styling control
             style={{
-              width: width * 0.2,
-              height: height * 0.3,
+              width: width * 0.4,
+              height: height * 0.2,
             }}
           >
             <Pressable
@@ -129,11 +129,11 @@ export const GroceryListModal = ({
               onPress={() => handleUpdate('purchased')}
             >
               {currentListStatus === 'purchased' ? (
-                <Text className="text-black dark:text-white">
+                <Text className="text-black dark:text-white text-xl text-center">
                   Unmark as Completed
                 </Text>
               ) : (
-                <Text className="text-black dark:text-white">
+                <Text className="text-black dark:text-white text-xl text-center">
                   Mark as Completed
                 </Text>
               )}
@@ -145,20 +145,20 @@ export const GroceryListModal = ({
                 onPress={() => handleUpdate('archived')}
               >
                 {currentListStatus === 'archived' ? (
-                  <Text className="text-black dark:text-white">
+                  <Text className="text-black dark:text-white text-xl">
                     Unhide list
                   </Text>
                 ) : (
-                  <Text className="text-black dark:text-white">Hide List</Text>
+                  <Text className="text-black dark:text-white text-xl">Hide List</Text>
                 )}
               </Pressable>
             </View>
 
             <Pressable
               className="items-center"
-              onPress={() => handleUpdate('deleted')}
+              onPress={() => setIsConfirmOpen(true)}
             >
-              <Text className="text-red-500">Delete List</Text>
+              <Text className="text-red-500 text-xl">Delete List</Text>
             </Pressable>
           </View>
         </Pressable>
@@ -176,13 +176,13 @@ export const GroceryListModal = ({
           className="w-full flex-1 justify-center items-center bg-black/50"
         >
           <View
-            className="bg-white dark:bg-gray-700 rounded-lg p-5 items-center"
+            className="bg-white dark:bg-gray-700 rounded-lg p-5 items-center justify-center"
             style={{
-              width: width * 0.3,
-              height: height * 0.25,
+              width: width * 0.5,
+              height: height * 0.20,
             }}
           >
-            <Text className="text-lg text-black dark:text-white font-bold mb-4 text-center">
+            <Text className="text-xl text-black dark:text-white font-bold mb-4 text-center">
               Delete Grocery List?
             </Text>
             <Text className="text-sm text-gray-700 dark:text-gray-300 mb-6 text-center">
@@ -191,7 +191,7 @@ export const GroceryListModal = ({
             <Pressable
               className="px-4 py-2 rounded"
               onPress={() => {
-                handleUpdate('deleted');
+                handleUpdate('delete');
               }}
             >
               <Text className="text-red-500 font-semibold">Confirm</Text>
