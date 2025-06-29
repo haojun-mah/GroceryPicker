@@ -15,7 +15,7 @@ import {
   SUPERMARKET,
 } from './interface';
 import { InfoIcon } from '@/components/ui/icon';
-import { GroceryContextProvider, useGroceryContext } from '@/context/groceryContext';
+import { useGroceryContext } from '@/context/groceryContext';
 
 /*
   Initial grocery input page where user can key in unstructred grocrey list to receive structured grocery list.

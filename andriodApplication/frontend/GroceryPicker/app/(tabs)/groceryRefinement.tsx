@@ -20,7 +20,7 @@ const { height: screenHeight } = Dimensions.get('window');
 const ModalPage = () => {
   const [generateRefinementGrocery, setGenerateRefinementGrocery] =
     useState<AiPromptRequestBody>();
-  const { groceryRefinement, setGroceryRefinement, setGroceryListHistory } = useGroceryContext();
+  const { setIsLoading, groceryRefinement, setGroceryRefinement, setGroceryListHistory } = useGroceryContext();
   const groceryList: GroceryItem[] | undefined = groceryRefinement?.items;
   const supermarketFilter: string[] | undefined =
     !groceryRefinement?.supermarketFilter
@@ -45,6 +45,7 @@ const ModalPage = () => {
     try {
       if (generateRefinementGrocery?.message.length === 0) return;
 
+      setIsLoading(true);
       console.log(generateRefinementGrocery); // debug
       const response = await fetch(`${backend_url}/lists/refine`, {
         method: 'POST',
@@ -56,6 +57,7 @@ const ModalPage = () => {
       });
 
       const output: GroceryMetadataTitleOutput = await response.json();
+      setIsLoading(false);
       if (response.ok) {
         setGroceryRefinement(output);
         const refinedList = output.items
@@ -75,6 +77,8 @@ const ModalPage = () => {
   const findCheapest = async () => {
     try {
       if (generateRefinementGrocery?.message.length === 0) return;
+
+      setIsLoading(true);
       console.log(generateRefinementGrocery); // debug
       const response = await fetch(`${backend_url}/lists/optimise`, {
         method: 'POST',
@@ -101,6 +105,7 @@ const ModalPage = () => {
 
       setGroceryListHistory(allList);
       router.push(`/groceryDisplay/${optimisedList.list_id}`);
+      setIsLoading(false);
       // Handle output
     } catch (error) {
       console.log(error);
