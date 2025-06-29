@@ -82,7 +82,7 @@ describe('updateItemStatus Controller', () => {
   it('should return 200 on successful update', async () => {
     const mockResult = { 
       success: true, 
-      item: { 
+      item:      { 
         item_id: 'test-item-id',
         list_id: 'test-list-id',
         name: 'Apple',
@@ -90,7 +90,7 @@ describe('updateItemStatus Controller', () => {
         unit: 'piece',
         purchased: true,
         product_id: null,
-        amount: null
+        amount: 0
       }
     };
     mockedUpdateGroceryListItemStatus.mockResolvedValue(mockResult);

@@ -44,7 +44,7 @@ export async function saveUserGroceryList(
     unit: item.unit,
     purchased: false,
     product_id: item.product_id || null, // direct mapping to products table
-    amount: item.amount !== undefined ? item.amount : null, // recommended amount
+    amount: item.amount !== undefined ? item.amount : 0, // default to 0 if not provided
   }));
   
   console.log(itemsToInsert);

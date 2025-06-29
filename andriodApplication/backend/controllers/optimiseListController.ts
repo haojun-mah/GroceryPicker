@@ -63,7 +63,14 @@ export const findBestPricesForGroceryList: RequestHandler<
     }
 
     const items = generatedResult.items;
-    const supermarketFilter = generatedResult.supermarketFilter;
+    let supermarketFilter = generatedResult.supermarketFilter;
+    
+    // Auto-convert incorrect request format: when supermarketFilter is an array instead of {exclude: []}
+    if (Array.isArray(supermarketFilter)) {
+      console.warn('SupermarketFilter received as array, converting to proper format:', supermarketFilter);
+      supermarketFilter = { exclude: supermarketFilter as any };
+      console.log('Converted to:', supermarketFilter);
+    }
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       const err = new ControllerError(
@@ -102,15 +109,41 @@ export const findBestPricesForGroceryList: RequestHandler<
     }
 
     // Transform the enhanced results into items suitable for saving
-    const optimizedItems: GeneratedGroceryItem[] = results.map((result) => ({
-      name: result.item,
-      quantity: items.find((item) => item.name === result.item)?.quantity || 1,
-      unit: items.find((item) => item.name === result.item)?.unit || 'piece',
-      product_id: result.selectedProduct?.product_id,
-      amount: result.amount,
-    }));
+    // Create a map for quick lookup of optimized results
+    const resultsMap = new Map(results.map(result => [result.item, result]));
+    
+    // Create items for ALL requested grocery items
+    const allItems: GeneratedGroceryItem[] = items.map(item => {
+      const result = resultsMap.get(item.name);
+      
+      if (result && result.selectedProduct) {
+        // Item was successfully optimized
+        return {
+          name: item.name,
+          quantity: item.quantity,
+          unit: item.unit,
+          product_id: result.selectedProduct.product_id,
+          amount: result.amount,
+        };
+      } else {
+        // Item couldn't be optimized (e.g., due to supermarket exclusion)
+        return {
+          name: item.name,
+          quantity: item.quantity,
+          unit: item.unit,
+          product_id: null, // Keep null for database integrity
+          amount: 0, // Use 0 instead of null - means "no optimization data"
+        };
+      }
+    });
 
-    // Use the title and metadata from generatedResult
+    // Count how many items were successfully optimized
+    const optimizedCount = allItems.filter(item => item.product_id !== null).length;
+    const totalCount = allItems.length;
+    
+    console.log(`Optimization result: ${optimizedCount}/${totalCount} items optimized`);
+    
+    // Use the title and metadata from generatedResult as-is
     const title = generatedResult.title;
     const metadata = generatedResult.metadata;
 
@@ -118,7 +151,7 @@ export const findBestPricesForGroceryList: RequestHandler<
     const savedList = await saveUserGroceryList(userId, {
       title,
       metadata,
-      items: optimizedItems,
+      items: allItems,
     });
 
     if ('statusCode' in savedList) {

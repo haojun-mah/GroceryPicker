@@ -104,8 +104,8 @@ export interface SavedGroceryListItem {
   quantity: number;
   unit: string;
   purchased: boolean;
-  product_id?: string;
-  amount?: number;
+  product_id?: string | null; // allow null for items without products
+  amount?: number; // 0 means no optimization data available
   product?: ProductRow;
 }
 
