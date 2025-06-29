@@ -20,7 +20,7 @@ export default function HomePage() {
   const [noListCreated, setNoListCreated] = useState<number>(0);
   const [noItems, setNoItems] = useState<number>(0);
   const [noListCompleted, setNoListCompleted] = useState<number>(0);
-  const { groceryListHistory, setGroceryListHistory} = useGroceryContext();
+  const { refreshVersion, groceryListHistory, setGroceryListHistory} = useGroceryContext();
 
   const fetchGroceryHistory = async () => {
     try {
@@ -52,7 +52,7 @@ export default function HomePage() {
     if (session) {
       fetchGroceryHistory();
     }
-  }, [groceryListHistory]); // when refreshVersion changes, useEffect will trigger code inside
+  }, [refreshVersion]); // when refreshVersion changes, useEffect will trigger code inside
 
   async function signOut() {
     const { error } = await supabase.auth.signOut();
