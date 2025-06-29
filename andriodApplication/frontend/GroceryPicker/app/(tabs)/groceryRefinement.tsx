@@ -10,7 +10,7 @@ import {
   SavedGroceryList,
   SavedGroceryListItem,
   AiPromptRequestBody,
-} from './interface';
+} from '../types/interface';
 import { useSession } from '@/context/authContext';
 import { backend_url } from '../../lib/api';
 import { router } from 'expo-router';
@@ -30,7 +30,7 @@ const ModalPage = () => {
 
   const groceryList: GroceryItem[] | undefined = groceryRefinement?.items;
   const supermarketFilter: string[] =
-    groceryRefinement?.supermarketFilter || [];
+    groceryRefinement?.supermarketFilter?.exclude || [];
 
   const { session } = useSession();
 
@@ -45,7 +45,7 @@ const ModalPage = () => {
       }
       setGenerateRefinementGrocery({
         message: groceryListString,
-        supermarketFilter: supermarketFilter,
+        supermarketFilter: { exclude: supermarketFilter },
       });
     } else {
       setGenerateRefinementGrocery(undefined);
@@ -88,7 +88,7 @@ const refineMyList = async (): Promise<boolean> => {
 
       setGenerateRefinementGrocery({
         message: refinedList,
-        supermarketFilter,
+        supermarketFilter: { exclude: supermarketFilter },
       });
 
       return true;
@@ -180,7 +180,7 @@ const refineMyList = async (): Promise<boolean> => {
               onChangeText={(e) =>
                 setGenerateRefinementGrocery({
                   message: e,
-                  supermarketFilter: supermarketFilter,
+                  supermarketFilter: { exclude: supermarketFilter },
                 })
               }
               textAlignVertical="top"

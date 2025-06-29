@@ -9,7 +9,7 @@ import { useSession } from '@/context/authContext';
 import { useColorScheme } from 'nativewind';
 import { useEffect } from 'react';
 import { backend_url } from '@/lib/api';
-import { ControllerError, SavedGroceryList } from './interface';
+import { ControllerError, SavedGroceryList } from '../types/interface';
 import { useState } from 'react';
 import { useGroceryContext } from '@/context/groceryContext';
 

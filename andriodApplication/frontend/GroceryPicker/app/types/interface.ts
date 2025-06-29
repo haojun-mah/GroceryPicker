@@ -40,16 +40,20 @@ export class ControllerSuccess {
   }
 }
 
+export interface SupermarketFilter {
+  exclude?: string[];
+}
+
 export interface AiPromptRequestBody {
   message: string;
-  supermarketFilter?: string[];
+  supermarketFilter?: SupermarketFilter;
 }
 
 export interface GroceryMetadataTitleOutput {
   title: string;
   metadata: string;
   items: GroceryItem[];
-  supermarketFilter?: string[];
+  supermarketFilter?: SupermarketFilter;
 }
 
 export interface GroceryItem {
@@ -60,7 +64,7 @@ export interface GroceryItem {
 
 export interface GroceryListRequest {
   items: GroceryItem[];
-  supermarketFilter?: string[];
+  supermarketFilter?: SupermarketFilter;
 }
 
 export interface GroceryListResponse {

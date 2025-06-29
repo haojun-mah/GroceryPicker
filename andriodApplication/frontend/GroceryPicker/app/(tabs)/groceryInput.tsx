@@ -13,7 +13,7 @@ import {
   GroceryMetadataTitleOutput,
   ALLOWED_SUPERMARKETS,
   SUPERMARKET,
-} from './interface';
+} from '../types/interface';
 import { InfoIcon } from '@/components/ui/icon';
 import { useGroceryContext } from '@/context/groceryContext';
 
@@ -48,9 +48,11 @@ const groceryInput = () => {
       setIsLoading(true);
       const req: AiPromptRequestBody = {
         message: groceryTextArea,
-        supermarketFilter: ALLOWED_SUPERMARKETS.filter(
-          (x) => !selectedGroceryShop.includes(x),
-        ),
+        supermarketFilter: {
+          exclude: ALLOWED_SUPERMARKETS.filter(
+            (x) => !selectedGroceryShop.includes(x),
+          ),
+        },
       };
       console.log(req); // debug
       const response = await fetch(`${backend_url}/lists/generate`, {

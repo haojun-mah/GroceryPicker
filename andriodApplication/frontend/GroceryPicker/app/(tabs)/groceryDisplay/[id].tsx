@@ -5,7 +5,7 @@ import { View, ScrollView } from 'react-native';
 import { Button, ButtonGroup, ButtonText } from '@/components/ui/button';
 import { useLocalSearchParams } from 'expo-router';
 import { useGroceryContext } from '@/context/groceryContext';
-import { ALLOWED_SUPERMARKETS, SavedGroceryList } from '../interface';
+import { ALLOWED_SUPERMARKETS, SavedGroceryList } from '../../types/interface';
 
 const GroceryDisplay = () => {
   // Extract it as ID
