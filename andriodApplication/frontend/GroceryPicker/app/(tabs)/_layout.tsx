@@ -1,6 +1,10 @@
 import { GroceryContextProvider } from '@/context/groceryContext';
 import { Tabs } from 'expo-router';
 import { useColorScheme } from 'nativewind';
+import Entypo from '@expo/vector-icons/Entypo';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import Fontisto from '@expo/vector-icons/Fontisto';
+
 
 export default function TabsLayout() {
   const { colorScheme } = useColorScheme();
@@ -11,7 +15,7 @@ export default function TabsLayout() {
   return (
     <GroceryContextProvider>
       <Tabs
-        screenOptions={{
+        screenOptions={({ route }) => ({
           headerShown: false,
           tabBarActiveTintColor: 'blue',
           tabBarInactiveTintColor: tabTextColor,
@@ -22,17 +26,28 @@ export default function TabsLayout() {
             elevation: 0,
             shadowOpacity: 0,
           },
-        }}
+          tabBarIcon: ({ color, size }) => {
+            let iconName;
+
+            switch (route.name) {
+              case 'Home':
+                iconName = <Entypo name="home" size={24} color={tabTextColor}/>;
+                break;
+              case 'groceryInput':
+                iconName = <Ionicons name="create" size={24} color={tabTextColor}/>;
+                break;
+              case 'groceryHistory':
+                iconName = <Fontisto name="history" size={18} color={tabTextColor} />;
+                break;
+              default:
+                iconName = <Fontisto name="history" size={18} color={tabTextColor} />;
+                break;
+            }
+
+            return iconName;
+          },
+        })}
       >
-        <Tabs.Screen
-          name="Home"
-          options={{
-            headerShown: false,
-            headerTitle: 'Main Page',
-            headerTitleAlign: 'center',
-            tabBarLabel: 'Home',
-          }}
-        />
         <Tabs.Screen
           name="groceryInput"
           options={{ headerShown: false, tabBarLabel: 'Create List' }}
