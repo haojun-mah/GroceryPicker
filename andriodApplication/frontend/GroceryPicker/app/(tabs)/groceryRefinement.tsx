@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Dimensions, ScrollView, View } from 'react-native';
+import { Alert, Dimensions, ScrollView, View } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { Textarea, TextareaInput } from '@/components/ui/textarea';
 import { ButtonGroup, Button, ButtonText } from '@/components/ui/button';
@@ -52,103 +52,106 @@ const ModalPage = () => {
     }
   }, [groceryList, supermarketFilter]);
 
-  const refineMyList = async () => {
-    try {
-      if (!generateRefinementGrocery?.message?.length) return;
+const refineMyList = async (): Promise<boolean> => {
+  try {
+    if (!generateRefinementGrocery?.message?.length) {
+      Alert.alert("Your list is empty.");
+      return false;
+    }
 
-      setIsLoading(true);
-      console.log(generateRefinementGrocery);
+    setIsLoading(true);
 
-      const response = await fetch(`${backend_url}/lists/refine`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(generateRefinementGrocery),
-      });
+    const response = await fetch(`${backend_url}/lists/generate`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${session?.access_token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(generateRefinementGrocery),
+    });
 
-      setIsLoading(false);
+    setIsLoading(false);
 
-      if (response.ok) {
-        const output: GroceryMetadataTitleOutput = await response.json();
+    if (response.ok) {
+      const output: GroceryMetadataTitleOutput = await response.json();
 
-        setGroceryRefinement(output);
-
-        const refinedList = output.items
-          .map((i) => `${i.name} - ${i.quantity}${i.unit}`)
-          .join('\n');
-
-        setGenerateRefinementGrocery({
-          message: refinedList,
-          supermarketFilter: supermarketFilter,
-        });
-      } else {
-        console.log('Error refining list');
+      if (output.title === '!@#$%^') {
+        Alert.alert("Invalid refinement item.");
+        return false;
       }
-    } catch (error) {
-      console.error(error);
-      alert('An error occurred while refining your list.');
-      setIsLoading(false);
-    }
-  };
 
-  const findCheapest = async () => {
-    try {
-      if (!generateRefinementGrocery?.message?.length) return;
+      setGroceryRefinement(output);
 
-      setIsLoading(true);
-      console.log(generateRefinementGrocery);
+      const refinedList = output.items
+        .map((i) => `${i.name} - ${i.quantity}${i.unit}`)
+        .join('\n');
 
-      const response = await fetch(`${backend_url}/lists/optimise`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(generateRefinementGrocery),
+      setGenerateRefinementGrocery({
+        message: refinedList,
+        supermarketFilter,
       });
 
-      const optimisedList: SavedGroceryListItem = await response.json();
-
-      // All of user's grocery lists retrieved, includes newly generated optimised list
-      const responseAllList = await fetch(`${backend_url}/lists/getAll`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const allList: SavedGroceryList[] = await responseAllList.json();
-
-      setGroceryListHistory(allList);
-      setGroceryRefinement(null);
-      setIsLoading(false);
-
-      router.push(`/groceryDisplay/${optimisedList.list_id}`);
-    } catch (error) {
-      console.error(error);
-      alert('An error occurred while finding the cheapest route.');
-      setIsLoading(false);
+      return true;
+    } else {
+      alert("Invalid refinement item.");
+      return false;
     }
-  };
-
-  // Prevent UI crashes if refinement data is null
-  if (groceryRefinement === null) {
-    return (
-      <ScrollView
-        contentContainerStyle={{ paddingTop: 60 }}
-        className="bg-[#EEEEEE] dark:bg-black min-h-screen px-4"
-      >
-        <View className="gap-6">
-          <Text className="text-2xl text-black dark:text-white">
-            No list loaded.
-          </Text>
-        </View>
-      </ScrollView>
-    );
+  } catch (error) {
+    console.error(error);
+    alert("An error occurred while refining your list.");
+    setIsLoading(false);
+    return false;
   }
+};
+
+
+ const findCheapest = async () => {
+  try {
+    if (!generateRefinementGrocery?.message?.length) return;
+
+    setIsLoading(true);
+
+    const refineSucceeded = await refineMyList();
+
+    if (!refineSucceeded) {
+      // Stop execution if refinement failed
+      setIsLoading(false);
+      return;
+    }
+
+    const response = await fetch(`${backend_url}/lists/optimise`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${session?.access_token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(generateRefinementGrocery),
+    });
+
+    const optimisedList: SavedGroceryListItem = await response.json();
+
+    const responseAllList = await fetch(`${backend_url}/lists/getAll`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${session?.access_token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const allList: SavedGroceryList[] = await responseAllList.json();
+
+    setGroceryListHistory(allList);
+    setGroceryRefinement(null);
+    setIsLoading(false);
+
+    router.push(`/groceryDisplay/${optimisedList.list_id}`);
+  } catch (error) {
+    console.error(error);
+    alert("An error occurred while finding the cheapest list.");
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <ScrollView

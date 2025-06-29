@@ -85,7 +85,7 @@ const GroceryDisplay = () => {
           );
         })}
 
-        <ButtonGroup className="rounded-xl overflow-hidden w-full">
+        {/* <ButtonGroup className="rounded-xl overflow-hidden w-full">
           <Button
             className="
                 w-full h-12 justify-center items-center
@@ -97,7 +97,7 @@ const GroceryDisplay = () => {
               Start Optimal Route Navigation
             </ButtonText>
           </Button>
-        </ButtonGroup>
+        </ButtonGroup> */}
       </View>
     </ScrollView>
   );
