@@ -1,4 +1,4 @@
-import { GroceryRefinementContextProvider } from '@/context/groceryRefinement';
+import { GroceryContextProvider } from '@/context/groceryContext';
 import { Tabs } from 'expo-router';
 import { useColorScheme } from 'nativewind';
 
@@ -9,7 +9,7 @@ export default function TabsLayout() {
   const tabTextColor = colorScheme === 'light' ? 'black' : 'white';
 
   return (
-    <GroceryRefinementContextProvider>
+    <GroceryContextProvider>
       <Tabs
         screenOptions={{
           headerShown: false,
@@ -50,6 +50,6 @@ export default function TabsLayout() {
           options={{ headerShown: false, href: null }}
         />
       </Tabs>
-    </GroceryRefinementContextProvider>
+    </GroceryContextProvider>
   );
 }

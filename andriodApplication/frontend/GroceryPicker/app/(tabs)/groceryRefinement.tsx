@@ -3,7 +3,6 @@ import { Dimensions, ScrollView, View } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { Textarea, TextareaInput } from '@/components/ui/textarea';
 import { ButtonGroup, Button, ButtonText } from '@/components/ui/button';
-import { useGroceryRefinementContext } from '@/context/groceryRefinement';
 import { useGroceryContext } from '@/context/groceryContext';
 import {
   GroceryItem,
@@ -21,9 +20,7 @@ const { height: screenHeight } = Dimensions.get('window');
 const ModalPage = () => {
   const [generateRefinementGrocery, setGenerateRefinementGrocery] =
     useState<AiPromptRequestBody>();
-  const { groceryRefinement, setGroceryRefinement } =
-    useGroceryRefinementContext();
-  const { setGroceryListHistory } = useGroceryContext();
+  const { groceryRefinement, setGroceryRefinement, setGroceryListHistory } = useGroceryContext();
   const groceryList: GroceryItem[] | undefined = groceryRefinement?.items;
   const supermarketFilter: string[] | undefined =
     !groceryRefinement?.supermarketFilter

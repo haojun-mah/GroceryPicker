@@ -5,7 +5,6 @@ import React, { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { backend_url } from '../../lib/api';
 import { useSession } from '@/context/authContext';
-import { useGroceryRefinementContext } from '@/context/groceryRefinement';
 import { router } from 'expo-router';
 import { DropdownSelector } from '@/components/DropDownSelector';
 import { Alert, AlertIcon, AlertText } from '@/components/ui/alert';
@@ -16,6 +15,7 @@ import {
   SUPERMARKET,
 } from './interface';
 import { InfoIcon } from '@/components/ui/icon';
+import { GroceryContextProvider, useGroceryContext } from '@/context/groceryContext';
 
 /*
   Initial grocery input page where user can key in unstructred grocrey list to receive structured grocery list.
@@ -34,7 +34,7 @@ const groceryInput = () => {
     groceryRefinement,
     setGroceryRefinement,
     setGroceryShop,
-  } = useGroceryRefinementContext();
+  } = useGroceryContext()
 
   const postData = async () => {
     try {
@@ -76,12 +76,15 @@ const groceryInput = () => {
           groceryRefinement,
         );
         router.push('/groceryRefinement');
+        setIsLoading(false);
       } else if (response.status === 403) {
         alert(
           'You are not authorized to perform this action. Please log in again.',
         );
+        setIsLoading(false);
       } else {
         alert('Your Grocery List Contains Invalid Items!');
+        setIsLoading(false);
       }
     } catch (error) {
       console.error(error);
