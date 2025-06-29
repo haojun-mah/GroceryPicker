@@ -125,10 +125,10 @@ describe('optimiseListController', () => {
       // Verify that generateGroceryList was called
       expect(mockGenerateGroceryList).toHaveBeenCalled();
       
-      // Verify RAG service was called with correct parameters
+      // Verify RAG service was called with correct parameters (converted format)
       expect(mockFindBestProductsForGroceryListEnhanced).toHaveBeenCalledWith(
         mockGeneratedResult.items,
-        mockGeneratedResult.supermarketFilter
+        { exclude: ['Fairprice'] }  // Auto-converted from array to object
       );
 
       // Verify save was called with optimized items
@@ -141,14 +141,28 @@ describe('optimiseListController', () => {
             quantity: 500,
             unit: 'grams',
             product_id: 'pasta-123',
-            amount: 2
+            amount: 2,
+            product: {
+              product_id: 'pasta-123',
+              name: 'Premium Pasta',
+              price: '3.50',
+              supermarket: 'FairPrice',
+              quantity: '500g'
+            }
           },
           {
             name: 'Tomatoes',
             quantity: 3,
             unit: 'pieces',
             product_id: 'tomato-456',
-            amount: 1
+            amount: 1,
+            product: {
+              product_id: 'tomato-456',
+              name: 'Fresh Tomatoes',
+              price: '2.80',
+              supermarket: 'FairPrice',
+              quantity: '3 pieces'
+            }
           }
         ]
       });
@@ -304,7 +318,7 @@ describe('optimiseListController', () => {
 
       expect(response.status).toBe(201);
       
-      // Verify that items without products are still included but with undefined product_id
+      // Verify that items without products are still included but with null product_id
       expect(mockSaveUserGroceryList).toHaveBeenCalledWith('test-user-id', {
         title: 'Pasta Shopping',
         metadata: '10:30:45 15/12/2024',
@@ -314,14 +328,22 @@ describe('optimiseListController', () => {
             quantity: 500,
             unit: 'grams',
             product_id: 'pasta-123',
-            amount: 2
+            amount: 2,
+            product: {
+              product_id: 'pasta-123',
+              name: 'Premium Pasta',
+              price: '3.50',
+              supermarket: 'FairPrice',
+              quantity: '500g'
+            }
           },
           {
             name: 'Tomatoes',
             quantity: 3,
             unit: 'pieces',
-            product_id: undefined,
-            amount: undefined
+            product_id: null,
+            amount: 0,
+            product: undefined
           }
         ]
       });
@@ -332,23 +354,10 @@ describe('optimiseListController', () => {
         res.status(200).json(mockGeneratedResult);
       });
 
-      const ragResultsWithUnknownItems = [
-        {
-          item: 'Unknown Item',
-          selectedProduct: {
-            product_id: 'unknown-123',
-            name: 'Unknown Product',
-            price: '1.00',
-            supermarket: 'FairPrice',
-            quantity: '1 piece'
-          },
-          amount: 1,
-          allProducts: [],
-          query: 'Unknown Item'
-        }
-      ];
+      // Simulate no products found for any items (empty RAG results)
+      const ragResultsWithNoProducts: any[] = [];
 
-      mockFindBestProductsForGroceryListEnhanced.mockResolvedValue(ragResultsWithUnknownItems);
+      mockFindBestProductsForGroceryListEnhanced.mockResolvedValue(ragResultsWithNoProducts);
       mockSaveUserGroceryList.mockResolvedValue(mockSavedList);
 
       const response = await request(app)
@@ -357,17 +366,26 @@ describe('optimiseListController', () => {
 
       expect(response.status).toBe(201);
       
-      // Verify fallback values are used
+      // Verify all original items are preserved but with null product_id when no RAG results
       expect(mockSaveUserGroceryList).toHaveBeenCalledWith('test-user-id', {
         title: 'Pasta Shopping',
         metadata: '10:30:45 15/12/2024',
         items: [
           {
-            name: 'Unknown Item',
-            quantity: 1, // fallback quantity
-            unit: 'piece', // fallback unit
-            product_id: 'unknown-123',
-            amount: 1
+            name: 'Pasta',
+            quantity: 500,
+            unit: 'grams',
+            product_id: null,
+            amount: 0,
+            product: undefined
+          },
+          {
+            name: 'Tomatoes',
+            quantity: 3,
+            unit: 'pieces',
+            product_id: null,
+            amount: 0,
+            product: undefined
           }
         ]
       });

@@ -130,8 +130,8 @@ const DropdownCard = ({
                   size="xs"
                   className="text:black dark:text-white text-md"
                 >
-                  {e.product?.name} - {e.amount} ({e.quantity} {e.unit}/
-                  {e.product?.price})
+                  {e.product?.name || e.name} - {e.amount === 0 ? 'Not optimized' : e.amount} ({e.quantity} {e.unit}/
+                  {e.product?.price || 'No price'})
                 </Text>
               ))}
             {expanded && (
@@ -193,7 +193,8 @@ const DropdownCard = ({
                         : 'text-gray-600 dark:text-gray-300'
                     }`}
                   >
-                    {item.product?.quantity} per pax, {item.amount} pax needed (
+                    {item.product?.quantity ? `${item.product.quantity} per pax, ` : ''}
+                    {item.amount === 0 ? 'Not optimized' : `${item.amount} pax needed`} (
                     {item.quantity}
                     {item.unit})
                   </Text>
