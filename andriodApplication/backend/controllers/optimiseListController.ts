@@ -9,6 +9,7 @@ import {
   AiPromptRequestBody,
   GroceryMetadataTitleOutput,
   EnhancedGroceryPriceResponse,
+  SupermarketFilter,
 } from '../interfaces';
 
 export const findBestPricesForGroceryList: RequestHandler<
@@ -63,7 +64,7 @@ export const findBestPricesForGroceryList: RequestHandler<
     }
 
     const items = generatedResult.items;
-    let supermarketFilter: SupermarketFilter = generatedResult.supermarketFilter;
+    let supermarketFilter: SupermarketFilter = generatedResult.supermarketFilter ?? { exclude: [] };
     
     // Auto-convert incorrect request format: when supermarketFilter is an array instead of {exclude: []}
     if (Array.isArray(supermarketFilter)) {
