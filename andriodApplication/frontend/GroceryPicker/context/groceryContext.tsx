@@ -19,6 +19,8 @@ interface GroceryContextType {
   setGroceryListHistory: Dispatch<SetStateAction<SavedGroceryList[] | null>>;
   refreshVersion: number;
   setRefreshVersion: Dispatch<SetStateAction<number>>;
+  purchasedState: Record<string, boolean>
+  setPurchasedState: React.Dispatch<React.SetStateAction<Record<string, boolean>>>
 }
 
 const GroceryContext = React.createContext<GroceryContextType | undefined>(

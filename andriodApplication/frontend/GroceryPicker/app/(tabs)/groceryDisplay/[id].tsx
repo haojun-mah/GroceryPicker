@@ -8,7 +8,10 @@ import { useGroceryContext } from '@/context/groceryContext';
 import { ALLOWED_SUPERMARKETS, SavedGroceryList } from '../interface';
 
 const GroceryDisplay = () => {
-  const { id } = useLocalSearchParams(); // id of grocerylist
+  // Extract it as ID
+  const { id: rawId } = useLocalSearchParams();
+  const id = Array.isArray(rawId) ? rawId[0] : rawId ?? "";
+
   const { groceryListHistory } = useGroceryContext();
   const [currGroceryList, setCurrGroceryList] =
     useState<SavedGroceryList | null>(null);
@@ -18,7 +21,7 @@ const GroceryDisplay = () => {
     if (id && groceryListHistory && groceryListHistory?.length > 0) {
       fetchDisplayInfo();
     }
-  }, [id, groceryListHistory]); // useEffect will run again when these 2 values changes
+  }, [id, groceryListHistory]); // Add groceryListHistory to dependencies
 
   // filter target grocery list from context with ID
   const fetchDisplayInfo = async () => {
@@ -31,7 +34,7 @@ const GroceryDisplay = () => {
     );
     console.log(
       'Check display if it has target grocery list mounted:\n',
-      currGroceryList,
+      list, // Log the found list, not currGroceryList (which might be stale)
     );
   };
 
@@ -66,14 +69,17 @@ const GroceryDisplay = () => {
             return null;
           }
           return (
-            <View key={idx} className="items-start w-full">
+            <View key={`${shops}-${idx}`} className="items-start w-full">
               <Text className="text-xl font-semibold mb-1 text-black dark:text-white">
                 {shops}
               </Text>
               <DropdownCard
+                key={`${id}-${shops}-${currGroceryList.list_id}`} // Unique key that includes list version
                 outsideText={items}
                 insideText={items}
                 defaultOpen={false}
+                id={id}
+                supermarket={shops} // Pass supermarket identifier
               />
             </View>
           );
