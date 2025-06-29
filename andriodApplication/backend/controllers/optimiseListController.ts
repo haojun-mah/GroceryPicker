@@ -63,12 +63,12 @@ export const findBestPricesForGroceryList: RequestHandler<
     }
 
     const items = generatedResult.items;
-    let supermarketFilter = generatedResult.supermarketFilter;
+    let supermarketFilter: SupermarketFilter = generatedResult.supermarketFilter;
     
     // Auto-convert incorrect request format: when supermarketFilter is an array instead of {exclude: []}
     if (Array.isArray(supermarketFilter)) {
       console.warn('SupermarketFilter received as array, converting to proper format:', supermarketFilter);
-      supermarketFilter = { exclude: supermarketFilter as any };
+      supermarketFilter = { exclude: supermarketFilter };
       console.log('Converted to:', supermarketFilter);
     }
 
