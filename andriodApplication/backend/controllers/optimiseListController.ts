@@ -11,7 +11,6 @@ import {
   EnhancedGroceryPriceResponse,
   SupermarketFilter,
 } from '../interfaces';
-import { SupermarketFilter } from '../interfaces';
 
 export const findBestPricesForGroceryList: RequestHandler<
   {},
