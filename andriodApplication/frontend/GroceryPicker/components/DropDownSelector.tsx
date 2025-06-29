@@ -74,25 +74,45 @@ export const DropdownSelector = ({
       <Animated.View style={animatedHeightStyle} className="mt-2">
         {items.map((item) => {
           const isSelected = selectedItems.includes(item);
-          return (
-            <TouchableOpacity
-              key={item}
-              onPress={() => toggleSelection(item)}
-              className={clsx(
-                'p-2 rounded-md my-1',
-                isSelected ? 'bg-blue-500' : 'bg-gray-100 dark:bg-gray-500',
-              )}
-            >
-              <Text
+          if (item === 'FairPrice') {
+            return (
+              <TouchableOpacity
+                key={item}
+                onPress={() => toggleSelection(item)}
                 className={clsx(
-                  'text-sm',
-                  isSelected ? 'text-white' : 'text-gray-800 dark:text-white',
+                  'p-2 rounded-md my-1',
+                  isSelected ? 'bg-blue-500' : 'bg-gray-100 dark:bg-gray-500',
                 )}
               >
-                {item}
-              </Text>
-            </TouchableOpacity>
-          );
+                <Text
+                  className={clsx(
+                    'text-sm',
+                    isSelected ? 'text-white' : 'text-gray-800 dark:text-white',
+                  )}
+                >
+                  {item}
+                </Text>
+              </TouchableOpacity>
+            );
+          } else {
+               return( <TouchableOpacity
+                key={item}
+                className={clsx(
+                  'p-2 rounded-md my-1',
+                  isSelected ? 'bg-blue-500' : 'bg-gray-100 dark:bg-gray-500',
+                )}
+              >
+                <Text
+                  className={clsx(
+                    'text-sm',
+                    isSelected ? 'text-white' : 'text-gray-800 dark:text-white',
+                  )}
+                >
+                  {item}
+                </Text>
+              </TouchableOpacity>
+               );
+          }
         })}
       </Animated.View>
     </View>

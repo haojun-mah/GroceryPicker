@@ -49,6 +49,10 @@ export default function TabsLayout() {
         })}
       >
         <Tabs.Screen
+          name="Home"
+          options={{ headerShown: false, tabBarLabel: 'Home' }}
+        />
+        <Tabs.Screen
           name="groceryInput"
           options={{ headerShown: false, tabBarLabel: 'Create List' }}
         />
