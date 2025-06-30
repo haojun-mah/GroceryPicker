@@ -10,7 +10,7 @@ import {
   SavedGroceryList,
   SavedGroceryListItem,
   AiPromptRequestBody,
-} from '../types/interface';
+} from './interface';
 import { useSession } from '@/context/authContext';
 import { backend_url } from '../../lib/api';
 import { router } from 'expo-router';

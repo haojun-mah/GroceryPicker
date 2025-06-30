@@ -9,7 +9,7 @@ import { View, ActivityIndicator } from 'react-native';
 import { 
   GroceryMetadataTitleOutput, 
   SavedGroceryList 
-} from '@/app/types/interface';
+} from '@/app/(tabs)/interface';
 
 interface GroceryContextType {
   // Main grocery properties

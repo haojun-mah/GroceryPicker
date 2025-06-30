@@ -15,7 +15,7 @@ import { Image } from './ui/image';
 import { CheckboxIcon, CheckboxIndicator, Checkbox } from './ui/checkbox';
 import { CircleIcon } from './ui/icon';
 import { Pressable } from 'react-native';
-import { SavedGroceryListItem } from '@/app/types/interface';
+import { SavedGroceryListItem } from '@/app/(tabs)/interface';
 import { useSession } from '@/context/authContext';
 import { backend_url } from '@/lib/api';
 import { useGroceryContext } from '@/context/groceryContext';

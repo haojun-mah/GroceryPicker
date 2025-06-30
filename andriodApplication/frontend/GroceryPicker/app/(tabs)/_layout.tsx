@@ -68,6 +68,10 @@ export default function TabsLayout() {
           name="groceryDisplay/[id]"
           options={{ headerShown: false, href: null }}
         />
+        <Tabs.Screen
+          name="interface"
+          options={{ headerShown: false, href: null }}
+        />
       </Tabs>
     </GroceryContextProvider>
   );

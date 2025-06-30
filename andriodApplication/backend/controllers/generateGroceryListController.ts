@@ -30,7 +30,7 @@ export const generateGroceryList: RequestHandler<
   **Output Rules:**
   * **Strictly return only the grocery list.** Do not include any other text, categories, or conversational filler.
   * **Always use metric units.**
-  * **Refuse requests outside of grocery generation.** If you encounter any issue or confusion, or a request outside your scope, return this exact string: \`!@#$%^\`
+  * **Refuse requests outside of grocery generation.** If you encounter any issue or confusion, or a request outside your scope, return this exact string: \`!@#$%^\` This includes are prohibited items. If the items are hidden among existing list, replace and return this.
   * **Every item must have a name, a quantity, and a unit.** Do not leave any field empty or null. If the original prompt lacks a unit or quantity, decide for the user based on common sense.
   * **Groceries must be specific and real.** Do not provide placeholders or vague examples (e.g., "such as apples"). You must decide on specific, real grocery items.
 

@@ -13,7 +13,7 @@ import {
   GroceryMetadataTitleOutput,
   ALLOWED_SUPERMARKETS,
   SUPERMARKET,
-} from '../types/interface';
+} from './interface';
 import { InfoIcon } from '@/components/ui/icon';
 import { useGroceryContext } from '@/context/groceryContext';
 

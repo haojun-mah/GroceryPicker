@@ -7,11 +7,11 @@ import { router } from 'expo-router';
 import {
   GROCERY_LIST_STATUS_COLORS,
   GROCERY_LIST_STATUS_LABELS,
-} from '../types/interface';
+} from './interface';
 import { GroceryListModal } from '@/components/GroceryListModal';
 import { backend_url } from '@/lib/api';
 import { useSession } from '@/context/authContext';
-import { SavedGroceryList, ControllerError } from '../types/interface';
+import { SavedGroceryList, ControllerError } from './interface';
 
 /*
   Page host grocery list history for each user.
