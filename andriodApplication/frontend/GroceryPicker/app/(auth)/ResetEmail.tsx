@@ -15,7 +15,6 @@ import BackButton from '@/components/BackButton';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'expo-router';
 import { useColorScheme } from 'nativewind';
-import * as Linking from 'expo-linking';
 
 export default function ResetPasswordScreen() {
   const router = useRouter();
@@ -29,6 +28,7 @@ export default function ResetPasswordScreen() {
       Alert.alert('Error', 'Please enter your email address.');
       return;
     }
+    router.replace('/ResetPassword')
 
     setLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(email.value);
@@ -56,7 +56,7 @@ export default function ResetPasswordScreen() {
         }}
         className="bg-[#EEEEEE] dark:bg-gray-900"
       >
-        <BackButton goBack={() => router.back()} />
+        <BackButton goBack={() => router.replace('/ResetPassword')} />
 
         <Box className="items-center gap-6 w-full">
           <Heading

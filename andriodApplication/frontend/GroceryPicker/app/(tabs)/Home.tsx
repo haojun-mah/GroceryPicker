@@ -59,6 +59,7 @@ export default function HomePage() {
 
     if (error) {
       console.error('Error signing out:', error.message);
+      router.replace('/(auth)/Login');
     } else {
       router.replace('/(auth)/Login');
     }
