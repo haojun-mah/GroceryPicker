@@ -9,16 +9,12 @@ import {
 const mockSaveUserGroceryList = jest.fn();
 const mockGetGroceryListById = jest.fn();
 const mockGetAllUserLists = jest.fn();
-const mockUpdateGroceryListStatus = jest.fn();
-const mockUpdateGroceryListItemStatus = jest.fn();
 const mockUpdateGroceryListsAndItems = jest.fn();
 
 jest.mock('../models/groceryListModel', () => ({
   saveUserGroceryList: mockSaveUserGroceryList,
   getGroceryListById: mockGetGroceryListById,
   getAllUserLists: mockGetAllUserLists,
-  updateGroceryListStatus: mockUpdateGroceryListStatus,
-  updateGroceryListItemStatus: mockUpdateGroceryListItemStatus,
   updateGroceryListsAndItems: mockUpdateGroceryListsAndItems,
 }));
 
@@ -27,8 +23,6 @@ import {
   saveUserGroceryList,
   getGroceryListById,
   getAllUserLists,
-  updateGroceryListStatus,
-  updateGroceryListItemStatus,
   updateGroceryListsAndItems,
 } from '../models/groceryListModel';
 
@@ -142,73 +136,6 @@ describe('groceryListModel', () => {
       const result = await getAllUserLists(mockUserId);
 
       expect(result).toEqual([]);
-    });
-  });
-
-  describe('updateGroceryListStatus', () => {
-    it('should successfully update list status', async () => {
-      const updatedList = { ...mockSavedList, list_status: 'purchased' as const };
-      mockUpdateGroceryListStatus.mockResolvedValue(updatedList);
-
-      const result = await updateGroceryListStatus(mockUserId, mockListId, 'purchased');
-
-      expect(result).toEqual(updatedList);
-      expect(mockUpdateGroceryListStatus).toHaveBeenCalledWith(mockUserId, mockListId, 'purchased');
-    });
-
-    it('should return ControllerError when list not found', async () => {
-      const error = new ControllerError(404, 'List not found');
-      mockUpdateGroceryListStatus.mockResolvedValue(error);
-
-      const result = await updateGroceryListStatus(mockUserId, mockListId, 'purchased');
-
-      expect(result).toBeInstanceOf(ControllerError);
-    });
-  });
-
-  describe('updateGroceryListItemStatus', () => {
-    it('should successfully update item status', async () => {
-      const updatedItem: SavedGroceryListItem = {
-        item_id: mockItemId,
-        list_id: mockListId,
-        name: 'Bread',
-        quantity: 2,
-        unit: 'loaves',
-        product_id: 'prod-1',
-        amount: 2,
-        purchased: true
-      };
-      
-      mockUpdateGroceryListItemStatus.mockResolvedValue(updatedItem);
-
-      const result = await updateGroceryListItemStatus(
-        mockUserId,
-        mockListId,
-        mockItemId,
-        { purchased: true }
-      );
-
-      expect(result).toEqual(updatedItem);
-      expect(mockUpdateGroceryListItemStatus).toHaveBeenCalledWith(
-        mockUserId,
-        mockListId,
-        mockItemId,
-        { purchased: true }
-      );
-    });
-
-    it('should return ControllerError when item not found', async () => {
-      const error = new ControllerError(404, 'Item not found');
-      mockUpdateGroceryListItemStatus.mockResolvedValue(error);
-
-      const result = await updateGroceryListItemStatus(
-        mockUserId,
-        mockListId,
-        mockItemId,
-        { purchased: true }
-      );
-
-      expect(result).toBeInstanceOf(ControllerError);
     });
   });
 
