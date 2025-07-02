@@ -223,8 +223,10 @@ export async function updateGroceryListsAndItems(
 
     // Update each item if present
     if (Array.isArray(list.grocery_list_items) && list.grocery_list_items.length > 0) {
+      console.log(`Processing ${list.grocery_list_items.length} items for list ${list.list_id}`);
       for (const item of list.grocery_list_items) {
         const { item_id, purchased, purchased_price } = item;
+        console.log(`Processing item: ${item_id}, purchased: ${purchased}, purchased_price: ${purchased_price}`);
         if (!item_id || typeof purchased === 'undefined') continue;
 
         // Prepare update data with price tracking logic
@@ -253,8 +255,9 @@ export async function updateGroceryListsAndItems(
                 .single();
 
               if (!productError && productData && productData.price) {
-                // Convert price string to number and snapshot it
-                const priceNumber = parseFloat(productData.price);
+                // Remove currency symbols and parse
+                const cleanPriceString = productData.price.replace(/[$,]/g, '');
+                const priceNumber = parseFloat(cleanPriceString);
                 if (!isNaN(priceNumber)) {
                   updateData.purchased_price = priceNumber;
                 }
