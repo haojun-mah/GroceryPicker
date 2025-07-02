@@ -146,10 +146,15 @@ export async function getAllUserLists(
 // Batch update grocery lists and their items.
 // Accepts an array of objects with at least list_id, and optionally list_status and grocery_list_items.
 // For each list:
-//   - If list_status is present, updates the list's status.
-//   - If grocery_list_items is present, only updates the 'purchased' field for each item (if both item_id and purchased are provided).
-//   - Ignores other fields in grocery_list_items for now.
-// Returns all updated lists and any errors.
+//   - If list_status is present, updates the list's status with validation.
+//   - If grocery_list_items is present, updates the 'purchased' field for each item (if both item_id and purchased are provided).
+//   - When purchased: true:
+//       - If purchased_price is provided, uses it (manual override).
+//       - If purchased_price is not provided, always snapshots the current product price (overriding any previous value).
+//   - When purchased: false:
+//       - Clears purchased_price (sets to null).
+//   - Ignores other fields in grocery_list_items.
+// Returns all updated lists and any errors. 
 export async function updateGroceryListsAndItems(
   userId: string,
   lists: (Partial<SavedGroceryList> & { list_id: string })[],
@@ -231,16 +236,15 @@ export async function updateGroceryListsAndItems(
           if (typeof purchased_price === 'number') {
             updateData.purchased_price = purchased_price;
           } else {
-            // Automatic price snapshotting - get current item to check conditions
+            // Always snapshot the current product price if purchased is true and no manual price is provided
             const { data: currentItem, error: currentItemError } = await supabase
               .from('grocery_list_items')
-              .select('product_id, purchased_price')
+              .select('product_id')
               .eq('item_id', item_id)
               .eq('list_id', list.list_id)
               .single();
 
-            // Only snapshot if item has product_id and no existing purchased_price
-            if (!currentItemError && currentItem && currentItem.product_id && !currentItem.purchased_price) {
+            if (!currentItemError && currentItem && currentItem.product_id) {
               // Fetch current price from products table
               const { data: productData, error: productError } = await supabase
                 .from('products')
