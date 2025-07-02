@@ -15,10 +15,12 @@ import BackButton from '@/components/BackButton';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'expo-router';
 import { useColorScheme } from 'nativewind';
+import * as Linking from 'expo-linking';
 
 export default function ResetPasswordScreen() {
   const router = useRouter();
   const { colorScheme } = useColorScheme();
+  const prefix = Linking.createURL('/');
 
   const [email, setEmail] = useState({ value: '', error: '' });
   const [loading, setLoading] = useState(false);
@@ -31,12 +33,15 @@ export default function ResetPasswordScreen() {
     router.replace('/ResetPassword')
 
     setLoading(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(email.value);
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email.value, {
+      redirectTo: 'grocerypicker://auth/ResetEmail',
+    });
+
     if (error) {
       Alert.alert('Error', error.message);
     } else {
-      Alert.alert('Password has been reset. Check your email.');
-      router.replace('/Login');
+      Alert.alert('Password reset request sent. Check your email.');
+      console.log(data);
     }
     setLoading(false);
   }

@@ -21,17 +21,26 @@ export default function ResetPasswordScreen() {
   const router = useRouter();
   const { colorScheme } = useColorScheme();
 
-  const [email, setEmail] = useState({ value: '', error: '' });
+  const [password, setPassword] = useState({ value: '', error: '' });
+  const [reconfirm, setReconfirm] = useState({ value: '', error: '' });
   const [loading, setLoading] = useState(false);
 
   async function sendResetPasswordEmail() {
-    if (!email.value || email.value.length === 0) {
-      Alert.alert('Error', 'Please enter your email address.');
+    if (!password.value || password.value.length === 0) {
+      Alert.alert('Error', 'Please enter your password.');
+      return;
+    }
+
+    if (password.value !== reconfirm.value) {
+      setPassword({ value: password.value, error: 'Passwords do not match.' });
       return;
     }
 
     setLoading(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(email.value);
+    const { error } = await supabase.auth.updateUser({
+      password: password.value,
+    })
+
     if (error) {
       Alert.alert('Error', error.message);
     } else {
@@ -63,32 +72,49 @@ export default function ResetPasswordScreen() {
             size="3xl"
             className="text-center text-black dark:text-white"
           >
-            Restore Password
+            Reset Password
           </Heading>
 
           <VStack space="md" className="w-full">
             <Input
-              isInvalid={!!email.error}
+              isInvalid={!!password.error}
               size="xl"
               className={`p-2 h-16 w-full bg-gray-100 dark:bg-gray-800 border ${
                 colorScheme === 'dark' ? 'border-gray-400' : 'border-white'
               }`}
             >
               <InputField
-                placeholder="E-mail address"
-                keyboardType="email-address"
+                placeholder="New Password"
+                type="password"
                 autoCapitalize="none"
-                value={email.value}
-                onChangeText={(text) => setEmail({ value: text, error: '' })}
+                value={password.value}
+                onChangeText={(text) => setPassword({ value: text, error: '' })}
+                className="text-black dark:text-white"
+              />
+            </Input>
+            <Input
+              isInvalid={!!password.error}
+              size="xl"
+              className={`p-2 h-16 w-full bg-gray-100 dark:bg-gray-800 border ${
+                colorScheme === 'dark' ? 'border-gray-400' : 'border-white'
+              }`}
+            >
+              <InputField
+                placeholder="Confirm Password"
+                type="password"
+                autoCapitalize="none"
+                value={reconfirm.value}
+                onChangeText={(text) => setReconfirm({ value: text, error: '' })}
                 className="text-black dark:text-white"
               />
             </Input>
 
-            {email.error ? (
-              <Text className="text-red-500 text-xs">{email.error}</Text>
+
+
+            {password.error ? (
+              <Text className="text-red-500 text-xs">{password.error}</Text>
             ) : (
               <Text className="text-gray-500 dark:text-gray-300 text-xs">
-                You will receive an email with a password reset link.
               </Text>
             )}
 
