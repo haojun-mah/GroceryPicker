@@ -30,20 +30,24 @@ export default function ResetPasswordScreen() {
       Alert.alert('Error', 'Please enter your email address.');
       return;
     }
-    router.replace('/ResetPassword')
 
     setLoading(true);
-    const { data, error } = await supabase.auth.resetPasswordForEmail(email.value, {
-      redirectTo: 'grocerypicker://auth/ResetEmail',
-    });
-
-    if (error) {
-      Alert.alert('Error', error.message);
-    } else {
-      Alert.alert('Password reset request sent. Check your email.');
-      console.log(data);
+    try {
+      const { data, error } = await supabase.auth.signInWithOtp({
+        email: email.value,
+        options: {
+          emailRedirectTo: Linking.createURL(`/ResetPassword`),
+        },
+      });
+      if (error) {
+        Alert.alert('Error', error.message);
+      } else {
+        router.push(`/VerifyOTP?email=${encodeURIComponent(email.value)}`);
+      }
+      setLoading(false);
+    } catch (error) {
+      console.error('Error sending reset password email:', error);
     }
-    setLoading(false);
   }
 
   return (
@@ -59,9 +63,9 @@ export default function ResetPasswordScreen() {
           paddingHorizontal: 24,
           paddingVertical: 48,
         }}
-        className="bg-[#EEEEEE] dark:bg-gray-900"
+        className="bg-[#EEEEEE} dark:bg-gray-900"
       >
-        <BackButton goBack={() => router.replace('/ResetPassword')} />
+        <BackButton goBack={() => router.replace('/Login')} />
 
         <Box className="items-center gap-6 w-full">
           <Heading

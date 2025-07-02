@@ -13,11 +13,11 @@ import { Input, InputField } from '@/components/ui/input';
 import { Button, ButtonText } from '@/components/ui/button';
 import BackButton from '@/components/BackButton';
 import { supabase } from '@/lib/supabase';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useColorScheme } from 'nativewind';
-import * as Linking from 'expo-linking';
 
 export default function ResetPasswordScreen() {
+  const { email } = useLocalSearchParams();
   const router = useRouter();
   const { colorScheme } = useColorScheme();
 

@@ -18,7 +18,28 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.ckwflash.GroceryPicker",
-      "softwareKeyboardLayoutMode": "pan"
+      "softwareKeyboardLayoutMode": "pan",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "grocerypicker.app",
+              "pathPrefix": "/auth/ResetPassword"
+            },
+            {
+              "scheme": "grocerypicker",
+              "host": "auth/ResetPassword"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -45,8 +66,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "ac19f785-3f50-40b0-b1cc-f69c116d38ee"
+        "projectId": "646f6a84-a9a9-4b4e-aecd-fae0a855bdf6"
       }
-    }
+    },
+    "owner": "haojunmah"
   }
 }

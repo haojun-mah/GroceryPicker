@@ -1,20 +1,18 @@
 import React from 'react';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
 import { Pressable } from 'react-native';
-import { Image } from './ui/image';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import { useColorScheme } from 'nativewind';
 
 export default function BackButton({ goBack }: { goBack: () => void }) {
+  const { colorScheme } = useColorScheme();
   return (
     <Pressable
       onPress={goBack}
       className={`absolute left-4 top-[${getStatusBarHeight() + 10}px] z-50`}
       style={{ top: 10 + getStatusBarHeight() }}
     >
-      <Image
-        source={require('../assets/images/arrow_back.png')}
-        alt="Back"
-        className="w-6 h-6"
-      />
+      <AntDesign name="arrowleft" size={24} color={colorScheme === 'dark' ? 'white' : 'black'} />
     </Pressable>
   );
 }
