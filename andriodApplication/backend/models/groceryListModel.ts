@@ -257,6 +257,9 @@ export async function updateGroceryListsAndItems(
               }
             }
           }
+        } else if (purchased === false) {
+          // If unmarking as purchased, clear the purchased_price
+          updateData.purchased_price = null;
         }
 
         // Update the item with all prepared data
