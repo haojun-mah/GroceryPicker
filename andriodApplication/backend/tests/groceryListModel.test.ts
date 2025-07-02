@@ -180,5 +180,41 @@ describe('groceryListModel', () => {
 
       expect(result).toBeInstanceOf(ControllerError);
     });
+
+    it('should clear purchased_price when item is unmarked as purchased', async () => {
+      const listWithUnpurchasedItem = [
+        {
+          ...mockSavedList,
+          grocery_list_items: [
+            {
+              item_id: mockItemId,
+              list_id: mockListId,
+              name: 'Bread',
+              quantity: 2,
+              unit: 'loaves',
+              product_id: 'prod-1',
+              amount: 2,
+              purchased: false,
+              purchased_price: 3.5 // previously set
+            }
+          ]
+        }
+      ];
+      const expectedResult = {
+        updatedLists: listWithUnpurchasedItem.map(list => ({
+          ...list,
+          grocery_list_items: list.grocery_list_items.map(item => ({
+            ...item,
+            purchased_price: null
+          }))
+        })),
+        errors: []
+      };
+      mockUpdateGroceryListsAndItems.mockResolvedValue(expectedResult);
+
+      const result = await updateGroceryListsAndItems(mockUserId, listWithUnpurchasedItem);
+      expect(result).toEqual(expectedResult);
+      expect(mockUpdateGroceryListsAndItems).toHaveBeenCalledWith(mockUserId, listWithUnpurchasedItem);
+    });
   });
 });
