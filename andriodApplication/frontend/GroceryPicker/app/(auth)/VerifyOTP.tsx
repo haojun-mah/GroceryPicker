@@ -61,7 +61,7 @@ const OTPInput = () => {
                 const { error } = await supabase.auth.resetPasswordForEmail(
                     email as string,
                     {
-                        redirectTo: Linking.createURL('/ResetPassword'),
+                        redirectTo: Linking.createURL('/auth/ResetPassword'),
                     }
                 );
                 
