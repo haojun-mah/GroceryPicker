@@ -120,7 +120,7 @@ export default function Login() {
             </Box>
           </KeyboardAvoidingView>
 
-          <Pressable onPress={() => router.push('/ResetPassword')}>
+          <Pressable onPress={() => router.push('/ResetEmail')}>
             <Text className="text-right text-sm text-blue-600 dark:text-blue-400 mt-2">
               Forgot your password?
             </Text>
