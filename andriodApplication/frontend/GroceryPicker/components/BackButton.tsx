@@ -9,7 +9,7 @@ export default function BackButton({ goBack }: { goBack: () => void }) {
   return (
     <Pressable
       onPress={goBack}
-      className={`absolute left-4 top-[${getStatusBarHeight() + 10}px] z-50`}
+      className="absolute left-4 z-50"
       style={{ top: 10 + getStatusBarHeight() }}
     >
       <AntDesign name="arrowleft" size={24} color={colorScheme === 'dark' ? 'white' : 'black'} />
