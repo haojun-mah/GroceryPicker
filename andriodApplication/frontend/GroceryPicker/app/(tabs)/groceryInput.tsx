@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, TouchableOpacity } from 'react-native'; // Add TouchableOpacity to imports
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
 import { Box } from '@/components/ui/box';
 import { Text } from '@/components/ui/text';
 import { Input, InputField } from '@/components/ui/input';
-import { Button, ButtonText } from '@/components/ui/button';
 import { ScrollView } from 'react-native';
 import { Heading } from '@/components/ui/heading';
 import { useSession } from '@/context/authContext';
@@ -17,7 +16,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { DropdownSelector } from '@/components/DropDownSelector';
 import { SUPERMARKET, ALLOWED_SUPERMARKETS } from '@/app/(tabs)/interface';
 import { useColorScheme } from 'nativewind';
-
+import { LinearGradient } from 'expo-linear-gradient';
 
 // Main Grocery Input Component
 const GroceryInputPage = () => {
@@ -28,6 +27,7 @@ const GroceryInputPage = () => {
     const { session } = useSession();
     const { setIsLoading, setGroceryRefinement, setGroceryShop, isLoading } = useGroceryContext();
     const { colorScheme } = useColorScheme();
+    const isDark = colorScheme === 'dark';
 
     const postData = async () => {
         try {
@@ -83,21 +83,30 @@ const GroceryInputPage = () => {
     };
 
     return (
+<LinearGradient
+      colors={isDark 
+        ? ['#1f2937', '#374151', '#4b5563'] 
+        : ['#667eea', '#764ba2', '#f093fb']
+      }
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={{ flex: 1 }}
+    >
         <ScrollView 
-            className="flex-1 bg-[#667eea] dark:bg-[#1f2937]" 
+            className="flex-1" 
             contentContainerStyle={{ flexGrow: 1 }}
         >
             <VStack className="flex-1 p-6 justify-center" space="lg">
                 {/* Header */}
                 <VStack space="md" className="items-center">
-                    <Heading className="text-4xl font-bold text-center text-white dark:text-gray-100">
+                    <Heading className="text-4xl font-bold text-center text-black dark:text-white">
                         Create Grocery List
                     </Heading>
                     <VStack space="xs" className="items-center">
-                        <Text className="text-sm text-gray-300 dark:text-gray-300 text-center">
+                        <Text className="text-sm text-black/70 dark:text-white/80 text-center">
                             Unsure of what groceries?
                         </Text>
-                        <Text className="text-sm text-gray-300 dark:text-gray-300 text-center">
+                        <Text className="text-sm text-black/70 dark:text-white/80 text-center">
                             Describe it and we will do the work!
                         </Text>
                     </VStack>
@@ -107,7 +116,7 @@ const GroceryInputPage = () => {
                 <VStack space="lg" className="w-full">
                     {/* Grocery Text Area */}
                     <VStack space="sm">
-                        <Text className="text-lg font-medium text-gray-100 dark:text-white">
+                        <Text className="text-lg font-medium text-black dark:text-white">
                             What groceries do you need?
                         </Text>
                         <Input className='min-h-32 bg-white dark:bg-gray-700 rounded-xl shadow-sm backdrop-blur-md border-gray-200 dark:border-gray-700'>
@@ -117,14 +126,15 @@ const GroceryInputPage = () => {
                                 onChangeText={setGroceryTextArea}
                                 multiline
                                 textAlignVertical="top"
-                                className="text-black dark:text-gray-100 p-4"
+                                className="text-black dark:text-white p-4"
+                                placeholderTextColor={isDark ? '#9CA3AF' : '#6B7280'}
                             />
                         </Input>
                     </VStack>
 
                     {/* Grocery Shops Selector */}
                     <VStack space="sm">
-                        <Text className="text-lg font-medium text-white dark:text-gray-100">
+                        <Text className="text-lg font-medium text-black dark:text-white">
                             Select Grocery Shops
                         </Text>
                         <DropdownSelector
@@ -148,32 +158,56 @@ const GroceryInputPage = () => {
                     )}
 
                     {/* Generate Button */}
-                    <Button
-                        onPress={postData}
-                        disabled={isLoading}
-                        className="h-14 bg-blue-600 hover:bg-blue-700 active:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 dark:active:bg-blue-600 rounded-xl shadow-lg disabled:opacity-50"
-                    >
-                        <HStack className="items-center" space="sm">
-                            {isLoading ? (
-                                <>
-                                    <Text className="text-white font-bold text-lg">
-                                        Generating...
-                                    </Text>
-                                </>
-                            ) : (
-                                <>
-                                    <AntDesign name="plus" size={20} color="white" />
-                                    <ButtonText className="text-white font-bold text-lg">
-                                        Generate Grocery List!
-                                    </ButtonText>
-                                </>
-                            )}
-                        </HStack>
-                    </Button>
+<TouchableOpacity
+  onPress={postData}
+  disabled={isLoading}
+  activeOpacity={0.8}
+  style={{
+    opacity: isLoading ? 0.5 : 1,
+  }}
+>
+  <LinearGradient
+    colors={isDark 
+      ? ['#4f46e5', '#7c3aed', '#db2777'] 
+      : ['#ff6b6b', '#ffa726', '#ffcc02']
+    }
+    start={{ x: 0, y: 0 }}
+    end={{ x: 1, y: 1 }}
+    style={{
+      height: 56,
+      borderRadius: 12,
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 8,
+    }}
+  >
+    <HStack className="items-center" space="sm">
+      {isLoading ? (
+        <>
+          <Text className="text-white font-bold text-lg">
+            Generating...
+          </Text>
+        </>
+      ) : (
+        <>
+          <AntDesign name="plus" size={20} color="white" />
+          <Text className="text-white font-bold text-lg">
+            Generate Grocery List!
+          </Text>
+        </>
+      )}
+    </HStack>
+  </LinearGradient>
+</TouchableOpacity>
 
                 </VStack>
             </VStack>
         </ScrollView>
+    </LinearGradient>
     );
 };
 

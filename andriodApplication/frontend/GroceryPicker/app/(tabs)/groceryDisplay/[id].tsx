@@ -6,11 +6,15 @@ import { Button, ButtonGroup, ButtonText } from '@/components/ui/button';
 import { useLocalSearchParams } from 'expo-router';
 import { useGroceryContext } from '@/context/groceryContext';
 import { ALLOWED_SUPERMARKETS, SavedGroceryList } from '../interface';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useColorScheme } from 'nativewind';
 
 const GroceryDisplay = () => {
   // Extract it as ID
   const { id: rawId } = useLocalSearchParams();
   const id = Array.isArray(rawId) ? rawId[0] : rawId ?? "";
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
   const { groceryListHistory } = useGroceryContext();
   const [currGroceryList, setCurrGroceryList] =
@@ -40,19 +44,38 @@ const GroceryDisplay = () => {
 
   if (!currGroceryList) {
     return (
-      <ScrollView contentContainerStyle={{ paddingTop: 52 }}>
-        <View className="px-4 gap-4 text-4xl font-bold text-black dark:text-white">
-          <Text className="text-4xl font-semibold mb-2">
-            Optimized Grocery List
-          </Text>
-        </View>
-      </ScrollView>
+      <LinearGradient
+        colors={isDark 
+          ? ['#1f2937', '#374151', '#4b5563'] 
+          : ['#667eea', '#764ba2', '#f093fb']
+        }
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ flex: 1 }}
+      >
+        <ScrollView contentContainerStyle={{ paddingTop: 52 }}>
+          <View className="px-4 gap-4 text-4xl font-bold">
+            <Text className="text-4xl font-semibold mb-2 text-black dark:text-white">
+              Optimized Grocery List
+            </Text>
+          </View>
+        </ScrollView>
+      </LinearGradient>
     );
   }
 
   return (
+   <LinearGradient
+      colors={isDark 
+        ? ['#1f2937', '#374151', '#4b5563'] 
+        : ['#667eea', '#764ba2', '#f093fb']
+      }
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={{ flex: 1 }}
+    >
     <ScrollView
-      className="bg-[#EEEEEE] dark:bg-black"
+      className="flex-1"
       contentContainerStyle={{ paddingTop: 52 }}
     >
       <View className="px-4 gap-4">
@@ -100,6 +123,7 @@ const GroceryDisplay = () => {
         </ButtonGroup> */}
       </View>
     </ScrollView>
+    </LinearGradient>
   );
 };
 

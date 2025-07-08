@@ -74,7 +74,7 @@ export default function HomePage() {
       end={{ x: 1, y: 1 }}
       style={{ flex: 1 }}
     >
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+      <ScrollView className='flex-1' contentContainerStyle={{ flexGrow: 1 }}>
         {/* Floating Dark Mode Toggle */}
         <View className="absolute top-12 right-6 z-10">
           <ColorModeSwitch />
@@ -84,20 +84,20 @@ export default function HomePage() {
           <View className="items-center py-8 w-full max-w-sm">
             <View className='flex-row items-center justify-items-center'>
               <Text 
-                className={`text-4xl font-bold ${isDark ? 'text-gray-100' : 'text-white'} mb-3 text-center`}
+                className={`text-4xl font-bold ${isDark ? 'text-white' : 'text-black'} mb-3 text-center`}
               >
                 Grocery Picker
               </Text>
             </View>
             
             <Text 
-              className={`text-xl ${isDark ? 'text-gray-200' : 'text-white/90'} mb-5 font-medium text-center`}
+              className={`text-xl ${isDark ? 'text-white/90' : 'text-black/80'} mb-5 font-medium text-center`}
             >
               Smart Shopping Made Simple
             </Text>
             
             <Text 
-              className={`text-base ${isDark ? 'text-gray-300' : 'text-white/70'} text-center leading-6 max-w-xs`}
+              className={`text-base ${isDark ? 'text-white/80' : 'text-black/80'} text-center leading-6 max-w-xs`}
             >
               Transform your shopping experience with AI-powered grocery lists that save time and reduce waste
             </Text>
@@ -107,20 +107,20 @@ export default function HomePage() {
           <View className="flex-row gap-1 mb-8 w-full max-w-sm">
             <View className={`flex-1 ${isDark ? 'bg-white/5' : 'bg-white/10'} backdrop-blur-md rounded-2xl p-4 items-center border ${isDark ? 'border-white/10' : 'border-white/20'}`}>
               <Text className="text-lg mb-1">📝</Text>
-              <Text className={`${isDark ? 'text-gray-100' : 'text-white'} font-bold text-xl`}>{noListCreated}</Text>
-              <Text className={`${isDark ? 'text-gray-300' : 'text-white/70'} text-sm text-center`}>Lists Created</Text>
+              <Text className={`${isDark ? 'text-white' : 'text-black'} font-bold text-xl`}>{noListCreated}</Text>
+              <Text className={`${isDark ? 'text-white/80' : 'text-black/80'} text-sm text-center`}>Lists Created</Text>
             </View>
             
             <View className={`flex-1 ${isDark ? 'bg-white/5' : 'bg-white/10'} backdrop-blur-md rounded-2xl p-4 items-center border ${isDark ? 'border-white/10' : 'border-white/20'}`}>
               <Text className="text-lg mb-1">🛍️</Text>
-              <Text className={`${isDark ? 'text-gray-100' : 'text-white'} font-bold text-xl`}>{noItems}</Text>
-              <Text className={`${isDark ? 'text-gray-300' : 'text-white/70'} text-sm text-center text-wrap text-gray-300 dark:text-gray-300`}>Items Managed</Text>
+              <Text className={`${isDark ? 'text-white' : 'text-black'} font-bold text-xl`}>{noItems}</Text>
+              <Text className={`${isDark ? 'text-white/80' : 'text-black/80'} text-sm text-center text-wrap`}>Items Managed</Text>
             </View>
             
             <View className={`flex-1 ${isDark ? 'bg-white/5' : 'bg-white/10'} backdrop-blur-md rounded-2xl p-4 items-center border ${isDark ? 'border-white/10' : 'border-white/20'}`}>
               <Text className="text-lg mb-1">🛒</Text>
-              <Text className={`${isDark ? 'text-gray-100' : 'text-white'} font-bold text-xl`}>{noListCompleted}</Text>
-              <Text className={`${isDark ? 'text-gray-300' : 'text-white/70'} text-sm text-center text-wrap text-gray-300 dark:text-gray-300`}>List Completed</Text>
+              <Text className={`${isDark ? 'text-white' : 'text-black'} font-bold text-xl`}>{noListCompleted}</Text>
+              <Text className={`${isDark ? 'text-white/80' : 'text-black/80'} text-sm text-center text-wrap`}>List Completed</Text>
             </View>
           </View>
 
@@ -167,7 +167,7 @@ export default function HomePage() {
                 >
                   <View className="items-center">
                     <Text className="text-lg mb-1">📋</Text>
-                    <Text className={`${isDark ? 'text-gray-100' : 'text-white'} font-semibold text-sm`}>History</Text>
+                    <Text className={`${isDark ? 'text-white' : 'text-black'} font-semibold text-sm`}>History</Text>
                   </View>
                 </Button>
               </View>
@@ -182,7 +182,7 @@ export default function HomePage() {
                 >
                   <View className="items-center">
                     <Text className="text-lg mb-1">🚪</Text>
-                    <Text className={`${isDark ? 'text-gray-100' : 'text-white'} font-semibold text-sm`}>Sign Out</Text>
+                    <Text className={`${isDark ? 'text-white' : 'text-black'} font-semibold text-sm`}>Sign Out</Text>
                   </View>
                 </Button>
               </View>

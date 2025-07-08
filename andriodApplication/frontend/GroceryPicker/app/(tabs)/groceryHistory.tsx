@@ -12,6 +12,8 @@ import { GroceryListModal } from '@/components/GroceryListModal';
 import { backend_url } from '@/lib/api';
 import { useSession } from '@/context/authContext';
 import { SavedGroceryList, ControllerError } from './interface';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useColorScheme } from 'nativewind';
 
 /*
   Page host grocery list history for each user.
@@ -26,6 +28,8 @@ const GroceryListHistoryPage = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [modalListID, setModalListID] = useState<string>('');
   const { session } = useSession();
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
   // Fetch grocery history from backend and cache into context
   const fetchGroceryHistory = async () => {
@@ -62,29 +66,54 @@ const GroceryListHistoryPage = () => {
   // Displays nothing when groceryListHistory is null or empty
   if (!groceryListHistory || groceryListHistory.length === 0) {
     return (
-      <ScrollView
-        contentContainerStyle={{ paddingTop: 60 }}
-        className="bg-[#EEEEEE] dark:bg-black"
+      <LinearGradient
+        colors={isDark 
+          ? ['#1f2937', '#374151', '#4b5563'] 
+          : ['#667eea', '#764ba2', '#f093fb']
+        }
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ flex: 1 }}
       >
-        <View className="px-6">
-          <Text className="text-4xl font-bold text-dark dark:text-white">
-            History
-          </Text>
-          <Text className="text-xl">History is Empty.</Text>
-        </View>
-      </ScrollView>
+        <ScrollView
+          contentContainerStyle={{ paddingTop: 60 }}
+          className="flex-1"
+          style={{ backgroundColor: 'transparent' }}
+        >
+          <View className="px-6">
+            <Text className="text-4xl font-bold text-black dark:text-white">
+              History
+            </Text>
+            <Text className="text-xl text-black/70 dark:text-white/80">
+              History is Empty.
+            </Text>
+          </View>
+        </ScrollView>
+      </LinearGradient>
     );
   }
 
   return (
-    <>
+     <LinearGradient
+      colors={isDark 
+        ? ['#1f2937', '#374151', '#4b5563'] 
+        : ['#667eea', '#764ba2', '#f093fb']
+      }
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={{ flex: 1 }}
+    >
       <ScrollView
         contentContainerStyle={{ paddingTop: 60 }}
-        className="bg-[#EEEEEE] dark:bg-black"
+        className="flex-1"
+        style={{ backgroundColor: 'transparent' }}
       >
         <View className="px-6 gap-4">
-          <Text className="text-4xl font-bold text-dark dark:text-white">
+          <Text className="text-4xl font-bold text-black dark:text-white">
             History
+          </Text>
+          <Text className="text-xl text-black/70 dark:text-white/80">
+            Hold on grocery list to edit
           </Text>
           <View className="gap-4">
             {groceryListHistory.map((list, idx) => {
@@ -97,17 +126,17 @@ const GroceryListHistoryPage = () => {
                     setIsModalOpen(true);
                   }}
                 >
-                  <Card className="bg-white dark:bg-gray-700 rounded-md">
+                  <Card className="bg-white/90 dark:bg-gray-700/90 rounded-xl border border-gray-200 dark:border-gray-600 shadow-lg backdrop-blur-sm">
                     <Text className="text-xl font-semibold text-black dark:text-white">
                       {list.title}
                     </Text>
-                    <Text className="text-xs font-normal text-gray-500 dark:text-gray-300">
+                    <Text className="text-xs font-normal text-black/70 dark:text-white/80">
                       {list.metadata ? list.metadata : ''}
                     </Text>
                     <Text
                       className={`text-md font-normal ${
                         GROCERY_LIST_STATUS_COLORS[list.list_status] ??
-                        'text-blackdark:text-white'
+                        'text-black dark:text-white'
                       }`}
                     >
                       {GROCERY_LIST_STATUS_LABELS[list.list_status]}
@@ -124,7 +153,7 @@ const GroceryListHistoryPage = () => {
         onClose={() => setIsModalOpen(false)}
         id={modalListID}
       />
-    </>
+    </LinearGradient>
   );
 };
 
