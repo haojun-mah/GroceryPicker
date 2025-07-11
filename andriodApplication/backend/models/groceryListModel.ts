@@ -143,85 +143,18 @@ export async function getAllUserLists(
   return sortedData || [];
 }
 
-// Function to update the status of a grocery list
-export async function updateGroceryListStatus(
-  userId: string,
-  listId: string,
-  newStatus: string,
-): Promise<{ success: boolean; message: string } | ControllerError> {
-  // Check ownership: ensure the list belongs to the user
-  const { data: list, error: listError } = await supabase
-    .from('grocery_lists')
-    .select('user_id')
-    .eq('list_id', listId)
-    .single();
-  if (listError || !list) {
-    return new ControllerError(404, 'List not found or access denied.');
-  }
-  if (list.user_id !== userId) {
-    return new ControllerError(403, 'Forbidden: You do not own this list.');
-  }
-
-  const { error } = await supabase
-    .from('grocery_lists')
-    .update({ list_status: newStatus })
-    .eq('list_id', listId)
-    .eq('user_id', userId);
-
-  if (error) {
-    console.error('Model: Error updating grocery list status:', error);
-    return new ControllerError(
-      500,
-      'Failed to update grocery list status.',
-      error.message,
-    );
-  }
-  return {
-    success: true,
-    message: 'Grocery list status updated successfully.',
-  };
-}
-
-// Function to update the status of a grocery list item
-export async function updateGroceryListItemStatus(
-  userId: string,
-  listId: string,
-  itemId: string,
-  fieldsToUpdate: Partial<SavedGroceryListItem>,
-): Promise<{ success: boolean; item?: any } | ControllerError> {
-  // Check ownership: ensure the list belongs to the user
-  const { data: list, error: listError } = await supabase
-    .from('grocery_lists')
-    .select('user_id')
-    .eq('list_id', listId)
-    .single();
-  if (listError || !list) {
-    return new ControllerError(404, 'List not found or access denied');
-  }
-  if (list.user_id !== userId) {
-    return new ControllerError(403, 'Forbidden');
-  }
-  // Update the specified fields for the item
-  const { data: item, error: itemError } = await supabase
-    .from('grocery_list_items')
-    .update(fieldsToUpdate)
-    .eq('list_id', listId)
-    .eq('item_id', itemId)
-    .select()
-    .single();
-  if (itemError || !item) {
-    return new ControllerError(404, 'Item not found or update failed');
-  }
-  return { success: true, item };
-}
-
 // Batch update grocery lists and their items.
 // Accepts an array of objects with at least list_id, and optionally list_status and grocery_list_items.
 // For each list:
-//   - If list_status is present, updates the list's status.
-//   - If grocery_list_items is present, only updates the 'purchased' field for each item (if both item_id and purchased are provided).
-//   - Ignores other fields in grocery_list_items for now.
-// Returns all updated lists and any errors.
+//   - If list_status is present, updates the list's status with validation.
+//   - If grocery_list_items is present, updates the 'purchased' field for each item (if both item_id and purchased are provided).
+//   - When purchased: true:
+//       - If purchased_price is provided, uses it (manual override).
+//       - If purchased_price is not provided, always snapshots the current product price (overriding any previous value).
+//   - When purchased: false:
+//       - Clears purchased_price (sets to null).
+//   - Ignores other fields in grocery_list_items.
+// Returns all updated lists and any errors. 
 export async function updateGroceryListsAndItems(
   userId: string,
   lists: (Partial<SavedGroceryList> & { list_id: string })[],
@@ -290,14 +223,59 @@ export async function updateGroceryListsAndItems(
 
     // Update each item if present
     if (Array.isArray(list.grocery_list_items) && list.grocery_list_items.length > 0) {
+      console.log(`Processing ${list.grocery_list_items.length} items for list ${list.list_id}`);
       for (const item of list.grocery_list_items) {
-        const { item_id, purchased } = item;
+        const { item_id, purchased, purchased_price } = item;
+        console.log(`Processing item: ${item_id}, purchased: ${purchased}, purchased_price: ${purchased_price}`);
         if (!item_id || typeof purchased === 'undefined') continue;
+
+        // Prepare update data with price tracking logic
+        let updateData: any = { purchased };
+
+        // Handle price snapshotting when item is marked as purchased
+        if (purchased === true) {
+          // If manual price is provided, use it
+          if (typeof purchased_price === 'number') {
+            updateData.purchased_price = purchased_price;
+          } else {
+            // Always snapshot the current product price if purchased is true and no manual price is provided
+            const { data: currentItem, error: currentItemError } = await supabase
+              .from('grocery_list_items')
+              .select('product_id')
+              .eq('item_id', item_id)
+              .eq('list_id', list.list_id)
+              .single();
+
+            if (!currentItemError && currentItem && currentItem.product_id) {
+              // Fetch current price from products table
+              const { data: productData, error: productError } = await supabase
+                .from('products')
+                .select('price')
+                .eq('product_id', currentItem.product_id)
+                .single();
+
+              if (!productError && productData && productData.price) {
+                // Remove currency symbols and parse
+                const cleanPriceString = productData.price.replace(/[$,]/g, '');
+                const priceNumber = parseFloat(cleanPriceString);
+                if (!isNaN(priceNumber)) {
+                  updateData.purchased_price = priceNumber;
+                }
+              }
+            }
+          }
+        } else if (purchased === false) {
+          // If unmarking as purchased, clear the purchased_price
+          updateData.purchased_price = null;
+        }
+
+        // Update the item with all prepared data
         const { error: itemError } = await supabase
           .from('grocery_list_items')
-          .update({ purchased })
+          .update(updateData)
           .eq('item_id', item_id)
           .eq('list_id', list.list_id);
+        
         if (itemError) {
           console.error(`Model: Error updating item ${item_id} in list ${list.list_id}:`, itemError);
           errors.push({
