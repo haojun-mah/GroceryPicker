@@ -271,6 +271,22 @@ const DropdownCard = ({
     outputRange: [0, 1],
   });
 
+  // Add this helper function to get the correct price to display
+  const getDisplayPrice = (item: SavedGroceryListItem): string => {
+    // If purchased_price exists and is not null, show it
+    if (item.purchased_price !== null && item.purchased_price !== undefined) {
+      return `$${item.purchased_price.toFixed(2)}`;
+    }
+    
+    // Otherwise, show the product price if it exists
+    if (item.product?.price) {
+      return `$${item.product.price}`;
+    }
+    
+    // If no price is available
+    return 'No price';
+  };
+
   // Get visual state for an item
   const getItemVisualState = (item: SavedGroceryListItem) => {
     const isPending = pendingUpdates.has(item.item_id);
@@ -416,7 +432,7 @@ const DropdownCard = ({
                             : 'text-red-600 dark:text-red-400'
                         }`}
                       >
-                        {item.product?.price}
+                        {getDisplayPrice(item)}
                       </Text>
                     </View>
                     {!isSelectItemsToEditState && (

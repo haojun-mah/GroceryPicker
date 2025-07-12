@@ -1,16 +1,16 @@
 import DropdownCard from '@/components/DropdownCard';
 import { Text } from '@/components/ui/text';
 import { useEffect, useState, useRef } from 'react';
-import { View, ScrollView, Animated, StatusBar } from 'react-native';
+import { View, ScrollView, Animated, StatusBar, Modal, TextInput, Alert, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useGroceryContext } from '@/context/groceryContext';
 import { ALLOWED_SUPERMARKETS, SavedGroceryList } from '../interface';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useColorScheme } from 'nativewind';
-import { Pressable } from 'react-native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { backend_url } from '@/lib/api';
 import { useSession } from '@/context/authContext';
+import { Image } from '@/components/ui/image';
 
 const GroceryDisplay = () => {
   const { session } = useSession();
@@ -20,7 +20,7 @@ const GroceryDisplay = () => {
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
 
-  const { groceryListHistory } = useGroceryContext();
+  const { groceryListHistory, setRefreshVersion } = useGroceryContext();
   const [currGroceryList, setCurrGroceryList] = useState<SavedGroceryList | null>(null);
   
   // Global selection state for all dropdown cards
@@ -28,8 +28,23 @@ const GroceryDisplay = () => {
   const [isSelectItemsToEditState, setIsSelectItemsToEditState] = useState(false);
   const [showEditHeader, setShowEditHeader] = useState(false);
   
+  // Modal state for edit quantity
+  const [showEditQuantityModal, setShowEditQuantityModal] = useState(false);
+  const [editingItem, setEditingItem] = useState<any>(null);
+  const [newQuantity, setNewQuantity] = useState('');
+  const [newPrice, setNewPrice] = useState('');
+  
   // Animation ref for header
   const headerAnimation = useRef(new Animated.Value(0)).current;
+
+  // Helper function to close modal and reset state
+  const closeEditModal = () => {
+    console.log('🔵 Closing edit modal');
+    setShowEditQuantityModal(false);
+    setEditingItem(null);
+    setNewQuantity('');
+    setNewPrice('');
+  };
 
   // Check ID exist and groceryListHistory is successfully fetched before calling for fetchDisplayInfo
   useEffect(() => {
@@ -75,58 +90,122 @@ const GroceryDisplay = () => {
 
   // Handle edit actions
   const handleEditAction = (action: 'delete' | 'mark-purchased' | 'mark-unpurchased' | 'edit-quantity') => {
-    const patchReq = async (list: SavedGroceryList) => {
+    const patchReq = async (modifiedList: SavedGroceryList) => {
       try {
+        // Create array with all grocery lists, replacing the modified one
+        const updatedGroceryListsArray = groceryListHistory?.map(list => 
+          list.list_id === modifiedList.list_id ? modifiedList : list
+        ) || [];
+        
+        console.log('🚀 Sending full array to API:', updatedGroceryListsArray);
+        console.log('🔍 Modified list:', modifiedList);
+        
         const response = await fetch(`${backend_url}/lists/update`, {
           method: 'PATCH',
           headers: {
             Authorization: `Bearer ${session?.access_token}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(list),
+          body: JSON.stringify(updatedGroceryListsArray), // Send entire array
         });
 
         if (!response.ok) {
           const error = await response.json();
           throw new Error(`Error ${error.statusCode}: ${error.message}`);
         } else {
-          console.log('Patch request successful from edit header:', list);
+          console.log('✅ Patch request successful - sent full array');
+          // REMOVED: Alert.alert('Success', 'Items updated successfully!');
+          
+          // Trigger refresh after successful update to sync with backend
+          setRefreshVersion(prev => prev + 1);
         }
       } catch (error) {
-        console.error('Error with patchReq:', error);
-
-    }
+        console.error('❌ Error with patchReq:', error);
+        Alert.alert('Error', 'Failed to update items. Please try again.');
+        
+        // Revert local state on error by refetching
+        setRefreshVersion(prev => prev + 1);
+      }
+    };
     
     if (currGroceryList === null) return;
 
+    let updatedList: SavedGroceryList;
+
     switch (action) {
       case 'mark-purchased':
-        const updatedList : SavedGroceryList = {
+        console.log('📋 Marking items as purchased:', selectedItemsToEdit);
+        updatedList = {
           ...currGroceryList,
           grocery_list_items: currGroceryList.grocery_list_items.map(i =>
             selectedItemsToEdit.includes(i.item_id) 
-              ? { ...i, purchased: true } // backend may change purchased into status
+              ? { ...i, item_status: 'purchased', purchased: true }
               : i
           ),
         };
+        console.log('📋 Updated list for purchase:', updatedList);
+        
+        // Update local state immediately (optimistic update)
+        setCurrGroceryList(updatedList);
+        
+        // Then send to backend
+        patchReq(updatedList);
+        break;
+        
       case 'mark-unpurchased':
-        selectedItemsToEdit.forEach(itemId => {
-          const item = currGroceryList?.grocery_list_items?.find(i => i.item_id === itemId);
-          if (item) {
-            // Handle unpurchase logic here - you'll need to implement this
-            console.log('Mark as unpurchased:', itemId);
-          }
-        });
+        console.log('📋 Marking items as unpurchased:', selectedItemsToEdit);
+        updatedList = {
+          ...currGroceryList,
+          grocery_list_items: currGroceryList.grocery_list_items.map(i =>
+            selectedItemsToEdit.includes(i.item_id) 
+              ? { ...i, item_status: 'unpurchased', purchased: false }
+              : i
+          ),
+        };
+        console.log('📋 Updated list for unpurchase:', updatedList);
+        
+        // Update local state immediately (optimistic update)
+        setCurrGroceryList(updatedList);
+        
+        // Then send to backend
+        patchReq(updatedList);
         break;
+        
       case 'delete':
-        console.log('Delete items:', selectedItemsToEdit);
+        console.log('🗑️ Deleting items:', selectedItemsToEdit);
+        updatedList = {
+          ...currGroceryList,
+          grocery_list_items: currGroceryList.grocery_list_items.filter(i =>
+            !selectedItemsToEdit.includes(i.item_id) // Remove items completely for better UX
+          ),
+        };
+        console.log('🗑️ Updated list for delete:', updatedList);
+        
+        // Update local state immediately (optimistic update)
+        setCurrGroceryList(updatedList);
+        
+        // Then send to backend
+        patchReq(updatedList);
         break;
+        
       case 'edit-quantity':
-        console.log('Edit quantity for:', selectedItemsToEdit);
+        // Instead of returning JSX, we set state to show the modal
+        if (selectedItemsToEdit.length === 1) {
+          const itemToEdit = currGroceryList.grocery_list_items.find(
+            item => item.item_id === selectedItemsToEdit[0]
+          );
+          if (itemToEdit) {
+            setEditingItem(itemToEdit);
+            setNewQuantity(String(itemToEdit.quantity));
+            setNewPrice(String(itemToEdit.product?.price || ''));
+            setShowEditQuantityModal(true);
+            return; // Don't exit selection mode yet
+          }
+        }
         break;
     }
     
-    // Exit selection mode
+    // Exit selection mode for other actions
     exitSelectionMode();
   };
 
@@ -134,6 +213,64 @@ const GroceryDisplay = () => {
     setSelectedItemsToEdit([]);
     setIsSelectItemsToEditState(false);
     setShowEditHeader(false);
+  };
+
+  // Handle quantity update
+  const handleQuantityUpdate = async () => {
+    if (!editingItem || !currGroceryList) return;
+
+    const updatedList: SavedGroceryList = {
+      ...currGroceryList,
+      grocery_list_items: currGroceryList.grocery_list_items.map(item =>
+        item.item_id === editingItem.item_id
+          ? {
+              ...item,
+              quantity: parseFloat(newQuantity) || item.quantity,
+              purchased_price: newPrice ? parseFloat(newPrice) : item.purchased_price, // Update purchased_price
+            }
+          : item
+      ),
+    };
+
+    // Update local state immediately (optimistic update)
+    setCurrGroceryList(updatedList);
+    
+    // Close modal and exit selection mode immediately
+    setShowEditQuantityModal(false);
+    setEditingItem(null);
+    setNewQuantity('');
+    setNewPrice('');
+    exitSelectionMode();
+
+    try {
+      // Create array with all grocery lists, replacing the modified one
+      const updatedGroceryListsArray = groceryListHistory?.map(list => 
+        list.list_id === updatedList.list_id ? updatedList : list
+      ) || [];
+      
+      console.log('🚀 Sending full array to API for quantity update:', updatedGroceryListsArray);
+      
+      const response = await fetch(`${backend_url}/lists/update`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedGroceryListsArray),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(`Error ${error.statusCode}: ${error.message}`);
+      } else {
+        console.log('✅ Quantity update successful - sent full array');
+        setRefreshVersion(prev => prev + 1);
+      }
+    } catch (error) {
+      console.error('❌ Error updating quantity:', error);
+      Alert.alert('Error', 'Failed to update item. Please try again.');
+      setRefreshVersion(prev => prev + 1);
+    }
   };
 
   // Global Edit Header Component
@@ -209,16 +346,19 @@ const GroceryDisplay = () => {
               />
             </Pressable>
             
-            <Pressable 
-              onPress={() => handleEditAction('edit-quantity')}
-              className={`p-2 rounded-full ${isDark ? 'bg-gray-600' : 'bg-gray-100'}`}
-            >
-              <AntDesign 
-                name="edit" 
-                size={20} 
-                color={isDark ? '#3B82F6' : '#2563EB'} 
-              />
-            </Pressable>
+            {/* Only show edit quantity button when exactly 1 item is selected */}
+            {selectedItemsToEdit.length === 1 && (
+              <Pressable 
+                onPress={() => handleEditAction('edit-quantity')}
+                className={`p-2 rounded-full ${isDark ? 'bg-gray-600' : 'bg-gray-100'}`}
+              >
+                <AntDesign 
+                  name="edit" 
+                  size={20} 
+                  color={isDark ? '#3B82F6' : '#2563EB'} 
+                />
+              </Pressable>
+            )}
             
             <Pressable 
               onPress={() => handleEditAction('delete')}
@@ -269,6 +409,114 @@ const GroceryDisplay = () => {
       style={{ flex: 1 }}
     >
       <EditHeader />
+      
+      {/* Edit Quantity Modal */}
+      <Modal
+        visible={showEditQuantityModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => {
+          closeEditModal();
+        }}
+      >
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1 }}
+        >
+          <Pressable 
+            className="flex-1 bg-black/50 justify-center items-center"
+            onPress={() => {
+              // Close modal when tapping outside
+              closeEditModal();
+            }}
+          >
+            <Pressable
+              className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 mx-4 w-80 max-w-sm`}
+              onPress={(e) => e.stopPropagation()} // Prevent modal from closing when tapping inside
+            >
+            <Text className={`text-xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              Edit Item
+            </Text>
+            
+            {editingItem && (
+              <>
+                {/* Item Image */}
+                <View className="items-center mb-4">
+                  <Image
+                    source={{
+                      uri: editingItem.product?.image_url || '',
+                    }}
+                    alt="Item image"
+                    className="w-20 h-20 rounded-lg bg-gray-300" // Smaller image
+                  />
+                </View>
+                
+                {/* Item Name - More compact */}
+                <Text className={`text-lg font-semibold mb-3 text-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  {editingItem.product?.name || editingItem.name}
+                </Text>
+                
+                {/* Amount Purchased Input */}
+                <View className="mb-3">
+                  <Text className={`text-sm font-medium mb-2 ${isDark ? 'text-white' : 'text-gray-700'}`}>
+                    Amount Purchased ({editingItem.unit})
+                  </Text>
+                  <TextInput
+                    value={newQuantity}
+                    onChangeText={setNewQuantity}
+                    keyboardType="numeric"
+                    className={`${isDark ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'} px-4 py-2 rounded-lg border ${isDark ? 'border-gray-600' : 'border-gray-300'}`}
+                    placeholder="Enter amount"
+                    placeholderTextColor={isDark ? '#9CA3AF' : '#6B7280'}
+                    autoFocus={true}
+                    selectTextOnFocus={true}
+                  />
+                </View>
+                
+                {/* Price Purchased Input */}
+                <View className="mb-4">
+                  <Text className={`text-sm font-medium mb-2 ${isDark ? 'text-white' : 'text-gray-700'}`}>
+                    Price Purchased
+                  </Text>
+                  <TextInput
+                    value={newPrice}
+                    onChangeText={setNewPrice}
+                    keyboardType="numeric"
+                    className={`${isDark ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'} px-4 py-2 rounded-lg border ${isDark ? 'border-gray-600' : 'border-gray-300'}`}
+                    placeholder="Enter price"
+                    placeholderTextColor={isDark ? '#9CA3AF' : '#6B7280'}
+                    selectTextOnFocus={true}
+                  />
+                </View>
+                
+                {/* Buttons */}
+                <View className="flex-row justify-between">
+                  <Pressable
+                    onPress={() => {
+                      closeEditModal();
+                    }}
+                    className={`flex-1 mr-2 py-2 px-4 rounded-lg ${isDark ? 'bg-gray-600' : 'bg-gray-200'}`}
+                  >
+                    <Text className={`text-center font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                      Cancel
+                    </Text>
+                  </Pressable>
+                  
+                  <Pressable
+                    onPress={handleQuantityUpdate}
+                    className="flex-1 ml-2 py-2 px-4 rounded-lg bg-blue-600"
+                  >
+                    <Text className="text-center font-medium text-white">
+                      Update
+                    </Text>
+                  </Pressable>
+                </View>
+              </>
+            )}
+          </Pressable>
+        </Pressable>
+        </KeyboardAvoidingView>
+      </Modal>
       
       <ScrollView
         className="flex-1"
