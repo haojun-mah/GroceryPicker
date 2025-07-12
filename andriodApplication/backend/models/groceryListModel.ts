@@ -42,7 +42,7 @@ export async function saveUserGroceryList(
     name: item.name,
     quantity: item.quantity,
     unit: item.unit,
-    purchased: false,
+    item_status: 'incomplete', // default status
     product_id: item.product_id || null, // direct mapping to products table
     amount: item.amount !== undefined ? item.amount : 0, // default to 0 if not provided
   }));
@@ -146,15 +146,15 @@ export async function getAllUserLists(
 // Batch update grocery lists and their items.
 // Accepts an array of objects with at least list_id, and optionally list_status and grocery_list_items.
 // For each list:
-//   - If list_status is present, updates the list's status with validation.
-//   - If grocery_list_items is present, updates the 'purchased' field for each item (if both item_id and purchased are provided).
-//   - When purchased: true:
+//   - If list_status is present, updates the list's status (with strict validation).
+//   - If grocery_list_items is present, updates the 'item_status' field for each item (if both item_id and item_status are provided).
+//   - When item_status: 'purchased':
 //       - If purchased_price is provided, uses it (manual override).
 //       - If purchased_price is not provided, always snapshots the current product price (overriding any previous value).
-//   - When purchased: false:
+//   - When item_status: 'incomplete', 'archived', or 'deleted':
 //       - Clears purchased_price (sets to null).
 //   - Ignores other fields in grocery_list_items.
-// Returns all updated lists and any errors. 
+// Returns all updated lists and any errors. Always overrides purchased_price on new purchase requests.
 export async function updateGroceryListsAndItems(
   userId: string,
   lists: (Partial<SavedGroceryList> & { list_id: string })[],
@@ -223,22 +223,20 @@ export async function updateGroceryListsAndItems(
 
     // Update each item if present
     if (Array.isArray(list.grocery_list_items) && list.grocery_list_items.length > 0) {
-      console.log(`Processing ${list.grocery_list_items.length} items for list ${list.list_id}`);
       for (const item of list.grocery_list_items) {
-        const { item_id, purchased, purchased_price } = item;
-        console.log(`Processing item: ${item_id}, purchased: ${purchased}, purchased_price: ${purchased_price}`);
-        if (!item_id || typeof purchased === 'undefined') continue;
+        const { item_id, item_status, purchased_price } = item;
+        if (!item_id || typeof item_status === 'undefined') continue;
 
         // Prepare update data with price tracking logic
-        let updateData: any = { purchased };
+        let updateData: any = { item_status };
 
         // Handle price snapshotting when item is marked as purchased
-        if (purchased === true) {
+        if (item_status === 'purchased') {
           // If manual price is provided, use it
           if (typeof purchased_price === 'number') {
             updateData.purchased_price = purchased_price;
           } else {
-            // Always snapshot the current product price if purchased is true and no manual price is provided
+            // Always snapshot the current product price if item_status is 'purchased' and no manual price is provided
             const { data: currentItem, error: currentItemError } = await supabase
               .from('grocery_list_items')
               .select('product_id')
@@ -264,8 +262,8 @@ export async function updateGroceryListsAndItems(
               }
             }
           }
-        } else if (purchased === false) {
-          // If unmarking as purchased, clear the purchased_price
+        } else {
+          // If not purchased, clear the purchased_price
           updateData.purchased_price = null;
         }
 

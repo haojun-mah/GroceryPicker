@@ -12,12 +12,12 @@ import { updateGroceryListsAndItems } from '../models/groceryListModel';
  * Each object requires:
  * - list_id: string (required)
  * - Optionally, list_status (will be updated if present and valid)
- * - Optionally, grocery_list_items: array of { item_id: string, purchased: boolean, purchased_price?: number }
+ * - Optionally, grocery_list_items: array of { item_id: string, item_status: GroceryListStatus, purchased_price?: number }
  *
  * Price Tracking:
- * - When purchased=true and no purchased_price provided: automatically uses current product price
- * - When purchased=true and purchased_price provided: uses the manual price override
- * - When purchased=false: purchased_price is reset to null
+ * - When item_status='purchased' and no purchased_price provided: automatically uses current product price
+ * - When item_status='purchased' and purchased_price provided: uses the manual price override
+ * - When item_status!='purchased': purchased_price is reset to null
  *
  * Minimal requests can be:
  * 1. Just list status: { "list_id": "...", "list_status": "deleted" }
@@ -25,7 +25,7 @@ import { updateGroceryListsAndItems } from '../models/groceryListModel';
  * 3. Both
  *
  * Notes:
- * - Only list_status and item fields (purchased, purchased_price) are updated. Other fields in payload are ignored.
+ * - Only list_status and item fields (item_status, purchased_price) are updated. Other fields in payload are ignored.
  * - Returns the full updated SavedGroceryList objects with all fields populated.
  * - If any list fails to update, a 207 is returned with error details for those lists.
  */
