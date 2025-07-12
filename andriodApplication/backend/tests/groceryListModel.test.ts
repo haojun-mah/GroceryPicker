@@ -59,7 +59,7 @@ describe('groceryListModel', () => {
         unit: 'loaves',
         product_id: 'prod-1',
         amount: 2,
-        purchased: false
+        item_status: 'incomplete'
       }
     ]
   };
@@ -153,7 +153,7 @@ describe('groceryListModel', () => {
             unit: 'loaves',
             product_id: 'prod-1',
             amount: 2,
-            purchased: true
+            item_status: 'purchased' as const
           }
         ]
       }
@@ -194,7 +194,7 @@ describe('groceryListModel', () => {
               unit: 'loaves',
               product_id: 'prod-1',
               amount: 2,
-              purchased: false,
+              item_status: 'incomplete' as const,
               purchased_price: 3.5 // previously set
             }
           ]
