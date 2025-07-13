@@ -41,7 +41,14 @@ export class ControllerSuccess {
 }
 
 export interface SupermarketFilter {
-  exclude?: string[];
+  exclude?: SupermarketName[];
+}
+
+// Helper to sanitize/validate supermarket filter
+export function sanitizeSupermarketFilter(filter: SupermarketFilter): SupermarketFilter {
+  return {
+    exclude: filter.exclude?.filter((s) => ALLOWED_SUPERMARKETS.includes(s as SupermarketName)),
+  };
 }
 
 export interface AiPromptRequestBody {
@@ -108,12 +115,11 @@ export interface SavedGroceryListItem {
   name: string;
   quantity: number;
   unit: string;
-  item_status: GroceryListStatus;
+  item_status: GroceryListStatus; // replaces purchased: boolean
   product_id?: string | null; // allow null for items without products
   amount?: number; // 0 means no optimization data available
   purchased_price?: number | null; // price when item was purchased, null if not purchased yet
   product?: ProductRow;
-  item_status: string; // incomplete | purchased | deleted
 }
 
 export interface ProductRow {
@@ -137,18 +143,25 @@ export const GROCERY_LIST_STATUSES = [
   'archived',
   'deleted',
 ] as const;
-export type GroceryListStatus = (typeof GROCERY_LIST_STATUSES)[number] | string;
+export type GroceryListStatus = (typeof GROCERY_LIST_STATUSES)[number];
+
+// Helper to validate list_status at runtime
+export function isValidGroceryListStatus(status: any): status is GroceryListStatus {
+  return GROCERY_LIST_STATUSES.includes(status);
+}
 
 export const GROCERY_LIST_STATUS_LABELS: Record<GroceryListStatus, string> = {
   incomplete: 'Not Purchased Yet',
   purchased: 'Purchased',
   archived: 'Archived',
+  deleted: 'Deleted',
 };
 
 export const GROCERY_LIST_STATUS_COLORS: Record<GroceryListStatus, string> = {
   incomplete: 'text-red-500 dark:text-red-400',
   purchased: 'text-green-600 dark:text-green-400',
   archived: 'text-gray-500 dark:text-gray-300',
+  deleted: 'text-gray-500 dark:text-gray-300',
 };
 
 export const ALLOWED_SUPERMARKETS = [

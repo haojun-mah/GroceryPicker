@@ -24,6 +24,7 @@ export default function HomePage() {
 
   const fetchGroceryHistory = async () => {
     try {
+      console.log('🔍 Fetching grocery history...');
       const response = await fetch(`${backend_url}/lists/getAll`, {
         method: 'GET',
         headers: {
@@ -34,12 +35,18 @@ export default function HomePage() {
 
       if (response.ok) {
         const data: SavedGroceryList[] = await response.json();
+        console.log('🔍 Fetched grocery lists:', data);
+        console.log('🔍 Number of lists:', data.length);
+        if (data.length > 0) {
+          console.log('🔍 First list ID:', data[0].list_id, 'Type:', typeof data[0].list_id);
+        }
         setNoListCreated(data.length);
         setNoItems(data.flatMap(list => list.grocery_list_items).length);
         setNoListCompleted(data.filter(list => list.list_status === 'purchased').length);
         setGroceryListHistory(data);
       } else {
         const error: ControllerError = await response.json();
+        console.error('🔍 Error fetching grocery history:', error);
         throw new Error(`Error ${error.statusCode}: ${error.message}`);
       }
     } catch (error) {

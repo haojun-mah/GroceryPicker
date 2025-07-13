@@ -82,10 +82,15 @@ const DropdownCard = ({
   }>>([]);
   const isProcessingRef = useRef(false);
 
+  // Helper function to get purchased status from item_status
+  const getItemPurchasedStatus = (item: SavedGroceryListItem): boolean => {
+    return item.item_status === 'purchased';
+  };
+
   // Initialize local state from server data
   const serverStateRef = useRef<string>('');
   useEffect(() => {
-    const serverStateKey = insideText.map(item => `${item.item_id}:${item.purchased}`).join('|');
+    const serverStateKey = insideText.map(item => `${item.item_id}:${getItemPurchasedStatus(item)}`).join('|');
     
     if (serverStateKey !== serverStateRef.current) {
       serverStateRef.current = serverStateKey;
@@ -93,9 +98,9 @@ const DropdownCard = ({
       const newLocalState: {[key: string]: boolean} = {};
       insideText.forEach(item => {
         if (!pendingUpdates.has(item.item_id)) {
-          newLocalState[item.item_id] = item.purchased;
+          newLocalState[item.item_id] = getItemPurchasedStatus(item);
         } else {
-          newLocalState[item.item_id] = localPurchasedState[item.item_id] ?? item.purchased;
+          newLocalState[item.item_id] = localPurchasedState[item.item_id] ?? getItemPurchasedStatus(item);
         }
       });
       
@@ -105,7 +110,7 @@ const DropdownCard = ({
         const newFailedUpdates = new Set(failedUpdates);
         failedUpdates.forEach(itemId => {
           const serverItem = insideText.find(i => i.item_id === itemId);
-          if (serverItem && localPurchasedState[itemId] === serverItem.purchased) {
+          if (serverItem && localPurchasedState[itemId] === getItemPurchasedStatus(serverItem)) {
             newFailedUpdates.delete(itemId);
           }
         });
@@ -137,7 +142,7 @@ const DropdownCard = ({
       const allItemsPurchased = insideText.every(item => {
         const currentState = item.item_id === update.item_id 
           ? update.purchased 
-          : localPurchasedState[item.item_id] ?? item.purchased;
+          : localPurchasedState[item.item_id] ?? getItemPurchasedStatus(item);
         return currentState;
       });
       const list_purchased = allItemsPurchased ? 'purchased' : 'incomplete';
@@ -147,7 +152,7 @@ const DropdownCard = ({
         list_status: list_purchased,
         grocery_list_items: [{
           item_id: update.item_id,
-          purchased: update.purchased,
+          item_status: update.purchased ? 'purchased' : 'incomplete',
         }],
       }];
 
@@ -176,7 +181,7 @@ const DropdownCard = ({
         if (serverItem) {
           setLocalPurchasedState(prev => ({
             ...prev,
-            [update.item_id]: serverItem.purchased
+            [update.item_id]: getItemPurchasedStatus(serverItem)
           }));
         }
       } else {
@@ -206,7 +211,7 @@ const DropdownCard = ({
       if (serverItem) {
         setLocalPurchasedState(prev => ({
           ...prev,
-          [update.item_id]: serverItem.purchased
+          [update.item_id]: getItemPurchasedStatus(serverItem)
         }));
       }
     }
@@ -291,7 +296,7 @@ const DropdownCard = ({
   const getItemVisualState = (item: SavedGroceryListItem) => {
     const isPending = pendingUpdates.has(item.item_id);
     const isFailed = failedUpdates.has(item.item_id);
-    const isPurchased = localPurchasedState[item.item_id] ?? item.purchased;
+    const isPurchased = localPurchasedState[item.item_id] ?? getItemPurchasedStatus(item);
     const isSelected = selectedItemsToEdit.includes(item.item_id);
     
     return {

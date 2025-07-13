@@ -75,17 +75,50 @@ const GroceryDisplay = () => {
 
   // filter target grocery list from context with ID
   const fetchDisplayInfo = async () => {
+    console.log('🔍 DEBUG: groceryListHistory:', groceryListHistory);
+    console.log('🔍 DEBUG: Looking for ID:', id, 'Type:', typeof id);
+    console.log('🔍 DEBUG: groceryListHistory length:', groceryListHistory?.length);
+    
+    if (groceryListHistory) {
+      console.log('🔍 DEBUG: Available list_ids:', groceryListHistory.map(list => ({ 
+        list_id: list.list_id, 
+        type: typeof list.list_id 
+      })));
+    }
+    
     const list = groceryListHistory?.find(
       (list) => String(list.list_id) === String(id),
     );
+    
+    // If list is not found in context, try to fetch it directly from the backend
+    if (!list && id) {
+      console.log('🔍 List not found in context, fetching directly from backend...');
+      try {
+        const response = await fetch(`${backend_url}/lists/${id}`, {
+          headers: {
+            Authorization: `Bearer ${session?.access_token}`,
+          },
+        });
+        
+        if (response.ok) {
+          const fetchedList = await response.json();
+          console.log('🔍 Fetched list directly from backend:', fetchedList);
+          setCurrGroceryList(fetchedList);
+          
+          // Also update the context with the new list
+          setRefreshVersion(prev => prev + 1);
+          return;
+        } else {
+          console.error('❌ Failed to fetch list from backend:', response.status);
+        }
+      } catch (error) {
+        console.error('❌ Error fetching list from backend:', error);
+      }
+    }
+    
     setCurrGroceryList(list ?? null);
-    console.log(
-      'Check displayid page. Expecting JSON containing singular grocery list',
-    );
-    console.log(
-      'Check display if it has target grocery list mounted:\n',
-      list,
-    );
+    console.log('Check displayid page. Expecting JSON containing singular grocery list');
+    console.log('Check display if it has target grocery list mounted:\n', list);
   };
 
   // Handle edit actions
@@ -139,7 +172,7 @@ const GroceryDisplay = () => {
           ...currGroceryList,
           grocery_list_items: currGroceryList.grocery_list_items.map(i =>
             selectedItemsToEdit.includes(i.item_id) 
-              ? { ...i, item_status: 'purchased', purchased: true }
+              ? { ...i, item_status: 'purchased' }
               : i
           ),
         };
@@ -158,7 +191,7 @@ const GroceryDisplay = () => {
           ...currGroceryList,
           grocery_list_items: currGroceryList.grocery_list_items.map(i =>
             selectedItemsToEdit.includes(i.item_id) 
-              ? { ...i, item_status: 'unpurchased', purchased: false }
+              ? { ...i, item_status: 'incomplete' }
               : i
           ),
         };
@@ -197,7 +230,7 @@ const GroceryDisplay = () => {
           if (itemToEdit) {
             setEditingItem(itemToEdit);
             setNewQuantity(String(itemToEdit.quantity));
-            setNewPrice(String(itemToEdit.product?.price || ''));
+            setNewPrice(String(itemToEdit.purchased_price || itemToEdit.product?.price || ''));
             setShowEditQuantityModal(true);
             return; // Don't exit selection mode yet
           }
@@ -219,14 +252,30 @@ const GroceryDisplay = () => {
   const handleQuantityUpdate = async () => {
     if (!editingItem || !currGroceryList) return;
 
+    // Validate inputs
+    const quantityNumber = parseFloat(newQuantity);
+    const priceNumber = parseFloat(newPrice);
+    
+    if (isNaN(quantityNumber) || quantityNumber <= 0) {
+      Alert.alert('Invalid Input', 'Please enter a valid quantity greater than 0.');
+      return;
+    }
+
+    if (newPrice && (isNaN(priceNumber) || priceNumber < 0)) {
+      Alert.alert('Invalid Input', 'Please enter a valid price (or leave empty).');
+      return;
+    }
+
+    console.log('🔵 Updating quantity for item:', editingItem.name, 'New quantity:', quantityNumber, 'New price:', priceNumber);
+
     const updatedList: SavedGroceryList = {
       ...currGroceryList,
       grocery_list_items: currGroceryList.grocery_list_items.map(item =>
         item.item_id === editingItem.item_id
           ? {
               ...item,
-              quantity: parseFloat(newQuantity) || item.quantity,
-              purchased_price: newPrice ? parseFloat(newPrice) : item.purchased_price, // Update purchased_price
+              quantity: quantityNumber,
+              purchased_price: priceNumber || item.purchased_price,
             }
           : item
       ),
@@ -236,10 +285,7 @@ const GroceryDisplay = () => {
     setCurrGroceryList(updatedList);
     
     // Close modal and exit selection mode immediately
-    setShowEditQuantityModal(false);
-    setEditingItem(null);
-    setNewQuantity('');
-    setNewPrice('');
+    closeEditModal();
     exitSelectionMode();
 
     try {
