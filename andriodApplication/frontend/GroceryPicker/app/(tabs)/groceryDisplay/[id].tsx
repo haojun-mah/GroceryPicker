@@ -254,21 +254,15 @@ const GroceryDisplay = () => {
   const handleQuantityUpdate = async () => {
     if (!editingItem || !currGroceryList) return;
 
-    // Validate inputs
-    const quantityNumber = parseFloat(newQuantity);
+    // Only validate price input now
     const priceNumber = parseFloat(newPrice);
     
-    if (isNaN(quantityNumber) || quantityNumber <= 0) {
-      Alert.alert('Invalid Input', 'Please enter a valid quantity greater than 0.');
-      return;
-    }
-
     if (newPrice && (isNaN(priceNumber) || priceNumber < 0)) {
       Alert.alert('Invalid Input', 'Please enter a valid price (or leave empty).');
       return;
     }
 
-    console.log('🔵 Updating quantity for item:', editingItem.name, 'New quantity:', quantityNumber, 'New price:', priceNumber);
+    console.log('🔵 Updating price for item:', editingItem.name, 'New price:', priceNumber);
 
     const updatedList: SavedGroceryList = {
       ...currGroceryList,
@@ -276,7 +270,7 @@ const GroceryDisplay = () => {
         item.item_id === editingItem.item_id
           ? {
               ...item,
-              quantity: quantityNumber,
+              // Only update purchased_price, keep quantity unchanged
               purchased_price: priceNumber || item.purchased_price,
             }
           : item
@@ -290,12 +284,24 @@ const GroceryDisplay = () => {
     closeEditModal();
 
     try {
-      // Create array with all grocery lists, replacing the modified one
-      const updatedGroceryListsArray = groceryListHistory?.map(list => 
-        list.list_id === updatedList.list_id ? updatedList : list
-      ) || [];
+      // Send only the specific item that was updated
+      const updatedItem = updatedList.grocery_list_items.find(item => item.item_id === editingItem.item_id);
       
-      console.log('🚀 Sending full array to API for quantity update:', updatedGroceryListsArray);
+      if (!updatedItem) {
+        throw new Error('Updated item not found');
+      }
+
+      const requestBody = [{
+        list_id: currGroceryList.list_id,
+        list_status: currGroceryList.list_status,
+        grocery_list_items: [{
+          item_id: updatedItem.item_id,
+          purchased_price: updatedItem.purchased_price,
+          // Only include the fields that were actually updated
+        }],
+      }];
+      
+      console.log('🚀 Sending minimal item update to API:', requestBody);
       
       const response = await fetch(`${backend_url}/lists/update`, {
         method: 'PATCH',
@@ -303,18 +309,18 @@ const GroceryDisplay = () => {
           Authorization: `Bearer ${session?.access_token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(updatedGroceryListsArray),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
         const error = await response.json();
         throw new Error(`Error ${error.statusCode}: ${error.message}`);
       } else {
-        console.log('✅ Quantity update successful');
+        console.log('✅ Price update successful');
         setRefreshVersion(prev => prev + 1);
       }
     } catch (error) {
-      console.error('❌ Error updating quantity:', error);
+      console.error('❌ Error updating price:', error);
       Alert.alert('Error', 'Failed to update item. Please try again.');
       setRefreshVersion(prev => prev + 1);
     }
@@ -494,31 +500,16 @@ const GroceryDisplay = () => {
                       uri: editingItem.product?.image_url || '',
                     }}
                     alt="Item image"
-                    className="w-20 h-20 rounded-lg bg-gray-300" // Smaller image
+                    className="w-20 h-20 rounded-lg bg-gray-300"
                   />
                 </View>
                 
-                {/* Item Name - More compact */}
+                {/* Item Name */}
                 <Text className={`text-lg font-semibold mb-3 text-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
                   {editingItem.product?.name || editingItem.name}
                 </Text>
                 
-                {/* Amount Purchased Input */}
-                <View className="mb-3">
-                  <Text className={`text-sm font-medium mb-2 ${isDark ? 'text-white' : 'text-gray-700'}`}>
-                    Amount Purchased ({editingItem.unit})
-                  </Text>
-                  <TextInput
-                    value={newQuantity}
-                    onChangeText={setNewQuantity}
-                    keyboardType="numeric"
-                    className={`${isDark ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'} px-4 py-2 rounded-lg border ${isDark ? 'border-gray-600' : 'border-gray-300'}`}
-                    placeholder="Enter amount"
-                    placeholderTextColor={isDark ? '#9CA3AF' : '#6B7280'}
-                    autoFocus={true}
-                    selectTextOnFocus={true}
-                  />
-                </View>
+                {/* Remove the Amount Purchased section entirely */}
                 
                 {/* Price Purchased Input */}
                 <View className="mb-4">
@@ -530,8 +521,9 @@ const GroceryDisplay = () => {
                     onChangeText={setNewPrice}
                     keyboardType="numeric"
                     className={`${isDark ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'} px-4 py-2 rounded-lg border ${isDark ? 'border-gray-600' : 'border-gray-300'}`}
-                    placeholder="Enter price"
+                    placeholder="Enter price (without $)"
                     placeholderTextColor={isDark ? '#9CA3AF' : '#6B7280'}
+                    autoFocus={true}
                     selectTextOnFocus={true}
                   />
                 </View>

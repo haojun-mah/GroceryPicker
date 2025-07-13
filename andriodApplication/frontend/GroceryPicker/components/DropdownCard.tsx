@@ -276,16 +276,16 @@ const DropdownCard = ({
     outputRange: [0, 1],
   });
 
-  // Fix the getDisplayPrice function to not add extra $ symbols
+  // Update the getDisplayPrice function to properly prioritize purchased_price
   const getDisplayPrice = (item: SavedGroceryListItem): string => {
-    // If purchased_price exists and is not null, show it
+    // If purchased_price exists and is not null, show it with $ symbol
     if (item.purchased_price !== null && item.purchased_price !== undefined) {
       return `$${item.purchased_price.toFixed(2)}`;
     }
     
-    // Otherwise, show the product price if it exists (don't add $ since it's already there)
+    // Otherwise, show the product price if it exists (already has $ symbol)
     if (item.product?.price) {
-      return item.product.price; // Remove the extra $ here
+      return item.product.price;
     }
     
     // If no price is available
