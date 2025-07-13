@@ -37,13 +37,24 @@ const GroceryDisplay = () => {
   // Animation ref for header
   const headerAnimation = useRef(new Animated.Value(0)).current;
 
-  // Helper function to close modal and reset state
+  // MOVE THIS TO THE TOP - Define exitSelectionMode first
+  const exitSelectionMode = () => {
+    console.log('🚪 Exiting selection mode');
+    setSelectedItemsToEdit([]);
+    setIsSelectItemsToEditState(false);
+    setShowEditHeader(false);
+  };
+
+  // Helper function to close modal and reset state - Define this early too
   const closeEditModal = () => {
     console.log('🔵 Closing edit modal');
     setShowEditQuantityModal(false);
     setEditingItem(null);
     setNewQuantity('');
     setNewPrice('');
+    
+    // Exit selection mode when closing the modal
+    exitSelectionMode();
   };
 
   // Check ID exist and groceryListHistory is successfully fetched before calling for fetchDisplayInfo
@@ -125,13 +136,7 @@ const GroceryDisplay = () => {
   const handleEditAction = (action: 'delete' | 'mark-purchased' | 'mark-unpurchased' | 'edit-quantity') => {
     const patchReq = async (modifiedList: SavedGroceryList) => {
       try {
-        // Create array with all grocery lists, replacing the modified one
-        const updatedGroceryListsArray = groceryListHistory?.map(list => 
-          list.list_id === modifiedList.list_id ? modifiedList : list
-        ) || [];
-        
-        console.log('🚀 Sending full array to API:', updatedGroceryListsArray);
-        console.log('🔍 Modified list:', modifiedList);
+        console.log('🚀 Sending request to API:', modifiedList);
         
         const response = await fetch(`${backend_url}/lists/update`, {
           method: 'PATCH',
@@ -139,24 +144,19 @@ const GroceryDisplay = () => {
             Authorization: `Bearer ${session?.access_token}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(updatedGroceryListsArray), // Send entire array
+          body: JSON.stringify([modifiedList]),
         });
 
         if (!response.ok) {
           const error = await response.json();
           throw new Error(`Error ${error.statusCode}: ${error.message}`);
         } else {
-          console.log('✅ Patch request successful - sent full array');
-          // REMOVED: Alert.alert('Success', 'Items updated successfully!');
-          
-          // Trigger refresh after successful update to sync with backend
+          console.log('✅ Patch request successful');
           setRefreshVersion(prev => prev + 1);
         }
       } catch (error) {
         console.error('❌ Error with patchReq:', error);
         Alert.alert('Error', 'Failed to update items. Please try again.');
-        
-        // Revert local state on error by refetching
         setRefreshVersion(prev => prev + 1);
       }
     };
@@ -176,14 +176,16 @@ const GroceryDisplay = () => {
               : i
           ),
         };
-        console.log('📋 Updated list for purchase:', updatedList);
         
         // Update local state immediately (optimistic update)
         setCurrGroceryList(updatedList);
         
-        // Then send to backend
+        // Exit selection mode INSTANTLY
+        exitSelectionMode();
+        
+        // Send to backend (no need to wait)
         patchReq(updatedList);
-        break;
+        return;
         
       case 'mark-unpurchased':
         console.log('📋 Marking items as unpurchased:', selectedItemsToEdit);
@@ -195,34 +197,37 @@ const GroceryDisplay = () => {
               : i
           ),
         };
-        console.log('📋 Updated list for unpurchase:', updatedList);
         
         // Update local state immediately (optimistic update)
         setCurrGroceryList(updatedList);
         
-        // Then send to backend
+        // Exit selection mode INSTANTLY
+        exitSelectionMode();
+        
+        // Send to backend (no need to wait)
         patchReq(updatedList);
-        break;
+        return;
         
       case 'delete':
         console.log('🗑️ Deleting items:', selectedItemsToEdit);
         updatedList = {
           ...currGroceryList,
           grocery_list_items: currGroceryList.grocery_list_items.filter(i =>
-            !selectedItemsToEdit.includes(i.item_id) // Remove items completely for better UX
+            !selectedItemsToEdit.includes(i.item_id)
           ),
         };
-        console.log('🗑️ Updated list for delete:', updatedList);
         
         // Update local state immediately (optimistic update)
         setCurrGroceryList(updatedList);
         
-        // Then send to backend
+        // Exit selection mode INSTANTLY
+        exitSelectionMode();
+        
+        // Send to backend (no need to wait)
         patchReq(updatedList);
-        break;
+        return;
         
       case 'edit-quantity':
-        // Instead of returning JSX, we set state to show the modal
         if (selectedItemsToEdit.length === 1) {
           const itemToEdit = currGroceryList.grocery_list_items.find(
             item => item.item_id === selectedItemsToEdit[0]
@@ -230,25 +235,22 @@ const GroceryDisplay = () => {
           if (itemToEdit) {
             setEditingItem(itemToEdit);
             setNewQuantity(String(itemToEdit.quantity));
-            setNewPrice(String(itemToEdit.purchased_price || itemToEdit.product?.price || ''));
+            
+            // Fix: Show purchased_price first, then fallback to product price
+            const displayPrice = itemToEdit.purchased_price 
+              ? String(itemToEdit.purchased_price)
+              : (itemToEdit.product?.price ? String(itemToEdit.product.price).replace('$', '') : '');
+            
+            setNewPrice(displayPrice);
             setShowEditQuantityModal(true);
-            return; // Don't exit selection mode yet
+            return; // Don't exit selection mode yet - will exit when modal is closed
           }
         }
         break;
     }
-    
-    // Exit selection mode for other actions
-    exitSelectionMode();
   };
 
-  const exitSelectionMode = () => {
-    setSelectedItemsToEdit([]);
-    setIsSelectItemsToEditState(false);
-    setShowEditHeader(false);
-  };
-
-  // Handle quantity update
+  // Update the handleQuantityUpdate function
   const handleQuantityUpdate = async () => {
     if (!editingItem || !currGroceryList) return;
 
@@ -286,7 +288,6 @@ const GroceryDisplay = () => {
     
     // Close modal and exit selection mode immediately
     closeEditModal();
-    exitSelectionMode();
 
     try {
       // Create array with all grocery lists, replacing the modified one
@@ -309,7 +310,7 @@ const GroceryDisplay = () => {
         const error = await response.json();
         throw new Error(`Error ${error.statusCode}: ${error.message}`);
       } else {
-        console.log('✅ Quantity update successful - sent full array');
+        console.log('✅ Quantity update successful');
         setRefreshVersion(prev => prev + 1);
       }
     } catch (error) {
