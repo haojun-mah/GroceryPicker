@@ -6,24 +6,24 @@ describe('Price Tracking Feature Tests', () => {
     it('should determine when to snapshot price correctly', () => {
       // Test the conditions under which price snapshotting should occur
       const shouldSnapshot = (
-        purchased: boolean | undefined, 
+        item_status: string | undefined, 
         providedPrice: number | undefined, 
         hasProductId: boolean, 
         existingPrice: number | null
       ) => {
-        return purchased === true && 
+        return item_status === 'purchased' && 
                providedPrice === undefined && 
                hasProductId && 
                existingPrice === null;
       };
 
       // Test various scenarios
-      expect(shouldSnapshot(true, undefined, true, null)).toBe(true);
-      expect(shouldSnapshot(true, 5.99, true, null)).toBe(false); // Manual price provided
-      expect(shouldSnapshot(true, undefined, false, null)).toBe(false); // No product ID
-      expect(shouldSnapshot(true, undefined, true, 3.99)).toBe(false); // Already has price
-      expect(shouldSnapshot(false, undefined, true, null)).toBe(false); // Not marking as purchased
-      expect(shouldSnapshot(undefined, undefined, true, null)).toBe(false); // Purchase status undefined
+      expect(shouldSnapshot('purchased', undefined, true, null)).toBe(true);
+      expect(shouldSnapshot('purchased', 5.99, true, null)).toBe(false); // Manual price provided
+      expect(shouldSnapshot('purchased', undefined, false, null)).toBe(false); // No product ID
+      expect(shouldSnapshot('purchased', undefined, true, 3.99)).toBe(false); // Already has price
+      expect(shouldSnapshot('incomplete', undefined, true, null)).toBe(false); // Not marking as purchased
+      expect(shouldSnapshot(undefined, undefined, true, null)).toBe(false); // Status undefined
     });
 
     it('should validate price parsing logic', () => {
@@ -62,30 +62,30 @@ describe('Price Tracking Feature Tests', () => {
 
       // Test with price snapshotting
       expect(prepareUpdateData(
-        { purchased: true },
+        { item_status: 'purchased' },
         true,
         4.99
       )).toEqual({
-        purchased: true,
+        item_status: 'purchased',
         purchased_price: 4.99
       });
 
       // Test without price snapshotting
       expect(prepareUpdateData(
-        { purchased: true },
+        { item_status: 'purchased' },
         false,
         null
       )).toEqual({
-        purchased: true
+        item_status: 'purchased'
       });
 
       // Test with manual price override - should not override existing price
       expect(prepareUpdateData(
-        { purchased: true, purchased_price: 6.99 },
+        { item_status: 'purchased', purchased_price: 6.99 },
         true,
         4.99
       )).toEqual({
-        purchased: true,
+        item_status: 'purchased',
         purchased_price: 6.99
       });
     });
@@ -97,7 +97,7 @@ describe('Price Tracking Feature Tests', () => {
         'name',
         'quantity',
         'unit',
-        'purchased',
+        'item_status',
         'product_id',
         'amount',
         'purchased_price',
@@ -111,14 +111,14 @@ describe('Price Tracking Feature Tests', () => {
       };
 
       // Valid fields
-      expect(validateFields({ purchased: true })).toEqual([]);
+      expect(validateFields({ item_status: 'purchased' })).toEqual([]);
       expect(validateFields({ purchased_price: 4.99 })).toEqual([]);
       expect(validateFields({ quantity: 2, unit: 'kg' })).toEqual([]);
 
       // Invalid fields
       expect(validateFields({ invalid_field: 'test' })).toEqual(['invalid_field']);
       expect(validateFields({ 
-        purchased: true, 
+        item_status: 'purchased', 
         invalid1: 'test', 
         invalid2: 123 
       })).toEqual(['invalid1', 'invalid2']);
@@ -142,12 +142,12 @@ describe('Price Tracking Feature Tests', () => {
 
     it('should validate purchase state consistency', () => {
       // Test logic to ensure data consistency
-      const isConsistentState = (purchased: boolean, purchasedPrice: number | null): boolean => {
+      const isConsistentState = (item_status: string, purchasedPrice: number | null): boolean => {
         // If not purchased, should not have a purchased price
-        if (!purchased && purchasedPrice !== null) return false;
+        if (item_status !== 'purchased' && purchasedPrice !== null) return false;
         
         // If purchased with a price, price should be valid
-        if (purchased && purchasedPrice !== null && (purchasedPrice < 0 || isNaN(purchasedPrice))) {
+        if (item_status === 'purchased' && purchasedPrice !== null && (purchasedPrice < 0 || isNaN(purchasedPrice))) {
           return false;
         }
         
@@ -155,14 +155,14 @@ describe('Price Tracking Feature Tests', () => {
       };
 
       // Valid states
-      expect(isConsistentState(false, null)).toBe(true);
-      expect(isConsistentState(true, null)).toBe(true); // Purchased but no price tracked
-      expect(isConsistentState(true, 4.99)).toBe(true);
-      expect(isConsistentState(true, 0)).toBe(true); // Free item
+      expect(isConsistentState('incomplete', null)).toBe(true);
+      expect(isConsistentState('purchased', null)).toBe(true); // Purchased but no price tracked
+      expect(isConsistentState('purchased', 4.99)).toBe(true);
+      expect(isConsistentState('purchased', 0)).toBe(true); // Free item
 
       // Invalid states
-      expect(isConsistentState(false, 4.99)).toBe(false); // Not purchased but has price
-      expect(isConsistentState(true, -1)).toBe(false); // Negative price
+      expect(isConsistentState('incomplete', 4.99)).toBe(false); // Not purchased but has price
+      expect(isConsistentState('purchased', -1)).toBe(false); // Negative price
     });
   });
 
