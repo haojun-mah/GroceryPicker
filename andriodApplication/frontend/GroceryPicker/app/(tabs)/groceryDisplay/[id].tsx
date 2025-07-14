@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { View, ScrollView, Animated, StatusBar, Modal, TextInput, Alert, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useGroceryContext } from '@/context/groceryContext';
-import { ALLOWED_SUPERMARKETS, SavedGroceryList } from '../interface';
+import { ALLOWED_SUPERMARKETS, SavedGroceryList, SavedGroceryListItem } from '../interface';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useColorScheme } from 'nativewind';
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -30,7 +30,7 @@ const GroceryDisplay = () => {
   
   // Modal state for edit quantity
   const [showEditQuantityModal, setShowEditQuantityModal] = useState(false);
-  const [editingItem, setEditingItem] = useState<any>(null);
+  const [editingItem, setEditingItem] = useState<SavedGroceryListItem | null>(null);
   const [newQuantity, setNewQuantity] = useState('');
   const [newPrice, setNewPrice] = useState('');
   
@@ -292,10 +292,10 @@ const GroceryDisplay = () => {
       }
 
       const requestBody = [{
-        list_id: currGroceryList.list_id,
-        list_status: currGroceryList.list_status,
+        list_id: updatedList.list_id,
+        list_status: updatedList.list_status,
         grocery_list_items: [{
-          item_id: updatedItem.item_id,
+          ...updatedList.grocery_list_items,
           purchased_price: updatedItem.purchased_price,
           // Only include the fields that were actually updated
         }],
