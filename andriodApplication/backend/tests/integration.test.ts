@@ -3,6 +3,10 @@
  * Tests core API functionality with minimal complexity
  */
 
+// Set environment variables BEFORE importing controllers
+process.env.JWT_SECRET = 'test-api-key';
+process.env.LLM_KEY = 'test-llm-key';
+
 import request from 'supertest';
 import express from 'express';
 
@@ -38,15 +42,8 @@ describe('Integration Tests', () => {
     'Content-Type': 'application/json'
   };
 
-  beforeEach(() => {
-    process.env.JWT_SECRET = 'test-api-key';
-    process.env.LLM_KEY = 'test-llm-key';
-  });
-
-  afterEach(() => {
-    delete process.env.JWT_SECRET;
-    delete process.env.LLM_KEY;
-  });
+  // Environment variables are already set at the top of the file
+  // No need to set them again in beforeEach
 
   describe('Product Upload', () => {
     it('should upload products successfully', async () => {
