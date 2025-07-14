@@ -293,9 +293,9 @@ const GroceryDisplay = () => {
 
       const requestBody = [{
         list_id: updatedList.list_id,
-        list_status: updatedList.list_status,
         grocery_list_items: [{
-          ...updatedList.grocery_list_items,
+          item_id: updatedItem.item_id,
+          item_status: updatedItem.item_status,
           purchased_price: updatedItem.purchased_price,
           // Only include the fields that were actually updated
         }],
@@ -328,6 +328,13 @@ const GroceryDisplay = () => {
 
   // Global Edit Header Component
   const EditHeader = () => {
+    // Check if the selected item is purchased (only relevant when exactly 1 item is selected)
+    const selectedItem = selectedItemsToEdit.length === 1 
+      ? currGroceryList?.grocery_list_items.find(item => item.item_id === selectedItemsToEdit[0])
+      : null;
+    
+    const canEditQuantity = selectedItem?.item_status === 'purchased';
+
     return (
       <Animated.View
         style={{
@@ -399,8 +406,8 @@ const GroceryDisplay = () => {
               />
             </Pressable>
             
-            {/* Only show edit quantity button when exactly 1 item is selected */}
-            {selectedItemsToEdit.length === 1 && (
+            {/* Only show edit quantity button when exactly 1 item is selected AND it's purchased */}
+            {selectedItemsToEdit.length === 1 && canEditQuantity && (
               <Pressable 
                 onPress={() => handleEditAction('edit-quantity')}
                 className={`p-2 rounded-full ${isDark ? 'bg-gray-600' : 'bg-gray-100'}`}
@@ -442,8 +449,8 @@ const GroceryDisplay = () => {
       >
         <ScrollView contentContainerStyle={{ paddingTop: 52 }}>
           <View className="px-4 gap-4 text-4xl font-bold">
-            <Text className="text-4xl font-semibold mb-2 text-white">
-              Optimized Grocery List
+            <Text className="text-4xl font-semibold mb-2 text-black dark:text-white">
+              Optimised Grocery List
             </Text>
           </View>
         </ScrollView>
@@ -564,7 +571,7 @@ const GroceryDisplay = () => {
         }}
       >
         <View className="px-4 gap-4">
-          <Text className="text-4xl font-bold mb-2 text-white">
+          <Text className="text-4xl font-bold mb-2 text-black dark:text-white">
             {currGroceryList.title}
           </Text>
 
@@ -578,7 +585,7 @@ const GroceryDisplay = () => {
             }
             return (
               <View key={`${shops}-${idx}`} className="items-start w-full">
-                <Text className="text-xl font-semibold mb-1 text-white">
+                <Text className="text-xl font-semibold mb-1 text-black dark:text-white">
                   {shops}
                 </Text>
                 <DropdownCard

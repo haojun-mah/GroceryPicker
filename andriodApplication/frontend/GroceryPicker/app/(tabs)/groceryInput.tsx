@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, TouchableOpacity } from 'react-native'; // Add TouchableOpacity to imports
+import { Alert, TouchableOpacity } from 'react-native';
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
 import { Box } from '@/components/ui/box';
@@ -83,131 +83,144 @@ const GroceryInputPage = () => {
     };
 
     return (
-<LinearGradient
-      colors={isDark 
-        ? ['#1f2937', '#374151', '#4b5563'] 
-        : ['#667eea', '#764ba2', '#f093fb']
-      }
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={{ flex: 1 }}
-    >
-        <ScrollView 
-            className="flex-1" 
-            contentContainerStyle={{ flexGrow: 1 }}
+        <LinearGradient
+            colors={isDark 
+                ? ['#1f2937', '#374151', '#4b5563'] 
+                : ['#667eea', '#764ba2', '#f093fb']
+            }
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={{ flex: 1 }}
         >
-            <VStack className="flex-1 p-6 justify-center" space="lg">
-                {/* Header */}
-                <VStack space="md" className="items-center">
-                    <Heading className="text-4xl font-bold text-center text-black dark:text-white">
-                        Create Grocery List
-                    </Heading>
-                    <VStack space="xs" className="items-center">
-                        <Text className="text-sm text-black/70 dark:text-white/80 text-center">
-                            Unsure of what groceries?
-                        </Text>
-                        <Text className="text-sm text-black/70 dark:text-white/80 text-center">
-                            Describe it and we will do the work!
-                        </Text>
+            <ScrollView 
+                className="flex-1" 
+                contentContainerStyle={{ 
+                    flexGrow: 1,
+                    justifyContent: 'center', // Center vertically
+                    alignItems: 'center', // Center horizontally
+                    paddingHorizontal: 24,
+                    paddingVertical: 40,
+                }}
+                showsVerticalScrollIndicator={false}
+            >
+                {/* Centered Content Container */}
+                <VStack 
+                    className="w-full max-w-md" 
+                    space="lg"
+                    style={{
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}
+                >
+                    {/* Header Section */}
+                    <VStack space="md" className="items-center mb-8">
+                        <Heading className="text-4xl font-bold text-center text-black dark:text-white">
+                            Create Grocery List
+                        </Heading>
+                        <VStack space="xs" className="items-center">
+                            <Text className="text-sm text-black/70 dark:text-white/80 text-center">
+                                Unsure of what groceries?
+                            </Text>
+                            <Text className="text-sm text-black/70 dark:text-white/80 text-center">
+                                Describe it and we will do the work!
+                            </Text>
+                        </VStack>
                     </VStack>
-                </VStack>
 
-                {/* Input Form */}
-                <VStack space="lg" className="w-full">
-                    {/* Grocery Text Area */}
-                    <VStack space="sm">
-                        <Text className="text-lg font-medium text-black dark:text-white">
-                            What groceries do you need?
-                        </Text>
-                        <Input className='min-h-32 bg-white dark:bg-gray-700 rounded-xl shadow-sm backdrop-blur-md border-gray-200 dark:border-gray-700'>
-                            <InputField
-                                placeholder="Enter groceries or description..."
-                                value={groceryTextArea}
-                                onChangeText={setGroceryTextArea}
-                                multiline
-                                textAlignVertical="top"
-                                className="text-black dark:text-white p-4"
-                                placeholderTextColor={isDark ? '#9CA3AF' : '#6B7280'}
+                    {/* Input Form Section */}
+                    <VStack className="w-full" space="xl">
+                        {/* Grocery Text Area */}
+                        <VStack space="sm" className="w-full">
+                            <Text className="text-lg font-medium text-black dark:text-white text-left">
+                                What groceries do you need?
+                            </Text>
+                            <Input className="min-h-32 bg-white/90 dark:bg-gray-700/90 rounded-xl shadow-sm backdrop-blur-md border border-gray-200 dark:border-gray-600">
+                                <InputField
+                                    placeholder="Enter groceries or description..."
+                                    value={groceryTextArea}
+                                    onChangeText={setGroceryTextArea}
+                                    multiline
+                                    textAlignVertical="top"
+                                    className="text-black dark:text-white p-4"
+                                    placeholderTextColor={isDark ? '#9CA3AF' : '#6B7280'}
+                                />
+                            </Input>
+                        </VStack>
+
+                        {/* Grocery Shops Selector */}
+                        <VStack space="sm" className="w-full">
+                            <Text className="text-lg font-medium text-black dark:text-white text-left">
+                                Select Grocery Shops
+                            </Text>
+                            <DropdownSelector
+                                title="Select Grocery Shops"
+                                items={SUPERMARKET}
+                                selectedItems={selectedGroceryShop}
+                                onSelectionChange={setSelectedGroceryShop}
                             />
-                        </Input>
+                        </VStack>
+
+                        {/* Alert Message */}
+                        {selectGroceryShopAlert && (
+                            <Box className="p-4 bg-red-50 dark:bg-red-900/90 border border-red-200 dark:border-red-700 shadow-sm backdrop-blur-md rounded-xl w-full">
+                                <HStack className="items-center justify-center" space="sm">
+                                    <AntDesign name="exclamationcircle" size={20} color="#ef4444" />
+                                    <Text className="text-red-600 dark:text-red-400 font-medium">
+                                        Please select a grocery shop
+                                    </Text>
+                                </HStack>
+                            </Box>
+                        )}
+
+                        {/* Generate Button */}
+                        <TouchableOpacity
+                            onPress={postData}
+                            disabled={isLoading}
+                            activeOpacity={0.8}
+                            style={{
+                                opacity: isLoading ? 0.5 : 1,
+                                width: '100%',
+                            }}
+                        >
+                            <LinearGradient
+                                colors={isDark 
+                                    ? ['#4f46e5', '#7c3aed', '#db2777'] 
+                                    : ['#ff6b6b', '#ffa726', '#ffcc02']
+                                }
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 1 }}
+                                style={{
+                                    height: 56,
+                                    borderRadius: 12,
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    shadowColor: '#000',
+                                    shadowOffset: { width: 0, height: 4 },
+                                    shadowOpacity: 0.3,
+                                    shadowRadius: 8,
+                                    elevation: 8,
+                                }}
+                            >
+                                <HStack className="items-center" space="sm">
+                                    {isLoading ? (
+                                        <Text className="text-white font-bold text-lg">
+                                            Generating...
+                                        </Text>
+                                    ) : (
+                                        <>
+                                            <AntDesign name="plus" size={20} color="white" />
+                                            <Text className="text-white font-bold text-lg">
+                                                Generate Grocery List!
+                                            </Text>
+                                        </>
+                                    )}
+                                </HStack>
+                            </LinearGradient>
+                        </TouchableOpacity>
                     </VStack>
-
-                    {/* Grocery Shops Selector */}
-                    <VStack space="sm">
-                        <Text className="text-lg font-medium text-black dark:text-white">
-                            Select Grocery Shops
-                        </Text>
-                        <DropdownSelector
-                            title="Select Grocery Shops"
-                            items={SUPERMARKET}
-                            selectedItems={selectedGroceryShop}
-                            onSelectionChange={setSelectedGroceryShop}
-                        />
-                    </VStack>
-
-                    {/* Alert Message */}
-                    {selectGroceryShopAlert && (
-                        <Box className="p-4 bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-800 shadow-sm backdrop-blur-md rounded-xl">
-                            <HStack className="items-center" space="sm">
-                                <AntDesign name="exclamationcircle" size={20} color="#ef4444" />
-                                <Text className="text-red-600 dark:text-white font-medium">
-                                    Please select a grocery shop
-                                </Text>
-                            </HStack>
-                        </Box>
-                    )}
-
-                    {/* Generate Button */}
-<TouchableOpacity
-  onPress={postData}
-  disabled={isLoading}
-  activeOpacity={0.8}
-  style={{
-    opacity: isLoading ? 0.5 : 1,
-  }}
->
-  <LinearGradient
-    colors={isDark 
-      ? ['#4f46e5', '#7c3aed', '#db2777'] 
-      : ['#ff6b6b', '#ffa726', '#ffcc02']
-    }
-    start={{ x: 0, y: 0 }}
-    end={{ x: 1, y: 1 }}
-    style={{
-      height: 56,
-      borderRadius: 12,
-      justifyContent: 'center',
-      alignItems: 'center',
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
-      elevation: 8,
-    }}
-  >
-    <HStack className="items-center" space="sm">
-      {isLoading ? (
-        <>
-          <Text className="text-white font-bold text-lg">
-            Generating...
-          </Text>
-        </>
-      ) : (
-        <>
-          <AntDesign name="plus" size={20} color="white" />
-          <Text className="text-white font-bold text-lg">
-            Generate Grocery List!
-          </Text>
-        </>
-      )}
-    </HStack>
-  </LinearGradient>
-</TouchableOpacity>
-
                 </VStack>
-            </VStack>
-        </ScrollView>
-    </LinearGradient>
+            </ScrollView>
+        </LinearGradient>
     );
 };
 

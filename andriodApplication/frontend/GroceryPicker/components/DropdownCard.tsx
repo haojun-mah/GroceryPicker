@@ -403,7 +403,9 @@ const DropdownCard = ({
                     <View className="flex-1">
                       <View className="flex-row items-center gap-2">
                         <Text
-                          className={`text-xl font-semibold ${visualState.textStyle}`}
+                          className={`text-xl font-semibold ${
+                            colorScheme === 'light' ? 'text-black' : 'text-white'
+                          }`}
                         >
                           {item.product?.name}
                         </Text>
