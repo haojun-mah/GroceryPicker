@@ -151,7 +151,7 @@ describe('updateGroceryList Controller', () => {
           grocery_list_items: [
             {
               item_id: 'ed76202d-37e7-45e3-bc03-23b46ffe0502',
-              purchased: false
+              item_status: 'incomplete'
             }
           ]
         }
@@ -171,7 +171,7 @@ describe('updateGroceryList Controller', () => {
                 name: 'Test Item 1',
                 quantity: 1,
                 unit: 'pcs',
-                purchased: false
+                item_status: 'incomplete'
               }
             ]
           }
@@ -185,7 +185,7 @@ describe('updateGroceryList Controller', () => {
       expect(response.body.message).toBe('Batch grocery list and item update complete.');
       expect(response.body.details[0].list_id).toBe(minimalList1[0].list_id);
       expect(response.body.details[0].grocery_list_items[0].item_id).toBe(minimalList1[0].grocery_list_items[0].item_id);
-      expect(response.body.details[0].grocery_list_items[0].purchased).toBe(false);
+      expect(response.body.details[0].grocery_list_items[0].item_status).toBe('incomplete');
     });
 
     it('should accept list_id, list_status, and grocery_list_items', async () => {
@@ -196,7 +196,7 @@ describe('updateGroceryList Controller', () => {
           grocery_list_items: [
             {
               item_id: '2098193b-db13-4884-b27a-e65ca89da1d4',
-              purchased: false
+              item_status: 'incomplete'
             }
           ]
         }
@@ -216,7 +216,7 @@ describe('updateGroceryList Controller', () => {
                 name: 'Test Item 2',
                 quantity: 2,
                 unit: 'pcs',
-                purchased: false
+                item_status: 'incomplete'
               }
             ]
           }
@@ -231,7 +231,7 @@ describe('updateGroceryList Controller', () => {
       expect(response.body.details[0].list_id).toBe(minimalList2[0].list_id);
       expect(response.body.details[0].list_status).toBe('deleted');
       expect(response.body.details[0].grocery_list_items[0].item_id).toBe(minimalList2[0].grocery_list_items[0].item_id);
-      expect(response.body.details[0].grocery_list_items[0].purchased).toBe(false);
+      expect(response.body.details[0].grocery_list_items[0].item_status).toBe('incomplete');
     });
 
     it('should accept only list_id and list_status', async () => {

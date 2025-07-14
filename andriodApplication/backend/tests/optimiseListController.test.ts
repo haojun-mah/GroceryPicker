@@ -87,7 +87,7 @@ describe('optimiseListController', () => {
           name: 'Pasta',
           quantity: 500,
           unit: 'grams',
-          purchased: false,
+          item_status: 'incomplete' as const,
           product_id: 'pasta-123',
           amount: 2
         },
@@ -97,7 +97,7 @@ describe('optimiseListController', () => {
           name: 'Tomatoes',
           quantity: 3,
           unit: 'pieces',
-          purchased: false,
+          item_status: 'incomplete' as const,
           product_id: 'tomato-456',
           amount: 1
         }

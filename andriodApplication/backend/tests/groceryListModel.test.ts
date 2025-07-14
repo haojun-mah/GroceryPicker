@@ -218,3 +218,23 @@ describe('groceryListModel', () => {
     });
   });
 });
+
+// Validation functions tests (merged from groceryListValidation.test.ts)
+describe('Grocery List Validation Functions', () => {
+  describe('isValidGroceryListStatus', () => {
+    it('should return true for valid statuses', () => {
+      const { GROCERY_LIST_STATUSES, isValidGroceryListStatus } = require('../interfaces/groceryList');
+      GROCERY_LIST_STATUSES.forEach((status: string) => {
+        expect(isValidGroceryListStatus(status)).toBe(true);
+      });
+    });
+
+    it('should return false for invalid statuses', () => {
+      const { isValidGroceryListStatus } = require('../interfaces/groceryList');
+      const invalidStatuses = ['invalid', 'completed', 'pending', '', null, undefined, 123];
+      invalidStatuses.forEach(status => {
+        expect(isValidGroceryListStatus(status)).toBe(false);
+      });
+    });
+  });
+});

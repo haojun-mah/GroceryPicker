@@ -45,7 +45,7 @@ describe('getAllUserLists - Product Name Sorting', () => {
             name: 'Generic Item',
             quantity: 1,
             unit: 'piece',
-            purchased: false,
+            item_status: 'incomplete',
             product_id: 'prod-3',
             product: { name: 'Zucchini', price: 2.50 }
           },
@@ -55,7 +55,7 @@ describe('getAllUserLists - Product Name Sorting', () => {
             name: 'Generic Item',
             quantity: 2,
             unit: 'pieces',
-            purchased: false,
+            item_status: 'incomplete',
             product_id: 'prod-1',
             product: { name: 'Apples', price: 3.99 }
           },
@@ -65,7 +65,7 @@ describe('getAllUserLists - Product Name Sorting', () => {
             name: 'Generic Item',
             quantity: 1,
             unit: 'gallon',
-            purchased: false,
+            item_status: 'incomplete',
             product_id: 'prod-2',
             product: { name: 'Milk', price: 4.50 }
           }
@@ -107,7 +107,7 @@ describe('getAllUserLists - Product Name Sorting', () => {
             name: 'Yogurt',
             quantity: 1,
             unit: 'container',
-            purchased: false,
+            item_status: 'incomplete',
             product_id: null,
             product: null
           },
@@ -117,7 +117,7 @@ describe('getAllUserLists - Product Name Sorting', () => {
             name: 'Bread',
             quantity: 1,
             unit: 'loaf',
-            purchased: false,
+            item_status: 'incomplete',
             product_id: null,
             product: null
           },
@@ -127,7 +127,7 @@ describe('getAllUserLists - Product Name Sorting', () => {
             name: 'Eggs',
             quantity: 12,
             unit: 'pieces',
-            purchased: false,
+            item_status: 'incomplete',
             product_id: null,
             product: null
           }
@@ -168,7 +168,7 @@ describe('getAllUserLists - Product Name Sorting', () => {
             name: 'Custom Item Z',
             quantity: 1,
             unit: 'piece',
-            purchased: false,
+            item_status: 'incomplete',
             product_id: null,
             product: null
           },
@@ -178,7 +178,7 @@ describe('getAllUserLists - Product Name Sorting', () => {
             name: 'Generic Item',
             quantity: 1,
             unit: 'piece',
-            purchased: false,
+            item_status: 'incomplete',
             product_id: 'prod-1',
             product: { name: 'Bananas', price: 2.99 }
           },
@@ -188,7 +188,7 @@ describe('getAllUserLists - Product Name Sorting', () => {
             name: 'Custom Item A',
             quantity: 1,
             unit: 'piece',
-            purchased: false,
+            item_status: 'incomplete',
             product_id: null,
             product: null
           }
@@ -229,7 +229,7 @@ describe('getAllUserLists - Product Name Sorting', () => {
             name: 'Generic',
             quantity: 1,
             unit: 'piece',
-            purchased: false,
+            item_status: 'incomplete',
             product_id: 'prod-1',
             product: { name: 'zebra fruit', price: 5.99 }
           },
@@ -239,7 +239,7 @@ describe('getAllUserLists - Product Name Sorting', () => {
             name: 'Generic',
             quantity: 1,
             unit: 'piece',
-            purchased: false,
+            item_status: 'incomplete',
             product_id: 'prod-2',
             product: { name: 'Apple', price: 1.99 }
           },
@@ -249,7 +249,7 @@ describe('getAllUserLists - Product Name Sorting', () => {
             name: 'Generic',
             quantity: 1,
             unit: 'piece',
-            purchased: false,
+            item_status: 'incomplete',
             product_id: 'prod-3',
             product: { name: 'banana', price: 2.50 }
           }
