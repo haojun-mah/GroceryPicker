@@ -48,7 +48,7 @@ const ModalPage = () => {
   const supermarketFilter = useMemo((): SupermarketName[] => {
     return (groceryRefinement?.supermarketFilter?.exclude || []).filter(
       (name): name is SupermarketName =>
-        ['FairPrice', 'Cold Storage', 'Giant', 'Sheng Siong'].includes(name),
+        ALLOWED_SUPERMARKETS.includes(name),
     );
   }, [groceryRefinement?.supermarketFilter?.exclude]);
 
