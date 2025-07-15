@@ -12,7 +12,11 @@ export default function BackButton({ goBack }: { goBack: () => void }) {
       className="absolute left-4 z-50"
       style={{ top: 10 + getStatusBarHeight() }}
     >
-      <AntDesign name="arrowleft" size={24} color={colorScheme === 'dark' ? 'white' : 'black'} />
+      <AntDesign
+        name="arrowleft"
+        size={24}
+        color={colorScheme === 'dark' ? 'white' : 'black'}
+      />
     </Pressable>
   );
 }

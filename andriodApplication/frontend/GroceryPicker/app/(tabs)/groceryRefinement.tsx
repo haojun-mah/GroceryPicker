@@ -29,8 +29,9 @@ const { height: screenHeight } = Dimensions.get('window');
 const ModalPage = () => {
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
-  const [generateRefinementGrocery, setGenerateRefinementGrocery] =
-    useState<AiPromptRequestBody | undefined>(undefined);
+  const [generateRefinementGrocery, setGenerateRefinementGrocery] = useState<
+    AiPromptRequestBody | undefined
+  >(undefined);
 
   const {
     setIsLoading,
@@ -42,13 +43,13 @@ const ModalPage = () => {
   } = useGroceryContext();
 
   const groceryList: GroceryItem[] | undefined = groceryRefinement?.items;
-  
+
   // Fix: Use useMemo to memoize the supermarketFilter
   const supermarketFilter = useMemo((): SupermarketName[] => {
-    return (groceryRefinement?.supermarketFilter?.exclude || [])
-      .filter((name): name is SupermarketName => 
-        ['FairPrice', 'Cold Storage', 'Giant', 'Sheng Siong'].includes(name)
-      );
+    return (groceryRefinement?.supermarketFilter?.exclude || []).filter(
+      (name): name is SupermarketName =>
+        ['FairPrice', 'Cold Storage', 'Giant', 'Sheng Siong'].includes(name),
+    );
   }, [groceryRefinement?.supermarketFilter?.exclude]);
 
   const { session } = useSession();
@@ -74,7 +75,7 @@ const ModalPage = () => {
   const refineMyList = async (): Promise<boolean> => {
     try {
       if (!generateRefinementGrocery?.message?.length) {
-        Alert.alert("Error", "Your list is empty.");
+        Alert.alert('Error', 'Your list is empty.');
         return false;
       }
 
@@ -89,12 +90,11 @@ const ModalPage = () => {
         body: JSON.stringify(generateRefinementGrocery),
       });
 
-
       if (response.ok) {
         const output: GroceryMetadataTitleOutput = await response.json();
 
         if (output.title === '!@#$%^') {
-          Alert.alert("Error", "Invalid refinement item.");
+          Alert.alert('Error', 'Invalid refinement item.');
           return false;
         }
 
@@ -113,12 +113,12 @@ const ModalPage = () => {
         return true;
       } else {
         setIsLoading(false);
-        Alert.alert("Error", "Invalid refinement item.");
+        Alert.alert('Error', 'Invalid refinement item.');
         return false;
       }
     } catch (error) {
       console.error(error);
-      Alert.alert("Error", "An error occurred while refining your list.");
+      Alert.alert('Error', 'An error occurred while refining your list.');
       setIsLoading(false);
       return false;
     }
@@ -127,7 +127,7 @@ const ModalPage = () => {
   const findCheapest = async () => {
     try {
       if (!generateRefinementGrocery?.message?.length) {
-        Alert.alert("Error", "Your list is empty.");
+        Alert.alert('Error', 'Your list is empty.');
         return;
       }
 
@@ -146,16 +146,25 @@ const ModalPage = () => {
       if (!response.ok) {
         const errorData = await response.json();
         console.error('❌ Optimize API failed:', response.status, errorData);
-        
+
         // Handle specific error cases from backend
-        if (errorData.message && errorData.message.includes('Invalid refinement item')) {
-          Alert.alert("Error", "Invalid refinement item detected in your list.");
+        if (
+          errorData.message &&
+          errorData.message.includes('Invalid refinement item')
+        ) {
+          Alert.alert(
+            'Error',
+            'Invalid refinement item detected in your list.',
+          );
         } else if (errorData.message) {
-          Alert.alert("Error", errorData.message);
+          Alert.alert('Error', errorData.message);
         } else {
-          Alert.alert("Error", "Failed to optimize your list. Please try again.");
+          Alert.alert(
+            'Error',
+            'Failed to optimize your list. Please try again.',
+          );
         }
-        
+
         setIsLoading(false);
         return;
       }
@@ -166,14 +175,15 @@ const ModalPage = () => {
       // Validate the optimized list structure
       if (!optimisedList || !optimisedList.list_id) {
         console.error('❌ Invalid optimized list structure:', optimisedList);
-        Alert.alert("Error", "Invalid response from optimization service.");
+        Alert.alert('Error', 'Invalid response from optimization service.');
         setIsLoading(false);
         return;
       }
 
       // Fix: Use the correct endpoint - /lists/getAll
       console.log('🔄 Fetching updated grocery list history...');
-      const allListsResponse = await fetch(`${backend_url}/lists/getAll`, { // Fixed to /lists/getAll
+      const allListsResponse = await fetch(`${backend_url}/lists/getAll`, {
+        // Fixed to /lists/getAll
         headers: {
           Authorization: `Bearer ${session?.access_token}`,
         },
@@ -182,59 +192,69 @@ const ModalPage = () => {
       if (allListsResponse.ok) {
         const allList: SavedGroceryList[] = await allListsResponse.json();
         console.log('🔄 Updated grocery list history:', allList);
-        
+
         // Validate the response
         if (!Array.isArray(allList)) {
           console.error('❌ Invalid grocery list history response:', allList);
-          Alert.alert("Error", "Failed to fetch updated grocery lists.");
+          Alert.alert('Error', 'Failed to fetch updated grocery lists.');
           setIsLoading(false);
           return;
         }
-        
+
         // Verify the optimized list is in the updated history
-        const listExists = allList.some(list => list.list_id === optimisedList.list_id);
+        const listExists = allList.some(
+          (list) => list.list_id === optimisedList.list_id,
+        );
         if (!listExists) {
-          console.warn('⚠️ Optimized list not found in updated history, adding it manually');
+          console.warn(
+            '⚠️ Optimized list not found in updated history, adding it manually',
+          );
           allList.push(optimisedList);
         }
 
         // Update the context with the new list
         setGroceryListHistory(allList);
-        setRefreshVersion(prev => prev + 1);
+        setRefreshVersion((prev) => prev + 1);
         setIsLoading(false);
 
         // Navigate to the optimized list
-        console.log('🔍 Navigating to optimized list with ID:', optimisedList.list_id);
+        console.log(
+          '🔍 Navigating to optimized list with ID:',
+          optimisedList.list_id,
+        );
         router.replace(`/groceryDisplay/${optimisedList.list_id}`);
-        
+
         // Clear the refinement state after navigation
         setTimeout(() => {
           setGroceryRefinement(null);
         }, 100);
-        
       } else {
-        console.error('❌ Failed to fetch updated grocery lists:', allListsResponse.status);
-        Alert.alert("Error", "Failed to fetch updated grocery lists.");
+        console.error(
+          '❌ Failed to fetch updated grocery lists:',
+          allListsResponse.status,
+        );
+        Alert.alert('Error', 'Failed to fetch updated grocery lists.');
         setIsLoading(false);
       }
     } catch (error) {
       console.error('❌ Error in findCheapest:', error);
-      Alert.alert("Error", "An error occurred while optimizing your list.");
+      Alert.alert('Error', 'An error occurred while optimizing your list.');
       setIsLoading(false);
     }
   };
 
   return (
     <LinearGradient
-      colors={isDark 
-        ? ['#1f2937', '#374151', '#4b5563'] 
-        : ['#667eea', '#764ba2', '#f093fb']
+      colors={
+        isDark
+          ? ['#1f2937', '#374151', '#4b5563']
+          : ['#667eea', '#764ba2', '#f093fb']
       }
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={{ flex: 1 }}
     >
-      <ScrollView 
+      <ScrollView
         className="flex-1"
         contentContainerStyle={{ flexGrow: 1 }}
         style={{ backgroundColor: 'transparent' }}
@@ -309,9 +329,10 @@ const ModalPage = () => {
                 }}
               >
                 <LinearGradient
-                  colors={isDark 
-                    ? ['#3b82f6', '#1d4ed8', '#1e40af'] 
-                    : ['#60a5fa', '#3b82f6', '#2563eb']
+                  colors={
+                    isDark
+                      ? ['#3b82f6', '#1d4ed8', '#1e40af']
+                      : ['#60a5fa', '#3b82f6', '#2563eb']
                   }
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
@@ -356,9 +377,10 @@ const ModalPage = () => {
                 }}
               >
                 <LinearGradient
-                  colors={isDark 
-                    ? ['#10b981', '#059669', '#047857'] 
-                    : ['#34d399', '#10b981', '#059669']
+                  colors={
+                    isDark
+                      ? ['#10b981', '#059669', '#047857']
+                      : ['#34d399', '#10b981', '#059669']
                   }
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
@@ -392,7 +414,6 @@ const ModalPage = () => {
                   </HStack>
                 </LinearGradient>
               </TouchableOpacity>
-
             </VStack>
           </VStack>
         </VStack>

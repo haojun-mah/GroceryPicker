@@ -74,25 +74,25 @@ export const DropdownSelector = ({
       <Animated.View style={animatedHeightStyle} className="mt-2">
         {items.map((item) => {
           const isSelected = selectedItems.includes(item);
-            return (
-              <TouchableOpacity
-                key={item}
-                onPress={() => toggleSelection(item)}
+          return (
+            <TouchableOpacity
+              key={item}
+              onPress={() => toggleSelection(item)}
+              className={clsx(
+                'p-2 rounded-md my-1',
+                isSelected ? 'bg-blue-500' : 'bg-gray-100 dark:bg-gray-500',
+              )}
+            >
+              <Text
                 className={clsx(
-                  'p-2 rounded-md my-1',
-                  isSelected ? 'bg-blue-500' : 'bg-gray-100 dark:bg-gray-500',
+                  'text-sm',
+                  isSelected ? 'text-white' : 'text-gray-800 dark:text-white',
                 )}
               >
-                <Text
-                  className={clsx(
-                    'text-sm',
-                    isSelected ? 'text-white' : 'text-gray-800 dark:text-white',
-                  )}
-                >
-                  {item}
-                </Text>
-              </TouchableOpacity>
-            );
+                {item}
+              </Text>
+            </TouchableOpacity>
+          );
         })}
       </Animated.View>
     </View>

@@ -1,10 +1,25 @@
 import DropdownCard from '@/components/DropdownCard';
 import { Text } from '@/components/ui/text';
 import { useEffect, useState, useRef } from 'react';
-import { View, ScrollView, Animated, StatusBar, Modal, TextInput, Alert, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  View,
+  ScrollView,
+  Animated,
+  StatusBar,
+  Modal,
+  TextInput,
+  Alert,
+  Pressable,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useGroceryContext } from '@/context/groceryContext';
-import { ALLOWED_SUPERMARKETS, SavedGroceryList, SavedGroceryListItem } from '../interface';
+import {
+  ALLOWED_SUPERMARKETS,
+  SavedGroceryList,
+  SavedGroceryListItem,
+} from '../interface';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useColorScheme } from 'nativewind';
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -16,24 +31,28 @@ const GroceryDisplay = () => {
   const { session } = useSession();
   // Extract it as ID
   const { id: rawId } = useLocalSearchParams();
-  const id = Array.isArray(rawId) ? rawId[0] : rawId ?? "";
+  const id = Array.isArray(rawId) ? rawId[0] : (rawId ?? '');
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
 
   const { groceryListHistory, setRefreshVersion } = useGroceryContext();
-  const [currGroceryList, setCurrGroceryList] = useState<SavedGroceryList | null>(null);
-  
+  const [currGroceryList, setCurrGroceryList] =
+    useState<SavedGroceryList | null>(null);
+
   // Global selection state for all dropdown cards
   const [selectedItemsToEdit, setSelectedItemsToEdit] = useState<string[]>([]);
-  const [isSelectItemsToEditState, setIsSelectItemsToEditState] = useState(false);
+  const [isSelectItemsToEditState, setIsSelectItemsToEditState] =
+    useState(false);
   const [showEditHeader, setShowEditHeader] = useState(false);
-  
+
   // Modal state for edit quantity
   const [showEditQuantityModal, setShowEditQuantityModal] = useState(false);
-  const [editingItem, setEditingItem] = useState<SavedGroceryListItem | null>(null);
+  const [editingItem, setEditingItem] = useState<SavedGroceryListItem | null>(
+    null,
+  );
   const [newQuantity, setNewQuantity] = useState('');
   const [newPrice, setNewPrice] = useState('');
-  
+
   // Animation ref for header
   const headerAnimation = useRef(new Animated.Value(0)).current;
 
@@ -52,7 +71,7 @@ const GroceryDisplay = () => {
     setEditingItem(null);
     setNewQuantity('');
     setNewPrice('');
-    
+
     // Exit selection mode when closing the modal
     exitSelectionMode();
   };
@@ -88,56 +107,71 @@ const GroceryDisplay = () => {
   const fetchDisplayInfo = async () => {
     console.log('🔍 DEBUG: groceryListHistory:', groceryListHistory);
     console.log('🔍 DEBUG: Looking for ID:', id, 'Type:', typeof id);
-    console.log('🔍 DEBUG: groceryListHistory length:', groceryListHistory?.length);
-    
+    console.log(
+      '🔍 DEBUG: groceryListHistory length:',
+      groceryListHistory?.length,
+    );
+
     if (groceryListHistory) {
-      console.log('🔍 DEBUG: Available list_ids:', groceryListHistory.map(list => ({ 
-        list_id: list.list_id, 
-        type: typeof list.list_id 
-      })));
+      console.log(
+        '🔍 DEBUG: Available list_ids:',
+        groceryListHistory.map((list) => ({
+          list_id: list.list_id,
+          type: typeof list.list_id,
+        })),
+      );
     }
-    
+
     const list = groceryListHistory?.find(
       (list) => String(list.list_id) === String(id),
     );
-    
+
     // If list is not found in context, try to fetch it directly from the backend
     if (!list && id) {
-      console.log('🔍 List not found in context, fetching directly from backend...');
+      console.log(
+        '🔍 List not found in context, fetching directly from backend...',
+      );
       try {
         const response = await fetch(`${backend_url}/lists/${id}`, {
           headers: {
             Authorization: `Bearer ${session?.access_token}`,
           },
         });
-        
+
         if (response.ok) {
           const fetchedList = await response.json();
           console.log('🔍 Fetched list directly from backend:', fetchedList);
           setCurrGroceryList(fetchedList);
-          
+
           // Also update the context with the new list
-          setRefreshVersion(prev => prev + 1);
+          setRefreshVersion((prev) => prev + 1);
           return;
         } else {
-          console.error('❌ Failed to fetch list from backend:', response.status);
+          console.error(
+            '❌ Failed to fetch list from backend:',
+            response.status,
+          );
         }
       } catch (error) {
         console.error('❌ Error fetching list from backend:', error);
       }
     }
-    
+
     setCurrGroceryList(list ?? null);
-    console.log('Check displayid page. Expecting JSON containing singular grocery list');
+    console.log(
+      'Check displayid page. Expecting JSON containing singular grocery list',
+    );
     console.log('Check display if it has target grocery list mounted:\n', list);
   };
 
   // Handle edit actions
-  const handleEditAction = (action: 'delete' | 'mark-purchased' | 'mark-unpurchased' | 'edit-quantity') => {
+  const handleEditAction = (
+    action: 'delete' | 'mark-purchased' | 'mark-unpurchased' | 'edit-quantity',
+  ) => {
     const patchReq = async (modifiedList: SavedGroceryList) => {
       try {
         console.log('🚀 Sending request to API:', modifiedList);
-        
+
         const response = await fetch(`${backend_url}/lists/update`, {
           method: 'PATCH',
           headers: {
@@ -152,15 +186,15 @@ const GroceryDisplay = () => {
           throw new Error(`Error ${error.statusCode}: ${error.message}`);
         } else {
           console.log('✅ Patch request successful');
-          setRefreshVersion(prev => prev + 1);
+          setRefreshVersion((prev) => prev + 1);
         }
       } catch (error) {
         console.error('❌ Error with patchReq:', error);
         Alert.alert('Error', 'Failed to update items. Please try again.');
-        setRefreshVersion(prev => prev + 1);
+        setRefreshVersion((prev) => prev + 1);
       }
     };
-    
+
     if (currGroceryList === null) return;
 
     let updatedList: SavedGroceryList;
@@ -170,77 +204,79 @@ const GroceryDisplay = () => {
         console.log('📋 Marking items as purchased:', selectedItemsToEdit);
         updatedList = {
           ...currGroceryList,
-          grocery_list_items: currGroceryList.grocery_list_items.map(i =>
-            selectedItemsToEdit.includes(i.item_id) 
+          grocery_list_items: currGroceryList.grocery_list_items.map((i) =>
+            selectedItemsToEdit.includes(i.item_id)
               ? { ...i, item_status: 'purchased' }
-              : i
+              : i,
           ),
         };
-        
+
         // Update local state immediately (optimistic update)
         setCurrGroceryList(updatedList);
-        
+
         // Exit selection mode INSTANTLY
         exitSelectionMode();
-        
+
         // Send to backend (no need to wait)
         patchReq(updatedList);
         return;
-        
+
       case 'mark-unpurchased':
         console.log('📋 Marking items as unpurchased:', selectedItemsToEdit);
         updatedList = {
           ...currGroceryList,
-          grocery_list_items: currGroceryList.grocery_list_items.map(i =>
-            selectedItemsToEdit.includes(i.item_id) 
+          grocery_list_items: currGroceryList.grocery_list_items.map((i) =>
+            selectedItemsToEdit.includes(i.item_id)
               ? { ...i, item_status: 'incomplete' }
-              : i
+              : i,
           ),
         };
-        
+
         // Update local state immediately (optimistic update)
         setCurrGroceryList(updatedList);
-        
+
         // Exit selection mode INSTANTLY
         exitSelectionMode();
-        
+
         // Send to backend (no need to wait)
         patchReq(updatedList);
         return;
-        
+
       case 'delete':
         console.log('🗑️ Deleting items:', selectedItemsToEdit);
         updatedList = {
           ...currGroceryList,
-          grocery_list_items: currGroceryList.grocery_list_items.filter(i =>
-            !selectedItemsToEdit.includes(i.item_id)
+          grocery_list_items: currGroceryList.grocery_list_items.filter(
+            (i) => !selectedItemsToEdit.includes(i.item_id),
           ),
         };
-        
+
         // Update local state immediately (optimistic update)
         setCurrGroceryList(updatedList);
-        
+
         // Exit selection mode INSTANTLY
         exitSelectionMode();
-        
+
         // Send to backend (no need to wait)
         patchReq(updatedList);
         return;
-        
+
       case 'edit-quantity':
         if (selectedItemsToEdit.length === 1) {
           const itemToEdit = currGroceryList.grocery_list_items.find(
-            item => item.item_id === selectedItemsToEdit[0]
+            (item) => item.item_id === selectedItemsToEdit[0],
           );
           if (itemToEdit) {
             setEditingItem(itemToEdit);
             setNewQuantity(String(itemToEdit.quantity));
-            
+
             // Fix: Show purchased_price first, then fallback to product price
-            const displayPrice = itemToEdit.purchased_price 
+            const displayPrice = itemToEdit.purchased_price
               ? String(itemToEdit.purchased_price)
-              : (itemToEdit.product?.price ? String(itemToEdit.product.price).replace('$', '') : '');
-            
+              : itemToEdit.product?.price
+                ? String(itemToEdit.product.price).replace('$', '')
+                : '';
+
             setNewPrice(displayPrice);
             setShowEditQuantityModal(true);
             return; // Don't exit selection mode yet - will exit when modal is closed
@@ -256,53 +292,67 @@ const GroceryDisplay = () => {
 
     // Only validate price input now
     const priceNumber = parseFloat(newPrice);
-    
+
     if (newPrice && (isNaN(priceNumber) || priceNumber < 0)) {
-      Alert.alert('Invalid Input', 'Please enter a valid price (or leave empty).');
+      Alert.alert(
+        'Invalid Input',
+        'Please enter a valid price (or leave empty).',
+      );
       return;
     }
 
-    console.log('🔵 Updating price for item:', editingItem.name, 'New price:', priceNumber);
+    console.log(
+      '🔵 Updating price for item:',
+      editingItem.name,
+      'New price:',
+      priceNumber,
+    );
 
     const updatedList: SavedGroceryList = {
       ...currGroceryList,
-      grocery_list_items: currGroceryList.grocery_list_items.map(item =>
+      grocery_list_items: currGroceryList.grocery_list_items.map((item) =>
         item.item_id === editingItem.item_id
           ? {
               ...item,
               // Only update purchased_price, keep quantity unchanged
               purchased_price: priceNumber || item.purchased_price,
             }
-          : item
+          : item,
       ),
     };
 
     // Update local state immediately (optimistic update)
     setCurrGroceryList(updatedList);
-    
+
     // Close modal and exit selection mode immediately
     closeEditModal();
 
     try {
       // Send only the specific item that was updated
-      const updatedItem = updatedList.grocery_list_items.find(item => item.item_id === editingItem.item_id);
-      
+      const updatedItem = updatedList.grocery_list_items.find(
+        (item) => item.item_id === editingItem.item_id,
+      );
+
       if (!updatedItem) {
         throw new Error('Updated item not found');
       }
 
-      const requestBody = [{
-        list_id: updatedList.list_id,
-        grocery_list_items: [{
-          item_id: updatedItem.item_id,
-          item_status: updatedItem.item_status,
-          purchased_price: updatedItem.purchased_price,
-          // Only include the fields that were actually updated
-        }],
-      }];
-      
+      const requestBody = [
+        {
+          list_id: updatedList.list_id,
+          grocery_list_items: [
+            {
+              item_id: updatedItem.item_id,
+              item_status: updatedItem.item_status,
+              purchased_price: updatedItem.purchased_price,
+              // Only include the fields that were actually updated
+            },
+          ],
+        },
+      ];
+
       console.log('🚀 Sending minimal item update to API:', requestBody);
-      
+
       const response = await fetch(`${backend_url}/lists/update`, {
         method: 'PATCH',
         headers: {
@@ -317,22 +367,25 @@ const GroceryDisplay = () => {
         throw new Error(`Error ${error.statusCode}: ${error.message}`);
       } else {
         console.log('✅ Price update successful');
-        setRefreshVersion(prev => prev + 1);
+        setRefreshVersion((prev) => prev + 1);
       }
     } catch (error) {
       console.error('❌ Error updating price:', error);
       Alert.alert('Error', 'Failed to update item. Please try again.');
-      setRefreshVersion(prev => prev + 1);
+      setRefreshVersion((prev) => prev + 1);
     }
   };
 
   // Global Edit Header Component
   const EditHeader = () => {
     // Check if the selected item is purchased (only relevant when exactly 1 item is selected)
-    const selectedItem = selectedItemsToEdit.length === 1 
-      ? currGroceryList?.grocery_list_items.find(item => item.item_id === selectedItemsToEdit[0])
-      : null;
-    
+    const selectedItem =
+      selectedItemsToEdit.length === 1
+        ? currGroceryList?.grocery_list_items.find(
+            (item) => item.item_id === selectedItemsToEdit[0],
+          )
+        : null;
+
     const canEditQuantity = selectedItem?.item_status === 'purchased';
 
     return (
@@ -372,62 +425,64 @@ const GroceryDisplay = () => {
         >
           <View className="flex-row items-center">
             <Pressable onPress={exitSelectionMode} className="mr-4">
-              <AntDesign 
-                name="close" 
-                size={24} 
-                color={isDark ? '#FFFFFF' : '#374151'} 
+              <AntDesign
+                name="close"
+                size={24}
+                color={isDark ? '#FFFFFF' : '#374151'}
               />
             </Pressable>
-            <Text className={`font-semibold text-lg ${isDark ? 'text-white' : 'text-gray-700'}`}>
+            <Text
+              className={`font-semibold text-lg ${isDark ? 'text-white' : 'text-gray-700'}`}
+            >
               {selectedItemsToEdit.length} selected
             </Text>
           </View>
-          
+
           <View className="flex-row items-center space-x-3">
-            <Pressable 
+            <Pressable
               onPress={() => handleEditAction('mark-purchased')}
               className={`p-2 rounded-full ${isDark ? 'bg-gray-600' : 'bg-gray-100'}`}
             >
-              <AntDesign 
-                name="checkcircle" 
-                size={20} 
-                color={isDark ? '#10B981' : '#059669'} 
+              <AntDesign
+                name="checkcircle"
+                size={20}
+                color={isDark ? '#10B981' : '#059669'}
               />
             </Pressable>
-            
-            <Pressable 
+
+            <Pressable
               onPress={() => handleEditAction('mark-unpurchased')}
               className={`p-2 rounded-full ${isDark ? 'bg-gray-600' : 'bg-gray-100'}`}
             >
-              <AntDesign 
-                name="closecircle" 
-                size={20} 
-                color={isDark ? '#EF4444' : '#DC2626'} 
+              <AntDesign
+                name="closecircle"
+                size={20}
+                color={isDark ? '#EF4444' : '#DC2626'}
               />
             </Pressable>
-            
+
             {/* Only show edit quantity button when exactly 1 item is selected AND it's purchased */}
             {selectedItemsToEdit.length === 1 && canEditQuantity && (
-              <Pressable 
+              <Pressable
                 onPress={() => handleEditAction('edit-quantity')}
                 className={`p-2 rounded-full ${isDark ? 'bg-gray-600' : 'bg-gray-100'}`}
               >
-                <AntDesign 
-                  name="edit" 
-                  size={20} 
-                  color={isDark ? '#3B82F6' : '#2563EB'} 
+                <AntDesign
+                  name="edit"
+                  size={20}
+                  color={isDark ? '#3B82F6' : '#2563EB'}
                 />
               </Pressable>
             )}
-            
-            <Pressable 
+
+            <Pressable
               onPress={() => handleEditAction('delete')}
               className={`p-2 rounded-full ${isDark ? 'bg-gray-600' : 'bg-gray-100'}`}
             >
-              <AntDesign 
-                name="delete" 
-                size={20} 
-                color={isDark ? '#EF4444' : '#DC2626'} 
+              <AntDesign
+                name="delete"
+                size={20}
+                color={isDark ? '#EF4444' : '#DC2626'}
               />
             </Pressable>
           </View>
@@ -439,9 +494,10 @@ const GroceryDisplay = () => {
   if (!currGroceryList) {
     return (
       <LinearGradient
-        colors={isDark 
-          ? ['#1f2937', '#374151', '#4b5563'] 
-          : ['#667eea', '#764ba2', '#f093fb']
+        colors={
+          isDark
+            ? ['#1f2937', '#374151', '#4b5563']
+            : ['#667eea', '#764ba2', '#f093fb']
         }
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
@@ -460,16 +516,17 @@ const GroceryDisplay = () => {
 
   return (
     <LinearGradient
-      colors={isDark 
-        ? ['#1f2937', '#374151', '#4b5563'] 
-        : ['#667eea', '#764ba2', '#f093fb']
+      colors={
+        isDark
+          ? ['#1f2937', '#374151', '#4b5563']
+          : ['#667eea', '#764ba2', '#f093fb']
       }
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={{ flex: 1 }}
     >
       <EditHeader />
-      
+
       {/* Edit Quantity Modal */}
       <Modal
         visible={showEditQuantityModal}
@@ -479,11 +536,11 @@ const GroceryDisplay = () => {
           closeEditModal();
         }}
       >
-        <KeyboardAvoidingView 
+        <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={{ flex: 1 }}
         >
-          <Pressable 
+          <Pressable
             className="flex-1 bg-black/50 justify-center items-center"
             onPress={() => {
               // Close modal when tapping outside
@@ -494,80 +551,90 @@ const GroceryDisplay = () => {
               className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 mx-4 w-80 max-w-sm`}
               onPress={(e) => e.stopPropagation()} // Prevent modal from closing when tapping inside
             >
-            <Text className={`text-xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-              Edit Item
-            </Text>
-            
-            {editingItem && (
-              <>
-                {/* Item Image */}
-                <View className="items-center mb-4">
-                  <Image
-                    source={{
-                      uri: editingItem.product?.image_url || '',
-                    }}
-                    alt="Item image"
-                    className="w-20 h-20 rounded-lg bg-gray-300"
-                  />
-                </View>
-                
-                {/* Item Name */}
-                <Text className={`text-lg font-semibold mb-3 text-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  {editingItem.product?.name || editingItem.name}
-                </Text>
-                
-                {/* Remove the Amount Purchased section entirely */}
-                
-                {/* Price Purchased Input */}
-                <View className="mb-4">
-                  <Text className={`text-sm font-medium mb-2 ${isDark ? 'text-white' : 'text-gray-700'}`}>
-                    Price Purchased
+              <Text
+                className={`text-xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}
+              >
+                Edit Item
+              </Text>
+
+              {editingItem && (
+                <>
+                  {/* Item Image */}
+                  <View className="items-center mb-4">
+                    <Image
+                      source={{
+                        uri: editingItem.product?.image_url || '',
+                      }}
+                      alt="Item image"
+                      className="w-20 h-20 rounded-lg bg-gray-300"
+                    />
+                  </View>
+
+                  {/* Item Name */}
+                  <Text
+                    className={`text-lg font-semibold mb-3 text-center ${isDark ? 'text-white' : 'text-gray-900'}`}
+                  >
+                    {editingItem.product?.name || editingItem.name}
                   </Text>
-                  <TextInput
-                    value={newPrice}
-                    onChangeText={setNewPrice}
-                    keyboardType="numeric"
-                    className={`${isDark ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'} px-4 py-2 rounded-lg border ${isDark ? 'border-gray-600' : 'border-gray-300'}`}
-                    placeholder="Enter price (without $)"
-                    placeholderTextColor={isDark ? '#9CA3AF' : '#6B7280'}
-                    autoFocus={true}
-                    selectTextOnFocus={true}
-                  />
-                </View>
-                
-                {/* Buttons */}
-                <View className="flex-row justify-between">
-                  <Pressable
-                    onPress={() => {
-                      closeEditModal();
-                    }}
-                    className={`flex-1 mr-2 py-2 px-4 rounded-lg ${isDark ? 'bg-gray-600' : 'bg-gray-200'}`}
-                  >
-                    <Text className={`text-center font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                      Cancel
+
+                  {/* Remove the Amount Purchased section entirely */}
+
+                  {/* Price Purchased Input */}
+                  <View className="mb-4">
+                    <Text
+                      className={`text-sm font-medium mb-2 ${isDark ? 'text-white' : 'text-gray-700'}`}
+                    >
+                      Price Purchased
                     </Text>
-                  </Pressable>
-                  
-                  <Pressable
-                    onPress={handleQuantityUpdate}
-                    className="flex-1 ml-2 py-2 px-4 rounded-lg bg-blue-600"
-                  >
-                    <Text className="text-center font-medium text-white">
-                      Update
-                    </Text>
-                  </Pressable>
-                </View>
-              </>
-            )}
+                    <TextInput
+                      value={newPrice}
+                      onChangeText={setNewPrice}
+                      keyboardType="numeric"
+                      className={`${isDark ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'} px-4 py-2 rounded-lg border ${isDark ? 'border-gray-600' : 'border-gray-300'}`}
+                      placeholder="Enter price (without $)"
+                      placeholderTextColor={isDark ? '#9CA3AF' : '#6B7280'}
+                      autoFocus={true}
+                      selectTextOnFocus={true}
+                    />
+                  </View>
+
+                  {/* Buttons */}
+                  <View className="flex-row justify-between">
+                    <Pressable
+                      onPress={() => {
+                        closeEditModal();
+                      }}
+                      className={`flex-1 mr-2 py-2 px-4 rounded-lg ${isDark ? 'bg-gray-600' : 'bg-gray-200'}`}
+                    >
+                      <Text
+                        className={`text-center font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}
+                      >
+                        Cancel
+                      </Text>
+                    </Pressable>
+
+                    <Pressable
+                      onPress={handleQuantityUpdate}
+                      className="flex-1 ml-2 py-2 px-4 rounded-lg bg-blue-600"
+                    >
+                      <Text className="text-center font-medium text-white">
+                        Update
+                      </Text>
+                    </Pressable>
+                  </View>
+                </>
+              )}
+            </Pressable>
           </Pressable>
-        </Pressable>
         </KeyboardAvoidingView>
       </Modal>
-      
+
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ 
-          paddingTop: showEditHeader ? 70 + (StatusBar.currentHeight || 44) + 16 : 52 
+        contentContainerStyle={{
+          paddingTop: showEditHeader
+            ? 70 + (StatusBar.currentHeight || 44) + 16
+            : 52,
         }}
       >
         <View className="px-4 gap-4">

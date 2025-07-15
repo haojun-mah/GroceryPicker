@@ -5,7 +5,6 @@ import Entypo from '@expo/vector-icons/Entypo';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Fontisto from '@expo/vector-icons/Fontisto';
 
-
 export default function TabsLayout() {
   const { colorScheme } = useColorScheme();
 
@@ -31,16 +30,24 @@ export default function TabsLayout() {
 
             switch (route.name) {
               case 'Home':
-                iconName = <Entypo name="home" size={24} color={tabTextColor}/>;
+                iconName = (
+                  <Entypo name="home" size={24} color={tabTextColor} />
+                );
                 break;
               case 'groceryInput':
-                iconName = <Ionicons name="create" size={24} color={tabTextColor}/>;
+                iconName = (
+                  <Ionicons name="create" size={24} color={tabTextColor} />
+                );
                 break;
               case 'groceryHistory':
-                iconName = <Fontisto name="history" size={18} color={tabTextColor} />;
+                iconName = (
+                  <Fontisto name="history" size={18} color={tabTextColor} />
+                );
                 break;
               default:
-                iconName = <Fontisto name="history" size={18} color={tabTextColor} />;
+                iconName = (
+                  <Fontisto name="history" size={18} color={tabTextColor} />
+                );
                 break;
             }
 

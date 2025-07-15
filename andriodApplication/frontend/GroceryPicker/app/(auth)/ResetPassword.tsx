@@ -39,7 +39,7 @@ export default function ResetPasswordScreen() {
     setLoading(true);
     const { error } = await supabase.auth.updateUser({
       password: password.value,
-    })
+    });
 
     if (error) {
       Alert.alert('Error', error.message);
@@ -104,18 +104,17 @@ export default function ResetPasswordScreen() {
                 type="password"
                 autoCapitalize="none"
                 value={reconfirm.value}
-                onChangeText={(text) => setReconfirm({ value: text, error: '' })}
+                onChangeText={(text) =>
+                  setReconfirm({ value: text, error: '' })
+                }
                 className="text-black dark:text-white"
               />
             </Input>
 
-
-
             {password.error ? (
               <Text className="text-red-500 text-xs">{password.error}</Text>
             ) : (
-              <Text className="text-gray-500 dark:text-gray-300 text-xs">
-              </Text>
+              <Text className="text-gray-500 dark:text-gray-300 text-xs"></Text>
             )}
 
             <Button

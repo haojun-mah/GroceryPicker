@@ -34,7 +34,9 @@ interface DropdownCardProps {
   id: string;
   supermarket: string;
   selectedItemsToEdit: string[];
-  setSelectedItemsToEdit: (items: string[] | ((prev: string[]) => string[])) => void;
+  setSelectedItemsToEdit: (
+    items: string[] | ((prev: string[]) => string[]),
+  ) => void;
   isSelectItemsToEditState: boolean;
   setIsSelectItemsToEditState: (value: boolean) => void;
   showEditHeader: boolean;
@@ -55,17 +57,19 @@ const DropdownCard = ({
   setShowEditHeader,
 }: DropdownCardProps) => {
   const [expanded, setExpanded] = useState(defaultOpen);
-  
+
   // Local state for purchased items
-  const [localPurchasedState, setLocalPurchasedState] = useState<{[key: string]: boolean}>({});
+  const [localPurchasedState, setLocalPurchasedState] = useState<{
+    [key: string]: boolean;
+  }>({});
   const [pendingUpdates, setPendingUpdates] = useState<Set<string>>(new Set());
   const [failedUpdates, setFailedUpdates] = useState<Set<string>>(new Set());
-  
+
   const animation = useRef(new Animated.Value(0)).current;
   const { session } = useSession();
   const { setRefreshVersion } = useGroceryContext();
   const { colorScheme } = useColorScheme();
-  
+
   // Track if component is mounted to prevent state updates after unmount
   const isMountedRef = useRef(true);
   useEffect(() => {
@@ -73,13 +77,15 @@ const DropdownCard = ({
       isMountedRef.current = false;
     };
   }, []);
-  
+
   // Queue for background API calls
-  const updateQueueRef = useRef<Array<{
-    item_id: string;
-    purchased: boolean;
-    timestamp: number;
-  }>>([]);
+  const updateQueueRef = useRef<
+    Array<{
+      item_id: string;
+      purchased: boolean;
+      timestamp: number;
+    }>
+  >([]);
   const isProcessingRef = useRef(false);
 
   // Helper function to get purchased status from item_status
@@ -90,27 +96,33 @@ const DropdownCard = ({
   // Initialize local state from server data
   const serverStateRef = useRef<string>('');
   useEffect(() => {
-    const serverStateKey = insideText.map(item => `${item.item_id}:${getItemPurchasedStatus(item)}`).join('|');
-    
+    const serverStateKey = insideText
+      .map((item) => `${item.item_id}:${getItemPurchasedStatus(item)}`)
+      .join('|');
+
     if (serverStateKey !== serverStateRef.current) {
       serverStateRef.current = serverStateKey;
-      
-      const newLocalState: {[key: string]: boolean} = {};
-      insideText.forEach(item => {
+
+      const newLocalState: { [key: string]: boolean } = {};
+      insideText.forEach((item) => {
         if (!pendingUpdates.has(item.item_id)) {
           newLocalState[item.item_id] = getItemPurchasedStatus(item);
         } else {
-          newLocalState[item.item_id] = localPurchasedState[item.item_id] ?? getItemPurchasedStatus(item);
+          newLocalState[item.item_id] =
+            localPurchasedState[item.item_id] ?? getItemPurchasedStatus(item);
         }
       });
-      
+
       setLocalPurchasedState(newLocalState);
-      
+
       if (failedUpdates.size > 0) {
         const newFailedUpdates = new Set(failedUpdates);
-        failedUpdates.forEach(itemId => {
-          const serverItem = insideText.find(i => i.item_id === itemId);
-          if (serverItem && localPurchasedState[itemId] === getItemPurchasedStatus(serverItem)) {
+        failedUpdates.forEach((itemId) => {
+          const serverItem = insideText.find((i) => i.item_id === itemId);
+          if (
+            serverItem &&
+            localPurchasedState[itemId] === getItemPurchasedStatus(serverItem)
+          ) {
             newFailedUpdates.delete(itemId);
           }
         });
@@ -131,30 +143,40 @@ const DropdownCard = ({
 
   // Background API processing
   const processUpdateQueue = async () => {
-    if (isProcessingRef.current || updateQueueRef.current.length === 0 || !isMountedRef.current) {
+    if (
+      isProcessingRef.current ||
+      updateQueueRef.current.length === 0 ||
+      !isMountedRef.current
+    ) {
       return;
     }
 
     isProcessingRef.current = true;
     const update = updateQueueRef.current.shift()!;
-    
+
     try {
-      const allItemsPurchased = insideText.every(item => {
-        const currentState = item.item_id === update.item_id 
-          ? update.purchased 
-          : localPurchasedState[item.item_id] ?? getItemPurchasedStatus(item);
+      const allItemsPurchased = insideText.every((item) => {
+        const currentState =
+          item.item_id === update.item_id
+            ? update.purchased
+            : (localPurchasedState[item.item_id] ??
+              getItemPurchasedStatus(item));
         return currentState;
       });
       const list_purchased = allItemsPurchased ? 'purchased' : 'incomplete';
 
-      const purchasedItem = [{
-        list_id: outsideText[0].list_id,
-        list_status: list_purchased,
-        grocery_list_items: [{
-          item_id: update.item_id,
-          item_status: update.purchased ? 'purchased' : 'incomplete',
-        }],
-      }];
+      const purchasedItem = [
+        {
+          list_id: outsideText[0].list_id,
+          list_status: list_purchased,
+          grocery_list_items: [
+            {
+              item_id: update.item_id,
+              item_status: update.purchased ? 'purchased' : 'incomplete',
+            },
+          ],
+        },
+      ];
 
       const response = await fetch(`${backend_url}/lists/update`, {
         method: 'PATCH',
@@ -170,58 +192,57 @@ const DropdownCard = ({
       if (!isMountedRef.current) return;
 
       if (output.name === 'ControllerError') {
-        setFailedUpdates(prev => new Set([...prev, update.item_id]));
-        setPendingUpdates(prev => {
+        setFailedUpdates((prev) => new Set([...prev, update.item_id]));
+        setPendingUpdates((prev) => {
           const newSet = new Set(prev);
           newSet.delete(update.item_id);
           return newSet;
         });
-        
-        const serverItem = insideText.find(i => i.item_id === update.item_id);
+
+        const serverItem = insideText.find((i) => i.item_id === update.item_id);
         if (serverItem) {
-          setLocalPurchasedState(prev => ({
+          setLocalPurchasedState((prev) => ({
             ...prev,
-            [update.item_id]: getItemPurchasedStatus(serverItem)
+            [update.item_id]: getItemPurchasedStatus(serverItem),
           }));
         }
       } else {
-        setPendingUpdates(prev => {
+        setPendingUpdates((prev) => {
           const newSet = new Set(prev);
           newSet.delete(update.item_id);
           return newSet;
         });
-        setFailedUpdates(prev => {
+        setFailedUpdates((prev) => {
           const newSet = new Set(prev);
           newSet.delete(update.item_id);
           return newSet;
         });
       }
-
     } catch (error) {
       if (!isMountedRef.current) return;
-      
-      setFailedUpdates(prev => new Set([...prev, update.item_id]));
-      setPendingUpdates(prev => {
+
+      setFailedUpdates((prev) => new Set([...prev, update.item_id]));
+      setPendingUpdates((prev) => {
         const newSet = new Set(prev);
         newSet.delete(update.item_id);
         return newSet;
       });
-      
-      const serverItem = insideText.find(i => i.item_id === update.item_id);
+
+      const serverItem = insideText.find((i) => i.item_id === update.item_id);
       if (serverItem) {
-        setLocalPurchasedState(prev => ({
+        setLocalPurchasedState((prev) => ({
           ...prev,
-          [update.item_id]: getItemPurchasedStatus(serverItem)
+          [update.item_id]: getItemPurchasedStatus(serverItem),
         }));
       }
     }
 
     isProcessingRef.current = false;
-    
+
     if (updateQueueRef.current.length > 0) {
       setTimeout(processUpdateQueue, 100);
     } else {
-      setRefreshVersion(v => v + 1);
+      setRefreshVersion((v) => v + 1);
     }
   };
 
@@ -229,23 +250,23 @@ const DropdownCard = ({
   const handleShortPress = (item_id: string, newPurchasedState: boolean) => {
     if (isSelectItemsToEditState) {
       if (selectedItemsToEdit.includes(item_id)) {
-        setSelectedItemsToEdit(prev => prev.filter(id => id !== item_id));
+        setSelectedItemsToEdit((prev) => prev.filter((id) => id !== item_id));
       } else {
-        setSelectedItemsToEdit(prev => [...prev, item_id]);
+        setSelectedItemsToEdit((prev) => [...prev, item_id]);
       }
     } else {
       if (pendingUpdates.has(item_id)) {
         return;
       }
 
-      setLocalPurchasedState(prev => ({
+      setLocalPurchasedState((prev) => ({
         ...prev,
-        [item_id]: newPurchasedState
+        [item_id]: newPurchasedState,
       }));
 
-      setPendingUpdates(prev => new Set([...prev, item_id]));
-      
-      setFailedUpdates(prev => {
+      setPendingUpdates((prev) => new Set([...prev, item_id]));
+
+      setFailedUpdates((prev) => {
         const newSet = new Set(prev);
         newSet.delete(item_id);
         return newSet;
@@ -282,12 +303,12 @@ const DropdownCard = ({
     if (item.purchased_price !== null && item.purchased_price !== undefined) {
       return `$${item.purchased_price.toFixed(2)}`;
     }
-    
+
     // Otherwise, show the product price if it exists (already has $ symbol)
     if (item.product?.price) {
       return item.product.price;
     }
-    
+
     // If no price is available
     return 'No price';
   };
@@ -296,20 +317,21 @@ const DropdownCard = ({
   const getItemVisualState = (item: SavedGroceryListItem) => {
     const isPending = pendingUpdates.has(item.item_id);
     const isFailed = failedUpdates.has(item.item_id);
-    const isPurchased = localPurchasedState[item.item_id] ?? getItemPurchasedStatus(item);
+    const isPurchased =
+      localPurchasedState[item.item_id] ?? getItemPurchasedStatus(item);
     const isSelected = selectedItemsToEdit.includes(item.item_id);
-    
+
     return {
       isPurchased,
       isPending,
       isFailed,
       isSelected,
       opacity: isPending ? 0.7 : 1,
-      textStyle: isPurchased 
-        ? 'line-through text-gray-400 dark:text-gray-500' 
-        : isFailed 
-        ? 'text-red-500 dark:text-red-400' 
-        : 'text-black dark:text-white'
+      textStyle: isPurchased
+        ? 'line-through text-gray-400 dark:text-gray-500'
+        : isFailed
+          ? 'text-red-500 dark:text-red-400'
+          : 'text-black dark:text-white',
     };
   };
 
@@ -329,8 +351,9 @@ const DropdownCard = ({
                     size="xs"
                     className="text-black dark:text-white text-md"
                   >
-                    {e.product?.name || e.name} - {e.amount === 0 ? 'Not optimized' : e.amount} ({e.quantity} {e.unit}/
-                    {e.product?.price || 'No price'})
+                    {e.product?.name || e.name} -{' '}
+                    {e.amount === 0 ? 'Not optimized' : e.amount} ({e.quantity}{' '}
+                    {e.unit}/{e.product?.price || 'No price'})
                   </Text>
                 ))}
               {expanded && (
@@ -377,7 +400,7 @@ const DropdownCard = ({
             <View className="mt-2 space-y-2">
               {insideText.map((item, idx) => {
                 const visualState = getItemVisualState(item);
-                
+
                 return (
                   <Pressable
                     key={`${item.item_id}-${idx}`}
@@ -387,15 +410,17 @@ const DropdownCard = ({
                     }}
                     onLongPress={() => handleLongPress(item.item_id)}
                     className={`flex-row items-center gap-3 m-2 p-3 rounded-lg border-2 ${
-                      visualState.isSelected 
-                        ? 'bg-blue-50 border-blue-200 dark:bg-blue-900/30 dark:border-blue-600/50' 
+                      visualState.isSelected
+                        ? 'bg-blue-50 border-blue-200 dark:bg-blue-900/30 dark:border-blue-600/50'
                         : 'bg-white border-transparent dark:bg-gray-700 dark:border-transparent'
                     }`}
                     style={{ opacity: visualState.opacity }}
                   >
                     <Image
                       source={{
-                        uri: !item.product?.image_url ? '' : item.product.image_url,
+                        uri: !item.product?.image_url
+                          ? ''
+                          : item.product.image_url,
                       }}
                       alt="Image of grocery"
                       className="w-20 h-20 rounded-md bg-gray-300"
@@ -404,7 +429,9 @@ const DropdownCard = ({
                       <View className="flex-row items-center gap-2">
                         <Text
                           className={`text-xl font-semibold ${
-                            colorScheme === 'light' ? 'text-black' : 'text-white'
+                            colorScheme === 'light'
+                              ? 'text-black'
+                              : 'text-white'
                           }`}
                         >
                           {item.product?.name}
@@ -417,7 +444,9 @@ const DropdownCard = ({
                         )}
                         {visualState.isSelected && (
                           <View className="bg-blue-500 dark:bg-blue-400 px-2 py-1 rounded-full">
-                            <Text className="text-xs text-white font-medium">Selected</Text>
+                            <Text className="text-xs text-white font-medium">
+                              Selected
+                            </Text>
                           </View>
                         )}
                       </View>
@@ -447,7 +476,10 @@ const DropdownCard = ({
                         value={`item-${item.item_id}-${idx}`}
                         isChecked={visualState.isPurchased}
                         onChange={() => {
-                          handleShortPress(item.item_id, !visualState.isPurchased);
+                          handleShortPress(
+                            item.item_id,
+                            !visualState.isPurchased,
+                          );
                         }}
                         className="rounded-full border border-gray-400 w-6 h-6 justify-center items-center"
                       >

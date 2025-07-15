@@ -1,4 +1,13 @@
-import { Pressable, ScrollView, View, Alert, Animated, StatusBar, Modal, Dimensions } from 'react-native';
+import {
+  Pressable,
+  ScrollView,
+  View,
+  Alert,
+  Animated,
+  StatusBar,
+  Modal,
+  Dimensions,
+} from 'react-native';
 import { Text } from '@/components/ui/text';
 import { Card } from '@/components/ui/card';
 import { useGroceryContext } from '@/context/groceryContext';
@@ -17,10 +26,13 @@ import { useColorScheme } from 'nativewind';
 import { Button } from '@/components/ui/button';
 import AntDesign from '@expo/vector-icons/AntDesign';
 
-
 const GroceryListHistoryPage = () => {
-  const { groceryListHistory, setGroceryListHistory, refreshVersion, setRefreshVersion } =
-    useGroceryContext();
+  const {
+    groceryListHistory,
+    setGroceryListHistory,
+    refreshVersion,
+    setRefreshVersion,
+  } = useGroceryContext();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [modalListID, setModalListID] = useState<string>('');
   const [isConfirmOpen, setIsConfirmOpen] = useState<boolean>(false); // Add this state
@@ -28,7 +40,6 @@ const GroceryListHistoryPage = () => {
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
   const { width, height } = Dimensions.get('window');
-
 
   // Selection state
   const [selectedLists, setSelectedLists] = useState<string[]>([]);
@@ -70,9 +81,9 @@ const GroceryListHistoryPage = () => {
       // Toggle selection
       const isSelected = selectedLists.includes(listId);
       if (isSelected) {
-        setSelectedLists(prev => prev.filter(id => id !== listId));
+        setSelectedLists((prev) => prev.filter((id) => id !== listId));
       } else {
-        setSelectedLists(prev => [...prev, listId]);
+        setSelectedLists((prev) => [...prev, listId]);
       }
     } else {
       // Navigate to grocery display
@@ -95,20 +106,22 @@ const GroceryListHistoryPage = () => {
     try {
       let updatedLists: SavedGroceryList[] = [];
 
-      updatedLists = groceryListHistory.filter(list => 
-        selectedLists.includes(list.list_id)
+      updatedLists = groceryListHistory.filter((list) =>
+        selectedLists.includes(list.list_id),
       );
-      updatedLists.map(list => list.list_status = 'deleted');
+      updatedLists.map((list) => (list.list_status = 'deleted'));
 
-      
       // Update local state immediately (optimistic update)
       setGroceryListHistory([
-  ...groceryListHistory.filter(list => !selectedLists.includes(list.list_id)), // Keep only non-updated items
-  ...updatedLists, ]);
+        ...groceryListHistory.filter(
+          (list) => !selectedLists.includes(list.list_id),
+        ), // Keep only non-updated items
+        ...updatedLists,
+      ]);
 
       // Close the confirmation modal
       setIsConfirmOpen(false);
-      
+
       // Exit selection mode
       exitSelectionMode();
 
@@ -128,17 +141,18 @@ const GroceryListHistoryPage = () => {
       }
 
       console.log('✅ Delete successful');
-      setRefreshVersion(prev => prev + 1);
-
+      setRefreshVersion((prev) => prev + 1);
     } catch (error) {
       console.error('❌ Error with delete:', error);
       Alert.alert('Error', 'Failed to delete lists. Please try again.');
-      setRefreshVersion(prev => prev + 1);
+      setRefreshVersion((prev) => prev + 1);
     }
   };
 
   // Handle batch actions
-  const handleBatchAction = async (action: 'delete' | 'archive' | 'activate' | 'purchased') => {
+  const handleBatchAction = async (
+    action: 'delete' | 'archive' | 'activate' | 'purchased',
+  ) => {
     if (!groceryListHistory || selectedLists.length === 0) return;
 
     // Show confirmation modal for delete action
@@ -156,53 +170,53 @@ const GroceryListHistoryPage = () => {
         switch (action) {
           case 'archive':
             // Update local state
-            updatedLists = groceryListHistory.map(list =>
+            updatedLists = groceryListHistory.map((list) =>
               selectedLists.includes(list.list_id)
                 ? { ...list, list_status: 'archived' as const }
-                : list
+                : list,
             );
-            
+
             // Prepare archive request
-            requestBody = selectedLists.map(listId => ({
+            requestBody = selectedLists.map((listId) => ({
               list_id: listId,
-              list_status: 'archived'
+              list_status: 'archived',
             }));
             break;
 
           case 'activate':
             // Update local state - use 'incomplete' instead of 'active'
-            updatedLists = groceryListHistory.map(list =>
+            updatedLists = groceryListHistory.map((list) =>
               selectedLists.includes(list.list_id)
                 ? { ...list, list_status: 'incomplete' as const }
-                : list
+                : list,
             );
-            
+
             // Prepare activate request - use 'incomplete' instead of 'active'
-            requestBody = selectedLists.map(listId => ({
+            requestBody = selectedLists.map((listId) => ({
               list_id: listId,
-              list_status: 'incomplete'
+              list_status: 'incomplete',
             }));
             break;
 
           case 'purchased':
             // Update local state
-            updatedLists = groceryListHistory.map(list =>
+            updatedLists = groceryListHistory.map((list) =>
               selectedLists.includes(list.list_id)
                 ? { ...list, list_status: 'purchased' as const }
-                : list
+                : list,
             );
-            
+
             // Prepare purchased request
-            requestBody = selectedLists.map(listId => ({
+            requestBody = selectedLists.map((listId) => ({
               list_id: listId,
-              list_status: 'purchased'
+              list_status: 'purchased',
             }));
             break;
         }
 
         // Update local state immediately (optimistic update)
         setGroceryListHistory(updatedLists);
-        
+
         // Exit selection mode
         exitSelectionMode();
 
@@ -222,12 +236,11 @@ const GroceryListHistoryPage = () => {
         }
 
         console.log(`✅ ${action} successful`);
-        setRefreshVersion(prev => prev + 1);
-
+        setRefreshVersion((prev) => prev + 1);
       } catch (error) {
         console.error(`❌ Error with ${action}:`, error);
         Alert.alert('Error', `Failed to ${action} lists. Please try again.`);
-        setRefreshVersion(prev => prev + 1);
+        setRefreshVersion((prev) => prev + 1);
       }
     };
 
@@ -239,20 +252,24 @@ const GroceryListHistoryPage = () => {
     if (!groceryListHistory) return null; // Add null check
 
     // Determine the status of the selected lists
-    const allSelectedArePurchased = selectedLists.every(listId => {
-      const list = groceryListHistory.find(l => l.list_id === listId);
+    const allSelectedArePurchased = selectedLists.every((listId) => {
+      const list = groceryListHistory.find((l) => l.list_id === listId);
       return list?.list_status === 'purchased';
     });
 
-    const allSelectedAreArchived = selectedLists.every(listId => {
-      const list = groceryListHistory.find(l => l.list_id === listId);
+    const allSelectedAreArchived = selectedLists.every((listId) => {
+      const list = groceryListHistory.find((l) => l.list_id === listId);
       return list?.list_status === 'archived';
     });
 
-    const allSelectedAreNotPurchasedOrArchived = selectedLists.every(listId => {
-      const list = groceryListHistory.find(l => l.list_id === listId);
-      return list?.list_status !== 'purchased' && list?.list_status !== 'archived';
-    });
+    const allSelectedAreNotPurchasedOrArchived = selectedLists.every(
+      (listId) => {
+        const list = groceryListHistory.find((l) => l.list_id === listId);
+        return (
+          list?.list_status !== 'purchased' && list?.list_status !== 'archived'
+        );
+      },
+    );
 
     return (
       <Animated.View
@@ -269,7 +286,7 @@ const GroceryListHistoryPage = () => {
           zIndex: 10,
         }}
       >
-        <View 
+        <View
           className="bg-white dark:bg-gray-800 border-b border-gray-300 dark:border-gray-500" // Thinner border
           style={{
             paddingTop: StatusBar.currentHeight || 44, // Add padding for status bar
@@ -283,13 +300,17 @@ const GroceryListHistoryPage = () => {
                 onPress={exitSelectionMode}
                 className="p-2 rounded-full bg-gray-100 dark:bg-gray-700"
               >
-                <AntDesign name="close" size={18} color={isDark ? 'white' : 'black'} />
+                <AntDesign
+                  name="close"
+                  size={18}
+                  color={isDark ? 'white' : 'black'}
+                />
               </Pressable>
               <Text className="text-base font-semibold text-black dark:text-white">
                 {selectedLists.length} selected
               </Text>
             </View>
-            
+
             <View className="flex-row gap-3">
               {/* Actions for Not Purchased or Archived */}
               {allSelectedAreNotPurchasedOrArchived && (
@@ -389,9 +410,10 @@ const GroceryListHistoryPage = () => {
   if (!groceryListHistory || groceryListHistory.length === 0) {
     return (
       <LinearGradient
-        colors={isDark 
-          ? ['#1f2937', '#374151', '#4b5563'] 
-          : ['#667eea', '#764ba2', '#f093fb']
+        colors={
+          isDark
+            ? ['#1f2937', '#374151', '#4b5563']
+            : ['#667eea', '#764ba2', '#f093fb']
         }
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
@@ -417,19 +439,22 @@ const GroceryListHistoryPage = () => {
 
   return (
     <LinearGradient
-      colors={isDark 
-        ? ['#1f2937', '#374151', '#4b5563'] 
-        : ['#667eea', '#764ba2', '#f093fb']
+      colors={
+        isDark
+          ? ['#1f2937', '#374151', '#4b5563']
+          : ['#667eea', '#764ba2', '#f093fb']
       }
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={{ flex: 1 }}
     >
       <EditHeader />
-      
+
       <ScrollView
-        contentContainerStyle={{ 
-          paddingTop: showEditHeader ? 60 + (StatusBar.currentHeight || 44) : 60, // Updated to match new header height
+        contentContainerStyle={{
+          paddingTop: showEditHeader
+            ? 60 + (StatusBar.currentHeight || 44)
+            : 60, // Updated to match new header height
           paddingBottom: 20,
         }}
         className="flex-1"
@@ -440,12 +465,14 @@ const GroceryListHistoryPage = () => {
             History
           </Text>
           <Text className="text-xl text-black/70 dark:text-white/80">
-            {isSelectionMode ? 'Select lists to perform batch actions' : 'Hold on grocery list to select multiple'}
+            {isSelectionMode
+              ? 'Select lists to perform batch actions'
+              : 'Hold on grocery list to select multiple'}
           </Text>
           <View className="gap-4">
             {groceryListHistory?.map((list, idx) => {
               const isSelected = selectedLists.includes(list.list_id);
-              
+
               return (
                 <Pressable
                   key={idx}
@@ -453,11 +480,13 @@ const GroceryListHistoryPage = () => {
                   onLongPress={() => handleLongPress(list.list_id)}
                   className={`${isSelected ? 'opacity-80' : ''}`}
                 >
-                  <Card className={`bg-white/90 dark:bg-gray-700/90 rounded-xl border shadow-lg backdrop-blur-sm ${
-                    isSelected 
-                      ? 'border-2 border-blue-500 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-900/30' 
-                      : 'border border-gray-200 dark:border-gray-600'
-                  }`}>
+                  <Card
+                    className={`bg-white/90 dark:bg-gray-700/90 rounded-xl border shadow-lg backdrop-blur-sm ${
+                      isSelected
+                        ? 'border-2 border-blue-500 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-900/30'
+                        : 'border border-gray-200 dark:border-gray-600'
+                    }`}
+                  >
                     <View className="flex-row items-center justify-between">
                       <View className="flex-1">
                         <Text className="text-xl font-semibold text-black dark:text-white">
@@ -475,10 +504,12 @@ const GroceryListHistoryPage = () => {
                           {GROCERY_LIST_STATUS_LABELS[list.list_status]}
                         </Text>
                       </View>
-                      
+
                       {isSelected && (
                         <View className="bg-blue-500 dark:bg-blue-400 px-3 py-1 rounded-full">
-                          <Text className="text-xs text-white font-medium">Selected</Text>
+                          <Text className="text-xs text-white font-medium">
+                            Selected
+                          </Text>
                         </View>
                       )}
                     </View>
@@ -489,7 +520,7 @@ const GroceryListHistoryPage = () => {
           </View>
         </View>
       </ScrollView>
-      
+
       <GroceryListModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

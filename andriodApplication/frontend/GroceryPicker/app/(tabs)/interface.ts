@@ -45,9 +45,13 @@ export interface SupermarketFilter {
 }
 
 // Helper to sanitize/validate supermarket filter
-export function sanitizeSupermarketFilter(filter: SupermarketFilter): SupermarketFilter {
+export function sanitizeSupermarketFilter(
+  filter: SupermarketFilter,
+): SupermarketFilter {
   return {
-    exclude: filter.exclude?.filter((s) => ALLOWED_SUPERMARKETS.includes(s as SupermarketName)),
+    exclude: filter.exclude?.filter((s) =>
+      ALLOWED_SUPERMARKETS.includes(s as SupermarketName),
+    ),
   };
 }
 
@@ -146,7 +150,9 @@ export const GROCERY_LIST_STATUSES = [
 export type GroceryListStatus = (typeof GROCERY_LIST_STATUSES)[number];
 
 // Helper to validate list_status at runtime
-export function isValidGroceryListStatus(status: any): status is GroceryListStatus {
+export function isValidGroceryListStatus(
+  status: any,
+): status is GroceryListStatus {
   return GROCERY_LIST_STATUSES.includes(status);
 }
 

@@ -98,7 +98,7 @@ export const GroceryListModal = ({
       console.log(output.statusCode, output.message, output.details);
     } else {
       console.log(output.message, output.details); // debug. Msg for successful
-      setRefreshVersion(v => v + 1);
+      setRefreshVersion((v) => v + 1);
       setIsConfirmOpen(false);
       onClose();
     }
@@ -149,7 +149,9 @@ export const GroceryListModal = ({
                     Unhide list
                   </Text>
                 ) : (
-                  <Text className="text-black dark:text-white text-xl">Hide List</Text>
+                  <Text className="text-black dark:text-white text-xl">
+                    Hide List
+                  </Text>
                 )}
               </Pressable>
             </View>
@@ -179,7 +181,7 @@ export const GroceryListModal = ({
             className="bg-white dark:bg-gray-700 rounded-lg p-5 items-center justify-center"
             style={{
               width: width * 0.5,
-              height: height * 0.20,
+              height: height * 0.2,
             }}
           >
             <Text className="text-xl text-black dark:text-white font-bold mb-4 text-center">
