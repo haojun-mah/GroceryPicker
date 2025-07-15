@@ -1,4 +1,4 @@
-import { Pressable, ScrollView, View, Alert, Animated, StatusBar } from 'react-native';
+import { Pressable, ScrollView, View, Alert, Animated, StatusBar, Modal, Dimensions } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { Card } from '@/components/ui/card';
 import { useGroceryContext } from '@/context/groceryContext';
@@ -17,22 +17,18 @@ import { useColorScheme } from 'nativewind';
 import { Button } from '@/components/ui/button';
 import AntDesign from '@expo/vector-icons/AntDesign';
 
-/*
-  Page host grocery list history for each user.
-  User can click on grocery list card which leads to grocery display.
-  User can long press to enter multi-selection mode for batch actions.
-
-  GET request to /lists/getAll return SavedGroceryList[] type.
-  */
 
 const GroceryListHistoryPage = () => {
   const { groceryListHistory, setGroceryListHistory, refreshVersion, setRefreshVersion } =
     useGroceryContext();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [modalListID, setModalListID] = useState<string>('');
+  const [isConfirmOpen, setIsConfirmOpen] = useState<boolean>(false); // Add this state
   const { session } = useSession();
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const { width, height } = Dimensions.get('window');
+
 
   // Selection state
   const [selectedLists, setSelectedLists] = useState<string[]>([]);
@@ -92,29 +88,72 @@ const GroceryListHistoryPage = () => {
     }
   };
 
+  // Handle the actual deletion after confirmation
+  const handleConfirmDelete = async () => {
+    if (!groceryListHistory || selectedLists.length === 0) return;
+
+    try {
+      let updatedLists: SavedGroceryList[] = [];
+
+      updatedLists = groceryListHistory.filter(list => 
+        selectedLists.includes(list.list_id)
+      );
+      updatedLists.map(list => list.list_status = 'deleted');
+
+      
+      // Update local state immediately (optimistic update)
+      setGroceryListHistory([
+  ...groceryListHistory.filter(list => !selectedLists.includes(list.list_id)), // Keep only non-updated items
+  ...updatedLists, ]);
+
+      // Close the confirmation modal
+      setIsConfirmOpen(false);
+      
+      // Exit selection mode
+      exitSelectionMode();
+
+      // Send to backend
+      const response = await fetch(`${backend_url}/lists/update`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedLists),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(`Error ${error.statusCode}: ${error.message}`);
+      }
+
+      console.log('✅ Delete successful');
+      setRefreshVersion(prev => prev + 1);
+
+    } catch (error) {
+      console.error('❌ Error with delete:', error);
+      Alert.alert('Error', 'Failed to delete lists. Please try again.');
+      setRefreshVersion(prev => prev + 1);
+    }
+  };
+
   // Handle batch actions
   const handleBatchAction = async (action: 'delete' | 'archive' | 'activate' | 'purchased') => {
     if (!groceryListHistory || selectedLists.length === 0) return;
 
+    // Show confirmation modal for delete action
+    if (action === 'delete') {
+      setIsConfirmOpen(true);
+      return;
+    }
+
+    // Handle other actions normally
     const performAction = async () => {
       try {
         let updatedLists: SavedGroceryList[] = [];
         let requestBody: any[] = [];
 
         switch (action) {
-          case 'delete':
-            // Remove from local state
-            updatedLists = groceryListHistory.filter(list => 
-              !selectedLists.includes(list.list_id)
-            );
-            
-            // Prepare delete request
-            requestBody = selectedLists.map(listId => ({
-              list_id: listId,
-              _action: 'delete'
-            }));
-            break;
-
           case 'archive':
             // Update local state
             updatedLists = groceryListHistory.map(list =>
@@ -192,26 +231,7 @@ const GroceryListHistoryPage = () => {
       }
     };
 
-    if (action === 'delete') {
-      // Show confirmation dialog for delete
-      Alert.alert(
-        'Delete Lists',
-        `Are you sure you want to delete ${selectedLists.length} list${selectedLists.length > 1 ? 's' : ''}? This action cannot be undone.`,
-        [
-          {
-            text: 'Cancel',
-            style: 'cancel',
-          },
-          {
-            text: 'Delete',
-            style: 'destructive',
-            onPress: performAction,
-          },
-        ]
-      );
-    } else {
-      performAction();
-    }
+    performAction();
   };
 
   // Edit Header Component
@@ -239,98 +259,93 @@ const GroceryListHistoryPage = () => {
         style={{
           height: headerAnimation.interpolate({
             inputRange: [0, 1],
-            outputRange: [0, 70],
+            outputRange: [0, 60 + (StatusBar.currentHeight || 44)], // Reduced height
           }),
           opacity: headerAnimation,
           position: 'absolute',
-          top: StatusBar.currentHeight || 44,
+          top: 0, // Flush to the very top
           left: 0,
           right: 0,
           zIndex: 10,
         }}
       >
-        <View className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-600 px-4 py-2">
+        <View 
+          className="bg-white dark:bg-gray-800 border-b border-gray-300 dark:border-gray-500" // Thinner border
+          style={{
+            paddingTop: StatusBar.currentHeight || 44, // Add padding for status bar
+            paddingHorizontal: 16,
+            paddingBottom: 6, // Reduced padding
+          }}
+        >
           <View className="flex-row items-center justify-between">
             <View className="flex-row items-center gap-3">
               <Pressable
                 onPress={exitSelectionMode}
                 className="p-2 rounded-full bg-gray-100 dark:bg-gray-700"
               >
-                <AntDesign name="close" size={20} color={isDark ? 'white' : 'black'} />
+                <AntDesign name="close" size={18} color={isDark ? 'white' : 'black'} />
               </Pressable>
-              <Text className="text-lg font-semibold text-black dark:text-white">
+              <Text className="text-base font-semibold text-black dark:text-white">
                 {selectedLists.length} selected
               </Text>
             </View>
             
-            <View className="flex-row gap-2">
+            <View className="flex-row gap-3">
               {/* Actions for Not Purchased or Archived */}
               {allSelectedAreNotPurchasedOrArchived && (
                 <>
-                  <Button
+                  <Pressable
                     onPress={() => handleBatchAction('purchased')}
-                    variant="outline"
-                    size="sm"
-                    className="border-green-500 dark:border-green-400"
+                    className="p-2 rounded-full bg-green-100 dark:bg-green-800"
                   >
-                    <Text className="text-green-600 dark:text-green-400">Purchased</Text>
-                  </Button>
-                  <Button
+                    <AntDesign name="check" size={18} color="#16a34a" />
+                  </Pressable>
+                  <Pressable
                     onPress={() => handleBatchAction('archive')}
-                    variant="outline"
-                    size="sm"
-                    className="border-orange-500 dark:border-orange-400"
+                    className="p-2 rounded-full bg-orange-100 dark:bg-orange-800"
                   >
-                    <Text className="text-orange-600 dark:text-orange-400">Archive</Text>
-                  </Button>
+                    <AntDesign name="inbox" size={18} color="#ea580c" />
+                  </Pressable>
                 </>
               )}
 
               {/* Actions for Purchased */}
               {allSelectedArePurchased && (
                 <>
-                  <Button
+                  <Pressable
                     onPress={() => handleBatchAction('activate')}
-                    variant="outline"
-                    size="sm"
-                    className="border-blue-500 dark:border-blue-400"
+                    className="p-2 rounded-full bg-blue-100 dark:bg-blue-800"
                   >
-                    <Text className="text-blue-600 dark:text-blue-400">Unpurchase</Text>
-                  </Button>
-                  <Button
+                    <AntDesign name="reload1" size={18} color="#2563eb" />
+                  </Pressable>
+                  <Pressable
                     onPress={() => handleBatchAction('archive')}
-                    variant="outline"
-                    size="sm"
-                    className="border-orange-500 dark:border-orange-400"
+                    className="p-2 rounded-full bg-orange-100 dark:bg-orange-800"
                   >
-                    <Text className="text-orange-600 dark:text-orange-400">Archive</Text>
-                  </Button>
+                    <AntDesign name="inbox" size={18} color="#ea580c" />
+                  </Pressable>
                 </>
               )}
 
               {/* Actions for Archived */}
               {allSelectedAreArchived && (
                 <>
-                  <Button
+                  <Pressable
                     onPress={() => handleBatchAction('activate')}
-                    variant="outline"
-                    size="sm"
-                    className="border-blue-500 dark:border-blue-400"
+                    className="p-2 rounded-full bg-blue-100 dark:bg-blue-800"
                   >
-                    <Text className="text-blue-600 dark:text-blue-400">Unarchive</Text>
-                  </Button>
+                    <AntDesign name="reload1" size={18} color="#2563eb" />
+                  </Pressable>
                 </>
               )}
 
               {/* Delete Button (Always Available) */}
-              <Button
+              <Pressable
                 onPress={() => handleBatchAction('delete')}
-                variant="outline"
-                size="sm"
-                className="border-red-500 dark:border-red-400"
+                className="p-2 rounded-full bg-red-100 dark:bg-red-800"
               >
-                <Text className="text-red-600 dark:text-red-400">Delete</Text>
-              </Button>
+                <AntDesign name="delete" size={18} color="#dc2626" />
+              </Pressable>
             </View>
           </View>
         </View>
@@ -414,7 +429,7 @@ const GroceryListHistoryPage = () => {
       
       <ScrollView
         contentContainerStyle={{ 
-          paddingTop: showEditHeader ? 70 + (StatusBar.currentHeight || 44) : 60,
+          paddingTop: showEditHeader ? 60 + (StatusBar.currentHeight || 44) : 60, // Updated to match new header height
           paddingBottom: 20,
         }}
         className="flex-1"
@@ -428,7 +443,7 @@ const GroceryListHistoryPage = () => {
             {isSelectionMode ? 'Select lists to perform batch actions' : 'Hold on grocery list to select multiple'}
           </Text>
           <View className="gap-4">
-            {groceryListHistory.map((list, idx) => {
+            {groceryListHistory?.map((list, idx) => {
               const isSelected = selectedLists.includes(list.list_id);
               
               return (
@@ -480,6 +495,47 @@ const GroceryListHistoryPage = () => {
         onClose={() => setIsModalOpen(false)}
         id={modalListID}
       />
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        visible={isConfirmOpen}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setIsConfirmOpen(false)}
+      >
+        <Pressable
+          onPress={() => setIsConfirmOpen(false)}
+          className="w-full flex-1 justify-center items-center bg-black/50"
+        >
+          <View
+            className="bg-white dark:bg-gray-700 rounded-lg p-5 items-center justify-center"
+            style={{
+              width: width * 0.8, // 50% of screen width
+              height: height * 0.4, // 20% of screen height
+            }}
+          >
+            <Text className="text-xl text-black dark:text-white font-bold mb-4 text-center">
+              Delete Grocery List?
+            </Text>
+            <Text className="text-sm text-gray-700 dark:text-gray-300 mb-6 text-center">
+              You cannot revert this action after deletion.
+            </Text>
+            <View className="flex-row justify-between w-full">
+              {/* Confirm Button */}
+              <Pressable
+                onPress={() => {
+                  handleConfirmDelete();
+                }}
+                className="flex-1 ml-2 py-3 px-4 rounded-lg bg-red-600"
+              >
+                <Text className="text-center font-medium text-white">
+                  Confirm
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </Pressable>
+      </Modal>
     </LinearGradient>
   );
 };
