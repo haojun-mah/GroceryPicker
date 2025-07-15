@@ -29,6 +29,7 @@ export const findBestPricesForGroceryList: RequestHandler<
 
     // Generate the structured grocery list from user input
     let generatedResult: GroceryMetadataTitleOutput;
+
     try {
       generatedResult = await new Promise<GroceryMetadataTitleOutput>(
         (resolve, reject) => {
