@@ -28,9 +28,14 @@ describe('GroceryPriceModel', () => {
       price: '3.50',
       supermarket: 'FairPrice',
       quantity: '500g',
-      similarity: 0.95,
+      promotion_text: null,
+      promotion_expiry: null,
+      embedding: null,
+      image_url: 'https://example.com/pasta.jpg',
       product_url: 'https://example.com/pasta',
-      image_url: 'https://example.com/pasta.jpg'
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z',
+      similarity: 0.95
     },
     {
       product_id: 'tomato-456',
@@ -38,9 +43,14 @@ describe('GroceryPriceModel', () => {
       price: '4.80',
       supermarket: 'Cold Storage',
       quantity: '1kg',
-      similarity: 0.88,
+      promotion_text: '20% off',
+      promotion_expiry: '2024-12-31T23:59:59Z',
+      embedding: null,
+      image_url: 'https://example.com/tomatoes.jpg',
       product_url: 'https://example.com/tomatoes',
-      image_url: 'https://example.com/tomatoes.jpg'
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z',
+      similarity: 0.88
     }
   ];
 
