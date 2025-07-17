@@ -15,7 +15,8 @@ import {
   SavedGroceryList,
   SavedGroceryListItem,
   AiPromptRequestBody,
-  SupermarketName, // Add this import
+  SupermarketName,
+  ALLOWED_SUPERMARKETS, // Add this import
 } from './interface';
 import { useSession } from '@/context/authContext';
 import { backend_url } from '../../lib/api';

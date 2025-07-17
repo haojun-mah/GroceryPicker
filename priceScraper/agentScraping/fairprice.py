@@ -23,7 +23,8 @@ from crawl4ai.extraction_strategy import LLMExtractionStrategy
 # product details, store the vectors and pushes it to DB to keep
 
 
-load_dotenv()                                   
+load_dotenv()
+api = os.getenv("BACKEND_URL")
 
 # URL used for scrape testing
 URL_TO_SCRAPE = "https://www.fairprice.com.sg/category/international-selections"
@@ -179,7 +180,7 @@ async def main():
                                 # sends to embedding service
                                 response = await asyncio.to_thread(
                                     requests.post,
-                                    "http://localhost:3000/products/embed-text",
+                                    "/products/embed-text",
                                     headers={
                                         'Content-Type': 'application/json',
                                         'X-API-Key': os.getenv("JWT_SECRET")
@@ -254,7 +255,7 @@ async def main():
                 
                 response = await asyncio.to_thread(
                     requests.post,
-                    "http://localhost:3000/products/upload",
+                    f"{api}/products/upload",
                     headers={
                         'Content-Type': 'application/json',
                         'X-API-Key': os.getenv("JWT_SECRET")
