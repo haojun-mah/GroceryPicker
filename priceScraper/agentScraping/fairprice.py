@@ -263,7 +263,7 @@ async def main():
                     json=chunk,
                 )
                 output = response.json()
-                if output.get('statusCode') == 200:
+                if output.gEt('statusCode') == 200:
                     print(output.get('message'))
                 else:
                     print(f"⚠️ [{i}] Upload To DB Failed: {output.get('message')}")
