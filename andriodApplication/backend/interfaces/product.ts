@@ -13,3 +13,15 @@ export interface ProductRow {
   updated_at: string;
   similarity?: number | null;
 }
+
+export interface ProductCatalog{
+  product_id: string;
+  name: string;
+  price: string;
+  image_url: string;
+  supermarket: string;
+  quantity: string;
+  promotion_description: string | null;
+  product_url: string;
+  promotion_end_date_text: string | null;
+}

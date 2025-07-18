@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { embedTextController } from '../controllers/embeddingController';
 import { scraperUploadController } from '../controllers/uploadProductController';
-import { searchProducts, getSearchSuggestions } from '../controllers/productSearchController';
+import { searchProducts, getSearchSuggestions } from '../controllers/productCatalogController';
 
 /*
     Route handles product operations.
