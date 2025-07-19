@@ -22,9 +22,9 @@ from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig
 load_dotenv()
 
 # Configuration
-TEST_MODE = True  # Set to False for production scraping
-ENABLE_EMBEDDING = False  # Set to True when backend is ready
-ENABLE_DB_UPLOAD = False  # Set to True when ready to upload to database
+TEST_MODE = False  # Set to False for production scraping
+ENABLE_EMBEDDING = True  # Set to True when backend is ready
+ENABLE_DB_UPLOAD = True  # Set to True when ready to upload to database
 
 # URLs
 URL_TO_SCRAPE = "https://shengsiong.com.sg/breakfast-spreads"
@@ -187,7 +187,7 @@ async def upload_to_database(products):
     if not ENABLE_DB_UPLOAD or not products:
         return
         
-    BATCH_SIZE = 10
+    BATCH_SIZE = 5
     total_batches = math.ceil(len(products) / BATCH_SIZE)
     
     print(f"🚀 Uploading {len(products)} products in {total_batches} batches...")
@@ -228,8 +228,11 @@ def save_products(products):
         print("⚠️ No products to save")
         return
         
+    # Get the directory where this script is located
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    
     # Save to CSV
-    csv_file = "shengsiong_products.csv"
+    csv_file = os.path.join(script_dir, "shengsiong_products.csv")
     csv_columns = ['name', 'supermarket', 'quantity', 'price', 'promotion_description', 
                    'promotion_end_date_text', 'product_url', 'image_url', 'embedding']
     
@@ -241,7 +244,7 @@ def save_products(products):
             writer.writerow(cleaned_product)
 
     # Save to JSON
-    json_file = "shengsiong_products.json"
+    json_file = os.path.join(script_dir, "shengsiong_products.json")
     with open(json_file, mode='w', encoding='utf-8') as f:
         json.dump(products, f, indent=2, ensure_ascii=False)
 
@@ -268,7 +271,7 @@ async def main():
     
     # Configure crawler
     crawl_config = CrawlerRunConfig(
-        scan_full_page=False,
+        scan_full_page=True,
         scroll_delay=1.0,
         extraction_strategy=JsonCssExtractionStrategy(css_schema, verbose=False),
         verbose=False,
