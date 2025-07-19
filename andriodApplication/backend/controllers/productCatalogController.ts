@@ -181,7 +181,7 @@ export const searchProducts: RequestHandler<
  */
 export const getSearchSuggestions: RequestHandler<
   {},
-  { suggestions: ProductCatalog[] },
+  ProductCatalog[],
   {},
   {
     q?: string;
@@ -192,7 +192,7 @@ export const getSearchSuggestions: RequestHandler<
     const { q: query, limit = '5' } = req.query;
 
     if (!query || typeof query !== 'string' || query.length < 2) {
-      res.status(200).json({ suggestions: [] });
+      res.status(200).json([]);
       return;
     }
 
@@ -205,16 +205,16 @@ export const getSearchSuggestions: RequestHandler<
     if (error) {
       const err = new ControllerError(500, 'Search suggestions error', error.message);
       console.error(err);
-      res.status(500).json({ suggestions: [] });
+      res.status(500).json([]);
       return;
     }
 
     // Format suggestions
     const suggestions: ProductCatalog[] = data;
-    res.status(200).json({ suggestions });
+    res.status(200).json(suggestions);
   } catch (error: any) {
     const err = new ControllerError(500, 'Search suggestions error', error.message);
     console.error(err);
-    res.status(500).json({ suggestions: [] });
+    res.status(500).json([]);
   }
 };
