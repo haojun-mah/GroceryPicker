@@ -128,18 +128,38 @@ export const searchProducts: RequestHandler<
       
       // Apply sorting - either random or standard sorting
       if (random === 'true') {
-        // Use PostgreSQL's RANDOM() function for randomized results
-        dbQuery = dbQuery.order('random'); // Remove ".asc"
+        // Build count query with the same filters as the main query
+        let countQuery = supabase
+          .from('products')
+          .select('*', { count: 'exact', head: true });
+        
+        // Apply the same filters to count query
+        if (supermarket) countQuery = countQuery.eq('supermarket', supermarket);
+        if (hasPromotion === 'true') countQuery = countQuery.not('promotion_description', 'is', null);
+        
+        const totalCount = await countQuery;
+        
+        if (totalCount.count && totalCount.count > limitNum) {
+          const maxOffset = Math.max(0, totalCount.count - limitNum);
+          const randomOffset = Math.floor(Math.random() * maxOffset);
+          dbQuery = dbQuery.range(randomOffset, randomOffset + limitNum - 1);
+        } else {
+          // If not enough records, just use normal pagination
+          dbQuery = dbQuery.range(offsetNum, offsetNum + limitNum - 1);
+        }
+        
+        // Apply a basic order to ensure consistent results per request
+        dbQuery = dbQuery.order('product_id');
       } else {
         // Apply standard sorting - only allow valid fields
         const validSortFields = ['name', 'price', 'supermarket', 'created_at'];
         const sortField = validSortFields.includes(sort) ? sort : 'name';
         const sortOrder = order === 'desc' ? false : true;
         dbQuery = dbQuery.order(sortField, { ascending: sortOrder });
+        
+        // Apply pagination for non-random queries
+        dbQuery = dbQuery.range(offsetNum, offsetNum + limitNum - 1);
       }
-      
-      // Apply pagination
-      dbQuery = dbQuery.range(offsetNum, offsetNum + limitNum - 1);
       
       const { data, error } = await dbQuery;
       if (error) {
