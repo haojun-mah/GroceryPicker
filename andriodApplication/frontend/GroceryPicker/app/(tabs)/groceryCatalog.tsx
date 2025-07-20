@@ -27,6 +27,7 @@ const GrocerySearch = () => {
   const { setIsLoading } = useGroceryContext();
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [suggestions, setSuggestions] = useState<ProductCatalog[] | null>(null);
+  const [promotions, setPromotions] = useState<ProductCatalog[] | null>(null);
   const [searchResult, setSearchResult] = useState<ProductCatalog[] | null>(null);
   const [itemDisplay, setItemDisplay] = useState<ProductCatalog[] | null>(null);
   const [target, setTarget] = useState<ProductCatalog | null>(null);
@@ -34,23 +35,34 @@ const GrocerySearch = () => {
   // Initally get to populate page
   useEffect(() => {
     const fetchData = async () => {
-      const results = await search(); 
-      setItemDisplay(results); 
-      setSearchResult(null); 
+      const itemDisplay = await search(); 
+      setItemDisplay(itemDisplay); 
+      
+      const promotion = await search(true);
+      setPromotions(promotion);
+      setSearchResult(null);
     };
     fetchData();
   }, []);
 
-  const search = async () => {
+  const search = async (promotion : boolean = false) => {
     try {
       setSuggestions(null);
       setIsLoading(true);
 
-      const response = await axios.get(`${backend_url}/products/search?q=${searchQuery}`, {
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`
-        }
-      });
+      let input : string;
+
+      if (promotion) {
+        input = 'hasPromotion=true&random=true';
+
+      } else {
+        input = `q=${searchQuery}`;
+      }
+      const response = await axios.get(`${backend_url}/products/search?${input}`, {
+          headers: {
+            Authorization: `Bearer ${session?.access_token}`
+          }
+        });
 
       if (response.status === 200) {
         const results: SearchProductsResponse = response.data;
@@ -245,42 +257,18 @@ const GrocerySearch = () => {
     showsHorizontalScrollIndicator={false} // Hides the scroll indicator
     className="flex-row"
   >
-    {[
-      {
-        id: 1,
-        name: "Fresh Organic Bananas",
-        originalPrice: 4.99,
-        discountPrice: 2.99,
-        discount: "40% OFF",
-        supermarket: "Whole Foods",
-        image_url: "https://example.com/banana.jpg",
-      },
-      {
-        id: 2,
-        name: "Premium Ground Coffee",
-        originalPrice: 12.99,
-        discountPrice: 8.99,
-        discount: "30% OFF",
-        supermarket: "Target",
-        image_url: "https://example.com/coffee.jpg",
-      },
-      {
-        id: 3,
-        name: "Greek Yogurt 4-Pack",
-        originalPrice: 6.99,
-        discountPrice: 4.99,
-        discount: "25% OFF",
-        supermarket: "Walmart",
-        image_url: "https://example.com/yogurt.jpg",
-      },
-    ].map((item, idx) => (
+    {
+    promotions === null ? 
+      (<Text>No Promotions Available</Text>)
+      :
+      promotions.map((item, idx) => (
       <Pressable
-        key={item.id || idx}
-        className="bg-white rounded-xl p-3 shadow-sm border border-gray-100 w-40 h-56 mr-4"
-        onPress={}
+        key={idx}
+        className="bg-white rounded-xl p-3 shadow-sm border border-gray-100 w-44 h-64 mr-4"
+        onPress={() => setTarget(item)}
       >
         {/* Item Image */}
-        <View className="w-full h-32 bg-gray-100 rounded-lg items-center justify-center mb-2">
+        <View className="w-full h-28 bg-gray-100 rounded-lg items-center justify-center mb-2">
           <Image
             source={{ uri: item.image_url || "/placeholder.svg?height=96&width=96" }}
             className="w-20 h-20"
@@ -289,19 +277,32 @@ const GrocerySearch = () => {
         </View>
 
         {/* Item Details */}
-        <Text className="font-semibold text-gray-900 text-sm mb-1" numberOfLines={2}>
+        <Text className="font-semibold text-gray-900 text-sm mb-2 text-center" numberOfLines={2}>
           {item.name}
         </Text>
-        <Text className="text-gray-500 text-xs mb-1">{item.supermarket}</Text>
+        <Text className="text-gray-500 text-xs mb-2 text-center" numberOfLines={1}>
+          {item.supermarket}
+        </Text>
 
-        {/* Price Row */}
-        <View className="flex-row justify-center items-center">
-          <Text className="text-gray-400 text-xs line-through mr-2">
-            ${item.originalPrice}
+        {/* Promotion Description Badge */}
+        {item.promotion_description && (
+          <View className="bg-red-500 rounded-lg px-2 py-1 mb-2">
+            <Text className="text-white text-xs font-bold text-center" numberOfLines={1}>
+              {item.promotion_description}
+            </Text>
+          </View>
+        )}
+
+        {/* Price and End Date */}
+        <View className="flex-1 justify-end">
+          <Text className="text-green-600 font-bold text-sm text-center mb-1">
+            ${item.price}
           </Text>
-          <Text className="text-green-600 font-bold text-sm">
-            ${item.discountPrice}
-          </Text>
+          {item.promotion_end_date_text && (
+            <Text className="text-gray-400 text-xs text-center" numberOfLines={1}>
+              Ends: {item.promotion_end_date_text}
+            </Text>
+          )}
         </View>
       </Pressable>
     ))}
