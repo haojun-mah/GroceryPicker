@@ -29,6 +29,7 @@ interface SearchProductsResponse {
  *   - offset: pagination offset (default 0)
  *   - sort: sort field for catalog mode (name, price, created_at)
  *   - order: sort order (asc, desc)
+ *   - random: randomize results order (true/false) - only applies in catalog mode
  * Returns:
  *   - results: array of matching products
  *   - query: original search term (or empty for catalog)
@@ -50,6 +51,7 @@ export const searchProducts: RequestHandler<
     offset?: string;
     sort?: string;
     order?: string;
+    random?: string;
   }
 > = async (req, res) => {
   try {
@@ -61,6 +63,7 @@ export const searchProducts: RequestHandler<
       offset = '0',
       sort = 'name',
       order = 'asc',
+      random,
     } = req.query;
 
     let results;
@@ -123,11 +126,17 @@ export const searchProducts: RequestHandler<
       if (supermarket) dbQuery = dbQuery.eq('supermarket', supermarket);
       if (hasPromotion === 'true') dbQuery = dbQuery.not('promotion_description', 'is', null);
       
-      // Apply sorting - only allow valid fields
-      const validSortFields = ['name', 'price', 'supermarket', 'created_at'];
-      const sortField = validSortFields.includes(sort) ? sort : 'name';
-      const sortOrder = order === 'desc' ? false : true;
-      dbQuery = dbQuery.order(sortField, { ascending: sortOrder });
+      // Apply sorting - either random or standard sorting
+      if (random === 'true') {
+        // Use PostgreSQL's RANDOM() function for randomized results
+        dbQuery = dbQuery.order('random'); // Remove ".asc"
+      } else {
+        // Apply standard sorting - only allow valid fields
+        const validSortFields = ['name', 'price', 'supermarket', 'created_at'];
+        const sortField = validSortFields.includes(sort) ? sort : 'name';
+        const sortOrder = order === 'desc' ? false : true;
+        dbQuery = dbQuery.order(sortField, { ascending: sortOrder });
+      }
       
       // Apply pagination
       dbQuery = dbQuery.range(offsetNum, offsetNum + limitNum - 1);
