@@ -4,6 +4,7 @@ import { useColorScheme } from 'nativewind';
 import Entypo from '@expo/vector-icons/Entypo';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Fontisto from '@expo/vector-icons/Fontisto';
+import AntDesign from '@expo/vector-icons/build/AntDesign';
 
 export default function TabsLayout() {
   const { colorScheme } = useColorScheme();
@@ -44,6 +45,11 @@ export default function TabsLayout() {
                   <Fontisto name="history" size={18} color={tabTextColor} />
                 );
                 break;
+              case 'groceryCatalog':
+                iconName = (
+                  <AntDesign name="infocirlce" size={24} color="black" />
+                );
+                break;
               default:
                 iconName = (
                   <Fontisto name="history" size={18} color={tabTextColor} />
@@ -68,6 +74,10 @@ export default function TabsLayout() {
           options={{ headerShown: false, tabBarLabel: 'History' }}
         />
         <Tabs.Screen
+          name="groceryCatalog"
+          options={{ headerShown: false, tabBarLabel: 'Catalog' }}
+        />
+        <Tabs.Screen
           name="groceryRefinement"
           options={{ headerShown: false, href: null }}
         />
@@ -75,6 +85,7 @@ export default function TabsLayout() {
           name="groceryDisplay/[id]"
           options={{ headerShown: false, href: null }}
         />
+        
         <Tabs.Screen
           name="interface"
           options={{ headerShown: false, href: null }}
