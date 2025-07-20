@@ -9,7 +9,6 @@ export interface GroceryItem {
 export const ALLOWED_SUPERMARKETS = [
   'FairPrice',
   'Cold Storage',
-  'Giant',
   'Sheng Siong',
 ] as const;
 export type SupermarketName = typeof ALLOWED_SUPERMARKETS[number];
