@@ -9,15 +9,15 @@ import AntDesign from '@expo/vector-icons/build/AntDesign';
 export default function TabsLayout() {
   const { colorScheme } = useColorScheme();
 
-  const tabBgColor = colorScheme === 'light' ? 'white' : '#1F2937'; // dark gray
-  const tabTextColor = colorScheme === 'light' ? 'black' : 'white';
+  const tabBgColor = colorScheme === 'light' ? '#f8fafc' : '#1F2937'; // light gray for light mode
+  const tabTextColor = colorScheme === 'light' ? '#374151' : 'white';
 
   return (
     <GroceryContextProvider>
       <Tabs
         screenOptions={({ route }) => ({
           headerShown: false,
-          tabBarActiveTintColor: 'blue',
+          tabBarActiveTintColor: colorScheme === 'light' ? '#3b82f6' : '#60a5fa',
           tabBarInactiveTintColor: tabTextColor,
           tabBarLabelStyle: { color: tabTextColor },
           tabBarStyle: {
@@ -47,7 +47,7 @@ export default function TabsLayout() {
                 break;
               case 'groceryCatalog':
                 iconName = (
-                  <AntDesign name="infocirlce" size={24} color="black" />
+                  <AntDesign name="infocirlce" size={24} color={tabTextColor} />
                 );
                 break;
               default:

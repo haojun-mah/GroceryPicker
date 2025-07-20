@@ -16,6 +16,7 @@ import {
   SavedGroceryListItem,
   AiPromptRequestBody,
   SupermarketName, // Add this import
+  ALLOWED_SUPERMARKETS,
 } from './interface';
 import { useSession } from '@/context/authContext';
 import { backend_url } from '../../lib/api';
@@ -248,7 +249,7 @@ const ModalPage = () => {
       colors={
         isDark
           ? ['#1f2937', '#374151', '#4b5563']
-          : ['#667eea', '#764ba2', '#f093fb']
+          : ['#f8fafc', '#f1f5f9']
       }
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
@@ -262,14 +263,14 @@ const ModalPage = () => {
         <VStack className="flex-1 p-6 justify-center" space="lg">
           {/* Header */}
           <VStack space="md" className="items-center">
-            <Heading className="text-4xl font-bold text-center text-black dark:text-white">
+            <Heading className="text-4xl font-bold text-center text-gray-900 dark:text-white">
               Refine Your List
             </Heading>
             <VStack space="xs" className="items-center">
-              <Text className="text-sm text-black/70 dark:text-white/80 text-center">
+              <Text className="text-sm text-gray-700 dark:text-white/80 text-center">
                 Don't like your list?
               </Text>
-              <Text className="text-sm text-black/70 dark:text-white/80 text-center">
+              <Text className="text-sm text-gray-700 dark:text-white/80 text-center">
                 Edit it and we'll do the work!
               </Text>
             </VStack>
@@ -279,13 +280,13 @@ const ModalPage = () => {
           <VStack space="lg" className="w-full">
             {/* Grocery List Text Area */}
             <VStack space="sm">
-              <Text className="text-lg font-medium text-black dark:text-white">
+              <Text className="text-lg font-medium text-gray-800 dark:text-white">
                 Your Grocery List
               </Text>
-              <Box className="min-h-80 bg-white/90 dark:bg-gray-700/90 border border-gray-200 dark:border-gray-600 rounded-xl shadow-sm backdrop-blur-sm">
+              <Box className="min-h-80 bg-white/95 dark:bg-gray-700/90 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm backdrop-blur-sm">
                 <Textarea className="w-full h-full rounded-xl bg-transparent border-0">
                   <TextareaInput
-                    className="text-black dark:text-white p-4"
+                    className="text-gray-900 dark:text-white p-4"
                     multiline
                     value={generateRefinementGrocery?.message || ''}
                     onChangeText={(e) =>

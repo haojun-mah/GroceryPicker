@@ -341,7 +341,7 @@ const DropdownCard = ({
         onPress={!expanded ? () => setExpanded(true) : undefined}
         className="w-full"
       >
-        <Card className="bg-white dark:bg-gray-700 w-full rounded-xl p-4">
+        <Card className="bg-white dark:bg-gray-700 w-full rounded-xl p-4 shadow-sm">
           <View className="flex-row items-start justify-between">
             <View className="flex-1">
               {!expanded &&

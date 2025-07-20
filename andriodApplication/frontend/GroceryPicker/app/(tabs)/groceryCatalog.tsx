@@ -10,6 +10,7 @@ import {
   Image,
   TouchableWithoutFeedback,
   Pressable,
+  Linking,
 } from 'react-native';
 import { Search, Star, Flame, Tag } from 'lucide-react-native';
 import axios from 'axios';
@@ -393,7 +394,14 @@ const GrocerySearch = () => {
                 </TouchableOpacity>
                 <TouchableOpacity
                   className="bg-blue-600 dark:bg-blue-500 rounded-lg px-3 py-2 flex-1 ml-2"
-                  onPress={() => {}}
+                  onPress={async () => {
+                    const supported = await Linking.canOpenURL(target?.product_url || '');
+                    if (supported) {
+                      await Linking.openURL(target?.product_url || '');
+                    } else {
+                      console.error('Unable to open URL:', target?.product_url);
+                    }
+                  }}
                 >
                   <Text className="text-white text-center text-sm font-semibold">Go to Link</Text>
                 </TouchableOpacity>

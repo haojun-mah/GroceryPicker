@@ -518,8 +518,8 @@ const GroceryDisplay = () => {
     <LinearGradient
       colors={
         isDark
-          ? ['#1f2937', '#374151', '#4b5563']
-          : ['#667eea', '#764ba2', '#f093fb']
+          ? ['#1f2937', '#374151', '#4b5563'] // Dark mode gradient
+          : ['#f8fafc', '#f1f5f9'] // Light mode gradient (consistent with other pages)
       }
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
@@ -576,8 +576,6 @@ const GroceryDisplay = () => {
                   >
                     {editingItem.product?.name || editingItem.name}
                   </Text>
-
-                  {/* Remove the Amount Purchased section entirely */}
 
                   {/* Price Purchased Input */}
                   <View className="mb-4">

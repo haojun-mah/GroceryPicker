@@ -413,7 +413,7 @@ const GroceryListHistoryPage = () => {
         colors={
           isDark
             ? ['#1f2937', '#374151', '#4b5563']
-            : ['#667eea', '#764ba2', '#f093fb']
+            : ['#f8fafc', '#f1f5f9']
         }
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
@@ -425,10 +425,10 @@ const GroceryListHistoryPage = () => {
           style={{ backgroundColor: 'transparent' }}
         >
           <View className="px-6">
-            <Text className="text-4xl font-bold text-black dark:text-white">
+            <Text className="text-4xl font-bold text-gray-900 dark:text-white">
               History
             </Text>
-            <Text className="text-xl text-black/70 dark:text-white/80">
+            <Text className="text-xl text-gray-700 dark:text-white/80">
               History is Empty.
             </Text>
           </View>
@@ -442,7 +442,7 @@ const GroceryListHistoryPage = () => {
       colors={
         isDark
           ? ['#1f2937', '#374151', '#4b5563']
-          : ['#667eea', '#764ba2', '#f093fb']
+          : ['#f8fafc', '#f1f5f9']
       }
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
@@ -461,10 +461,10 @@ const GroceryListHistoryPage = () => {
         style={{ backgroundColor: 'transparent' }}
       >
         <View className="px-6 gap-4">
-          <Text className="text-4xl font-bold text-black dark:text-white">
+          <Text className="text-4xl font-bold text-gray-900 dark:text-white">
             History
           </Text>
-          <Text className="text-xl text-black/70 dark:text-white/80">
+          <Text className="text-xl text-gray-700 dark:text-white/80">
             {isSelectionMode
               ? 'Select lists to perform batch actions'
               : 'Hold on grocery list to select multiple'}
@@ -479,20 +479,19 @@ const GroceryListHistoryPage = () => {
                   onPress={() => handleListPress(list.list_id)}
                   onLongPress={() => handleLongPress(list.list_id)}
                   className={`${isSelected ? 'opacity-80' : ''}`}
-                >
-                  <Card
-                    className={`bg-white/90 dark:bg-gray-700/90 rounded-xl border shadow-lg backdrop-blur-sm ${
-                      isSelected
-                        ? 'border-2 border-blue-500 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-900/30'
-                        : 'border border-gray-200 dark:border-gray-600'
-                    }`}
-                  >
+                >                    <Card
+                      className={`bg-white/95 dark:bg-gray-700/90 rounded-xl border shadow-lg backdrop-blur-sm ${
+                        isSelected
+                          ? 'border-2 border-blue-500 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-900/30'
+                          : 'border border-gray-300 dark:border-gray-600'
+                      }`}
+                    >
                     <View className="flex-row items-center justify-between">
                       <View className="flex-1">
-                        <Text className="text-xl font-semibold text-black dark:text-white">
+                        <Text className="text-xl font-semibold text-gray-900 dark:text-white">
                           {list.title}
                         </Text>
-                        <Text className="text-xs font-normal text-black/70 dark:text-white/80">
+                        <Text className="text-xs font-normal text-gray-700 dark:text-white/80">
                           {list.metadata ? list.metadata : ''}
                         </Text>
                         <Text
