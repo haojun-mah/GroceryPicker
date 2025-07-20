@@ -1,4 +1,4 @@
-import generate from '../services/llm';
+import generate from '../services/multiProviderLLM';
 import { RequestHandler } from 'express-serve-static-core';
 import {
   AiPromptRequestBody,
@@ -56,13 +56,13 @@ export const generateGroceryList: RequestHandler<
     return;
   }
 
-  // this entire paragraph is me trying to convert LLM information into JSON
+  // Enhanced LLM call with multi-provider fallback
   try {
     const llmOutputString: string = await generate(input, instruction);
     console.log('Generate GroceryList LLM Output:\n', llmOutputString); // Log raw output for debugging
 
     try {
-      // --- NEW PARSING LOGIC FOR CSV-LIKE STRING ---
+      // --- EXISTING PARSING LOGIC (unchanged) ---
       // 1. Clean the output string
       const cleanedOutput = llmOutputString.trim();
 
@@ -109,9 +109,9 @@ export const generateGroceryList: RequestHandler<
       if (output.items.length === 0) {
         const err = new ControllerError(
           500,
-          'Grocery Refinement converting LLM into structured form failed.',
+          'Grocery generation failed - no valid items produced.',
         );
-        res.status(400).json(err);
+        res.status(500).json(err);
       } else {
         res.status(200).json(output);
       }
@@ -131,14 +131,14 @@ export const generateGroceryList: RequestHandler<
       return;
     }
   } catch (error) {
-    console.error('Error generating list with LLM', error);
+    console.error('Error generating list with multi-provider LLM:', error);
     const errorMessage =
       error instanceof Error
         ? error.message
-        : 'Unknown error from LLM api integration caused';
+        : 'Unknown error from LLM api integration';
     const err = new ControllerError(
       500,
-      'Failed to process string input',
+      'Failed to process grocery list generation request',
       errorMessage,
     );
     res.status(500).json(err);
