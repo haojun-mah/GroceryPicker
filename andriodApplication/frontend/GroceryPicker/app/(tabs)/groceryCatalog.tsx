@@ -203,7 +203,7 @@ const GrocerySearch = () => {
             {searchResult.map((item, idx) => (
               <Pressable
                 key={idx}
-                className="flex-row items-center justify-between border-b bg-gray-200 dark:bg-gray-700 rounded-xl p-4 py-4"
+                className="flex-row items-center justify-between border-b bg-gray-100 dark:bg-gray-700 rounded-xl p-4 py-4"
                 onPress={() => setTarget(item)}
               >
                 {/* Item Image */}
@@ -258,61 +258,64 @@ const GrocerySearch = () => {
     showsHorizontalScrollIndicator={false} // Hides the scroll indicator
     className="flex-row"
   >
-    {
-    promotions === null ? 
-      (<Text className="text-gray-500 dark:text-gray-400">No Promotions Available</Text>)
-      :
+    {promotions === null ? (
+      <Text className="text-gray-500 dark:text-gray-400">No Promotions Available</Text>
+    ) : (
       promotions.map((item, idx) => (
-      <Pressable
-        key={idx}
-        className="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-sm border border-gray-100 dark:border-gray-600 w-44 h-64 mr-4"
-        onPress={() => setTarget(item)}
-      >
-        {/* Item Image */}
-        <View className="w-full h-28 bg-gray-100 dark:bg-gray-700 rounded-lg items-center justify-center mb-2">
-          <Image
-            source={{ uri: item.image_url || "/placeholder.svg?height=96&width=96" }}
-            className="w-20 h-20"
-            resizeMode="contain"
-          />
-        </View>
-
-        {/* Item Details */}
-        <Text className="font-semibold text-gray-900 dark:text-white text-sm mb-2 text-center" numberOfLines={2}>
-          {item.name}
-        </Text>
-        <Text className="text-gray-500 dark:text-gray-400 text-xs mb-2 text-center" numberOfLines={1}>
-          {item.supermarket}
-        </Text>
-
-        {/* Promotion Description Badge */}
-        {item.promotion_description && (
-          <View className="bg-red-500 dark:bg-red-600 rounded-lg px-2 py-1 mb-2">
-            <Text className="text-white text-xs font-bold text-center" numberOfLines={1}>
-              {item.promotion_description}
-            </Text>
+        <Pressable
+          key={idx}
+          className="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-sm border border-gray-100 dark:border-gray-600 w-44 h-70 mr-4 mb-8"
+          onPress={() => setTarget(item)}
+        >
+          {/* Item Image */}
+          <View className="w-full h-28 bg-gray-100 dark:bg-gray-700 rounded-lg items-center justify-center mb-2">
+            <Image
+              source={{ uri: item.image_url || "/placeholder.svg?height=96&width=96" }}
+              className="w-20 h-20"
+              resizeMode="contain"
+            />
           </View>
-        )}
 
-        {/* Price and End Date */}
-        <View className="flex-1 justify-end">
-          {item.promotion_end_date_text && (
-            <Text className="text-gray-400 dark:text-gray-500 text-xs text-center" numberOfLines={1}>
-              Ends: {item.promotion_end_date_text}
-            </Text>
+          {/* Item Details */}
+          <Text className="font-semibold text-gray-900 dark:text-white text-sm mb-2 text-center" numberOfLines={2}>
+            {item.name}
+          </Text>
+          <Text className="text-gray-800 dark:text-gray-400 text-xs mb-2 text-center" numberOfLines={1}>
+            {item.supermarket || 'Unknown Store'}
+          </Text>
+
+          {/* Promotion Description Badge */}
+          {item.promotion_description && (
+            <View className="bg-red-500 dark:bg-red-600 rounded-lg px-2 py-1 mb-2">
+              <Text className="text-white text-xs font-bold text-center" numberOfLines={2}>
+                {item.promotion_description}
+              </Text>
+            </View>
           )}
-        </View>
-      </Pressable>
-    ))}
+
+          {/* Price and End Date */}
+          <View className="justify-end">
+            <Text className="text-green-600 dark:text-green-400 font-bold text-sm text-center mb-1">
+              {item.price}
+            </Text>
+            {item.promotion_end_date_text && (
+              <Text className="text-gray-800 dark:text-gray-500 text-xs text-center" numberOfLines={1}>
+                Ends: {item.promotion_end_date_text}
+              </Text>
+            )}
+          </View>
+        </Pressable>
+      ))
+    )}
   </ScrollView>
 </View>
-          <View className="px-6 py-4">
+          <View className="px-6">
               </View>
-              <View className="space-y-4 gap-2">
+              <View className="space-y-4 gap-2 p-4">
               {itemDisplay.map((item, idx) => (
                 <Pressable
                   key={idx}
-                  className="flex-row items-center justify-between border-b bg-gray-200 dark:bg-gray-700 rounded-xl p-4 py-4"
+                  className="flex-row items-center justify-between border-b bg-gray-100 dark:bg-gray-700 rounded-xl p-4 py-4"
                   onPress={() => setTarget(item)}
                 >
                   {/* Item Image */}
@@ -333,9 +336,6 @@ const GrocerySearch = () => {
                   </View>
 
                   <View className="items-end">
-                    <Text className="text-green-600 dark:text-green-400 font-bold text-lg">
-                      {item.price}
-                    </Text>
                     <TouchableOpacity className="bg-green-600 dark:bg-green-500 rounded-lg px-3 py-1 mt-2">
                       <Text className="text-white text-xs font-semibold">Add</Text>
                     </TouchableOpacity>
