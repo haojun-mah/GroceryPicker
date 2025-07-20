@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
   TouchableWithoutFeedback,
   Pressable,
   Linking,
+  ActivityIndicator,
 } from 'react-native';
 import { Search, Star, Flame, Tag } from 'lucide-react-native';
 import axios from 'axios';
@@ -22,7 +23,6 @@ import { Modal } from 'react-native'
 import { Button } from '@/components/ui/button';
 import AntDesign from '@expo/vector-icons/AntDesign';
 
-
 const GrocerySearch = () => {
   const { session } = useSession();
   const { setIsLoading } = useGroceryContext();
@@ -32,11 +32,22 @@ const GrocerySearch = () => {
   const [searchResult, setSearchResult] = useState<ProductCatalog[] | null>(null);
   const [itemDisplay, setItemDisplay] = useState<ProductCatalog[] | null>(null);
   const [target, setTarget] = useState<ProductCatalog | null>(null);
+  
+  // Pagination states
+  const [offset, setOffset] = useState<number>(0);
+  const [isFetchingMore, setIsFetchingMore] = useState<boolean>(false);
+  const [hasMoreItems, setHasMoreItems] = useState<boolean>(true);
+  const [searchOffset, setSearchOffset] = useState<number>(0);
+  const [hasMoreSearchResults, setHasMoreSearchResults] = useState<boolean>(true);
 
-  // Initally get to populate page
+  // Initially get to populate page
   useEffect(() => {
     const fetchData = async () => {
-      const itemDisplay = await search(); 
+      // Reset pagination states
+      setOffset(0);
+      setHasMoreItems(true);
+      
+      const itemDisplay = await fetchCatalogItems(0, true); // true means reset the list
       setItemDisplay(itemDisplay); 
       
       const promotion = await search(true);
@@ -46,41 +57,163 @@ const GrocerySearch = () => {
     fetchData();
   }, []);
 
-  const search = async (promotion : boolean = false) => {
+  // Function to fetch catalog items with pagination
+  const fetchCatalogItems = async (currentOffset: number, reset: boolean = false) => {
+    try {
+      if (!reset) setIsFetchingMore(true);
+      if (reset) setIsLoading(true);
+
+      const response = await axios.get(`${backend_url}/products/search?limit=10&offset=${currentOffset}`, {
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`
+        }
+      });
+
+      if (response.status === 200) {
+        const results: SearchProductsResponse = response.data;
+        console.log(`Fetched ${results.results.length} items at offset ${currentOffset}`);
+        
+        // Check if we have more items
+        if (results.results.length < 10) {
+          setHasMoreItems(false);
+        }
+        
+        if (reset) {
+          setOffset(10);
+          return results.results;
+        } else {
+          setOffset(currentOffset + 10);
+          return results.results;
+        }
+      } else {
+        console.error('Failed to fetch catalog items:', response.statusText);
+        return [];
+      }
+    } catch (error) {
+      console.error('Error fetching catalog items:', error);
+      return [];
+    } finally {
+      setIsFetchingMore(false);
+      if (reset) setIsLoading(false);
+    }
+  };
+
+  // Function to fetch more catalog items
+  const fetchMoreCatalogItems = useCallback(async () => {
+    if (isFetchingMore || !hasMoreItems) return;
+
+    const moreItems = await fetchCatalogItems(offset);
+    if (moreItems.length > 0) {
+      setItemDisplay((prevItems) => 
+        prevItems ? [...prevItems, ...moreItems] : moreItems
+      );
+    }
+  }, [offset, isFetchingMore, hasMoreItems]);
+
+  // Function to fetch search results with pagination
+  const fetchSearchResults = async (query: string, currentOffset: number, reset: boolean = false) => {
+    try {
+      if (!reset) setIsFetchingMore(true);
+      if (reset) setIsLoading(true);
+
+      const response = await axios.get(`${backend_url}/products/search?q=${query}&limit=10&offset=${currentOffset}`, {
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`
+        }
+      });
+
+      if (response.status === 200) {
+        const results: SearchProductsResponse = response.data;
+        console.log(`Fetched ${results.results.length} search results at offset ${currentOffset}`);
+        
+        // Check if we have more search results
+        if (results.results.length < 10) {
+          setHasMoreSearchResults(false);
+        }
+        
+        if (reset) {
+          setSearchOffset(10);
+          return results.results;
+        } else {
+          setSearchOffset(currentOffset + 10);
+          return results.results;
+        }
+      } else {
+        console.error('Search failed:', response.statusText);
+        return [];
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+      return [];
+    } finally {
+      setIsFetchingMore(false);
+      if (reset) setIsLoading(false);
+    }
+  };
+
+  // Function to fetch more search results
+  const fetchMoreSearchResults = useCallback(async () => {
+    if (isFetchingMore || !hasMoreSearchResults || !searchQuery) return;
+
+    const moreResults = await fetchSearchResults(searchQuery, searchOffset);
+    if (moreResults.length > 0) {
+      setSearchResult((prevResults) => 
+        prevResults ? [...prevResults, ...moreResults] : moreResults
+      );
+    }
+  }, [searchOffset, isFetchingMore, hasMoreSearchResults, searchQuery]);
+
+  const search = async (promotion: boolean = false) => {
     try {
       setSuggestions(null);
-      setIsLoading(true);
 
-      let input : string;
+      let input: string;
 
       if (promotion) {
         input = 'hasPromotion=true&random=true';
+        setIsLoading(true);
 
-      } else {
-        input = `q=${searchQuery}`;
-      }
-      const response = await axios.get(`${backend_url}/products/search?${input}`, {
+        const response = await axios.get(`${backend_url}/products/search?${input}`, {
           headers: {
             Authorization: `Bearer ${session?.access_token}`
           }
         });
 
-      if (response.status === 200) {
-        const results: SearchProductsResponse = response.data;
-        console.log('Search results:', results);
-        setSearchResult(results.results);
-        return results.results; 
+        if (response.status === 200) {
+          const results: SearchProductsResponse = response.data;
+          return results.results;
+        }
       } else {
-        console.error('Search failed:', response.statusText);
-        return []; 
+        // Reset search pagination states
+        setSearchOffset(0);
+        setHasMoreSearchResults(true);
+        
+        const results = await fetchSearchResults(searchQuery, 0, true);
+        setSearchResult(results);
+        return results;
       }
     } catch (error) {
       console.error('Search error:', error);
-      return []; // Return empty array on error
+      return [];
     } finally {
       setIsLoading(false);
     }
   }
+
+  // Handle scroll to bottom
+  const handleScroll = ({ nativeEvent }: any) => {
+    const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+    const paddingToBottom = 20;
+    
+    if (layoutMeasurement.height + contentOffset.y >= contentSize.height - paddingToBottom) {
+      // Check if we're showing search results or catalog items
+      if (searchResult !== null && Array.isArray(searchResult) && searchResult.length > 0) {
+        fetchMoreSearchResults();
+      } else if (itemDisplay !== null) {
+        fetchMoreCatalogItems();
+      }
+    }
+  };
 
   return (
     <View className="flex-1 bg-gradient-to-br from-green-50 to-blue-50 dark:from-gray-900 dark:to-slate-800">
@@ -88,6 +221,8 @@ const GrocerySearch = () => {
         className="flex-1"
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        onScroll={handleScroll}
+        scrollEventThrottle={400}
       >
         {/* Header */}
         <View className="bg-white dark:bg-gray-800 pt-12 pb-6 px-6 z-10 shadow-sm">
@@ -112,7 +247,7 @@ const GrocerySearch = () => {
                 placeholder="Search for groceries, brands, or categories..."
                 placeholderTextColor="#9CA3AF"
                 value={searchQuery}
-                onChangeText={ async (text) => {
+                onChangeText={async (text) => {
                   setSearchQuery(text);
 
                   if (text.length === 0) {
@@ -126,24 +261,23 @@ const GrocerySearch = () => {
                         Authorization: `Bearer ${session?.access_token}`,
                       },
                     });
-                  if (response.status === 200) {
-                    setSuggestions(response.data);
-                    console.log('Search suggestions:', response.data, suggestions);
-                    return;
-                  } else {
-                    console.error('Failed to fetch search suggestions:', response.statusText);
-                    return;
+                    if (response.status === 200) {
+                      setSuggestions(response.data);
+                      console.log('Search suggestions:', response.data, suggestions);
+                      return;
+                    } else {
+                      console.error('Failed to fetch search suggestions:', response.statusText);
+                      return;
+                    }
+                  } catch (error) {
+                    console.error('Error fetching search suggestions:', error);
                   }
-                } catch (error) {
-                  console.error('Error fetching search suggestions:', error);
                 }}
-              }
                 onBlur={() => setTimeout(() => setSuggestions(null), 200)}
                 onSubmitEditing={() => {
                   if (searchQuery.length === 0) return;
                   search();
-                }
-                }
+                }}
                 returnKeyType="search"
               />
             </View>
@@ -200,118 +334,130 @@ const GrocerySearch = () => {
               </Button>
             </View>
             <View className="space-y-4 gap-2">
-            {searchResult.map((item, idx) => (
-              <Pressable
-                key={idx}
-                className="flex-row items-center justify-between border-b bg-gray-100 dark:bg-gray-700 rounded-xl p-4 py-4"
-                onPress={() => setTarget(item)}
-              >
-                {/* Item Image */}
-                <View className="w-16 h-16 bg-gray-100 dark:bg-gray-600 rounded-lg items-center justify-center mr-4">
-                  <Image
-                    source={{ uri: item.image_url || '/placeholder.svg?height=64&width=64' }}
-                    className="w-12 h-12"
-                    resizeMode="contain"
-                  />
-                </View>
+              {searchResult.map((item, idx) => (
+                <Pressable
+                  key={idx}
+                  className="flex-row items-center justify-between border-b bg-gray-100 dark:bg-gray-700 rounded-xl p-4 py-4"
+                  onPress={() => setTarget(item)}
+                >
+                  {/* Item Image */}
+                  <View className="w-16 h-16 bg-gray-100 dark:bg-gray-600 rounded-lg items-center justify-center mr-4">
+                    <Image
+                      source={{ uri: item.image_url || '/placeholder.svg?height=64&width=64' }}
+                      className="w-12 h-12"
+                      resizeMode="contain"
+                    />
+                  </View>
 
-                {/* Item Details */}
-                <View className="flex-1">
-                  <Text className="font-bold text-gray-900 dark:text-white text-base mb-1">
-                    {item.name}
-                  </Text>
-                  <Text className="text-gray-900 dark:text-gray-300 text-sm">{item.supermarket || 'Unknown Store'}</Text>
-                </View>
+                  {/* Item Details */}
+                  <View className="flex-1">
+                    <Text className="font-bold text-gray-900 dark:text-white text-base mb-1">
+                      {item.name}
+                    </Text>
+                    <Text className="text-gray-900 dark:text-gray-300 text-sm">{item.supermarket || 'Unknown Store'}</Text>
+                  </View>
 
-                <View className="items-end">
-                  <Text className="text-green-600 dark:text-green-400 font-bold text-lg">
-                    {item.price}
-                  </Text>
-                  <TouchableOpacity className="bg-green-600 dark:bg-green-500 rounded-lg px-3 py-1 mt-2">
-                    <Text className="text-white text-xs font-semibold">Add</Text>
-                  </TouchableOpacity>
+                  <View className="items-end">
+                    <Text className="text-green-600 dark:text-green-400 font-bold text-lg">
+                      {item.price}
+                    </Text>
+                    <TouchableOpacity className="bg-green-600 dark:bg-green-500 rounded-lg px-3 py-1 mt-2">
+                      <Text className="text-white text-xs font-semibold">Add</Text>
+                    </TouchableOpacity>
+                  </View>
+                </Pressable>
+              ))}
+              
+              {/* Loading indicator for search results */}
+              {isFetchingMore && hasMoreSearchResults && (
+                <View className="py-4 items-center">
+                  <ActivityIndicator size="small" color="#10B981" />
+                  <Text className="text-gray-500 dark:text-gray-400 text-sm mt-2">Loading more results...</Text>
                 </View>
-              </Pressable>
-            ))}
+              )}
+              
+              {!hasMoreSearchResults && searchResult.length > 0 && (
+                <View className="py-4 items-center">
+                  <Text className="text-gray-500 dark:text-gray-400 text-sm">No more search results</Text>
+                </View>
+              )}
             </View>
           </View>
-        ) 
-        : itemDisplay !== null ?
-         (
+        ) : itemDisplay !== null ? (
           /* Default Content - Hot Items and Categories */
           <View>
-          <View>
-            {/* Hot Items / Promotions Section */}
-            <View className="px-6 py-6">
-              <View className="flex-row items-center mb-4">
-                <Flame size={24} color="#F97316" />
-                <Text className="text-xl font-bold text-gray-900 dark:text-white ml-2">
-                  Hot Deals & Promotions
-                </Text>
-                <Tag size={20} color="#F97316" className="ml-2" />
+            <View>
+              {/* Hot Items / Promotions Section */}
+              <View className="px-6 py-6">
+                <View className="flex-row items-center mb-4">
+                  <Flame size={24} color="#F97316" />
+                  <Text className="text-xl font-bold text-gray-900 dark:text-white ml-2">
+                    Hot Deals & Promotions
+                  </Text>
+                  <Tag size={20} color="#F97316" className="ml-2" />
+                </View>
               </View>
             </View>
-          </View>
-          <View className="px-6 py-4">
-  <ScrollView
-    horizontal={true} // Enables horizontal scrolling
-    showsHorizontalScrollIndicator={false} // Hides the scroll indicator
-    className="flex-row"
-  >
-    {promotions === null ? (
-      <Text className="text-gray-500 dark:text-gray-400">No Promotions Available</Text>
-    ) : (
-      promotions.map((item, idx) => (
-        <Pressable
-          key={idx}
-          className="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-sm border border-gray-100 dark:border-gray-600 w-44 h-70 mr-4 mb-8"
-          onPress={() => setTarget(item)}
-        >
-          {/* Item Image */}
-          <View className="w-full h-28 bg-gray-100 dark:bg-gray-700 rounded-lg items-center justify-center mb-2">
-            <Image
-              source={{ uri: item.image_url || "/placeholder.svg?height=96&width=96" }}
-              className="w-20 h-20"
-              resizeMode="contain"
-            />
-          </View>
+            <View className="px-6 py-4">
+              <ScrollView
+                horizontal={true}
+                showsHorizontalScrollIndicator={false}
+                className="flex-row"
+              >
+                {promotions === null ? (
+                  <Text className="text-gray-500 dark:text-gray-400">No Promotions Available</Text>
+                ) : (
+                  promotions.map((item, idx) => (
+                    <Pressable
+                      key={idx}
+                      className="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-sm border border-gray-100 dark:border-gray-600 w-44 h-64 mr-4"
+                      onPress={() => setTarget(item)}
+                    >
+                      {/* Item Image */}
+                      <View className="w-full h-28 bg-gray-100 dark:bg-gray-700 rounded-lg items-center justify-center mb-2">
+                        <Image
+                          source={{ uri: item.image_url || "/placeholder.svg?height=96&width=96" }}
+                          className="w-20 h-20"
+                          resizeMode="contain"
+                        />
+                      </View>
 
-          {/* Item Details */}
-          <Text className="font-semibold text-gray-900 dark:text-white text-sm mb-2 text-center" numberOfLines={2}>
-            {item.name}
-          </Text>
-          <Text className="text-gray-800 dark:text-gray-400 text-xs mb-2 text-center" numberOfLines={1}>
-            {item.supermarket || 'Unknown Store'}
-          </Text>
+                      {/* Item Details */}
+                      <Text className="font-semibold text-gray-900 dark:text-white text-sm mb-2 text-center" numberOfLines={2}>
+                        {item.name}
+                      </Text>
+                      <Text className="text-gray-500 dark:text-gray-400 text-xs mb-2 text-center" numberOfLines={1}>
+                        {item.supermarket || 'Unknown Store'}
+                      </Text>
 
-          {/* Promotion Description Badge */}
-          {item.promotion_description && (
-            <View className="bg-red-500 dark:bg-red-600 rounded-lg px-2 py-1 mb-2">
-              <Text className="text-white text-xs font-bold text-center" numberOfLines={2}>
-                {item.promotion_description}
-              </Text>
+                      {/* Promotion Description Badge */}
+                      {item.promotion_description && (
+                        <View className="bg-red-500 dark:bg-red-600 rounded-lg px-2 py-1 mb-2">
+                          <Text className="text-white text-xs font-bold text-center" numberOfLines={2}>
+                            {item.promotion_description}
+                          </Text>
+                        </View>
+                      )}
+
+                      {/* Price and End Date */}
+                      <View className="justify-end">
+                        <Text className="text-green-600 dark:text-green-400 font-bold text-sm text-center mb-1">
+                          ${item.price}
+                        </Text>
+                        {item.promotion_end_date_text && (
+                          <Text className="text-gray-400 dark:text-gray-500 text-xs text-center" numberOfLines={1}>
+                            Ends: {item.promotion_end_date_text}
+                          </Text>
+                        )}
+                      </View>
+                    </Pressable>
+                  ))
+                )}
+              </ScrollView>
             </View>
-          )}
-
-          {/* Price and End Date */}
-          <View className="justify-end">
-            <Text className="text-green-600 dark:text-green-400 font-bold text-sm text-center mb-1">
-              {item.price}
-            </Text>
-            {item.promotion_end_date_text && (
-              <Text className="text-gray-800 dark:text-gray-500 text-xs text-center" numberOfLines={1}>
-                Ends: {item.promotion_end_date_text}
-              </Text>
-            )}
-          </View>
-        </Pressable>
-      ))
-    )}
-  </ScrollView>
-</View>
-          <View className="px-6">
-              </View>
-              <View className="space-y-4 gap-2 p-4">
+            <View className="px-6">
+            </View>
+            <View className="space-y-4 gap-2 p-4">
               {itemDisplay.map((item, idx) => (
                 <Pressable
                   key={idx}
@@ -336,81 +482,97 @@ const GrocerySearch = () => {
                   </View>
 
                   <View className="items-end">
+                    <Text className="text-green-600 dark:text-green-400 font-bold text-lg">
+                      {item.price}
+                    </Text>
                     <TouchableOpacity className="bg-green-600 dark:bg-green-500 rounded-lg px-3 py-1 mt-2">
                       <Text className="text-white text-xs font-semibold">Add</Text>
                     </TouchableOpacity>
                   </View>
                 </Pressable>
               ))}
-              </View>
+              
+              {/* Loading indicator for catalog items */}
+              {isFetchingMore && hasMoreItems && (
+                <View className="py-4 items-center">
+                  <ActivityIndicator size="small" color="#10B981" />
+                  <Text className="text-gray-500 dark:text-gray-400 text-sm mt-2">Loading more items...</Text>
+                </View>
+              )}
+              
+              {!hasMoreItems && itemDisplay.length > 0 && (
+                <View className="py-4 items-center">
+                  <Text className="text-gray-500 dark:text-gray-400 text-sm">No more items to load</Text>
+                </View>
+              )}
             </View>
-        ) 
-      :
-      <View>
-        <Text className="text-gray-500 dark:text-gray-400 text-center mt-10">
-          Item not staged
-        </Text>
-      </View>
-      }
+          </View>
+        ) : (
+          <View>
+            <Text className="text-gray-500 dark:text-gray-400 text-center mt-10">
+              Item not staged
+            </Text>
+          </View>
+        )}
       </ScrollView>
+      
+      {/* Modal remains the same */}
       <Modal
-      visible={target !== null}
-      transparent={true} // Ensures the modal background is transparent
-      animationType="fade"
-      onRequestClose={() => setTarget(null)} // Close modal on back button press (Android)
-    >
-      {/* Overlay to dim the background */}
-      <TouchableWithoutFeedback onPress={() => setTarget(null)}>
-        <View className="flex-1 justify-center items-center bg-black/50">
-          {/* Modal Content */}
-          <TouchableWithoutFeedback>
-            <View className="bg-white dark:bg-gray-800 rounded-2xl p-4 w-10/12 max-h-3/4 shadow-lg">
-              {/* Item Image */}
-              <View className="w-full h-40 bg-gray-100 dark:bg-gray-700 rounded-xl mb-3 items-center justify-center">
-                <Image
-                  source={{ uri: target?.image_url || '/placeholder.svg?height=120&width=120' }}
-                  className="w-24 h-24"
-                  resizeMode="contain"
-                />
-              </View>
+        visible={target !== null}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setTarget(null)}
+      >
+        <TouchableWithoutFeedback onPress={() => setTarget(null)}>
+          <View className="flex-1 justify-center items-center bg-black/50">
+            <TouchableWithoutFeedback>
+              <View className="bg-white dark:bg-gray-800 rounded-2xl p-4 w-10/12 max-h-3/4 shadow-lg">
+                {/* Item Image */}
+                <View className="w-full h-40 bg-gray-100 dark:bg-gray-700 rounded-xl mb-3 items-center justify-center">
+                  <Image
+                    source={{ uri: target?.image_url || '/placeholder.svg?height=120&width=120' }}
+                    className="w-24 h-24"
+                    resizeMode="contain"
+                  />
+                </View>
 
-              {/* Item Details */}
-              <Text className="text-lg font-bold text-gray-900 dark:text-white mb-1" numberOfLines={2}>
-                {target?.name}
-              </Text>
+                {/* Item Details */}
+                <Text className="text-lg font-bold text-gray-900 dark:text-white mb-1" numberOfLines={2}>
+                  {target?.name}
+                </Text>
 
-              <View className="flex-row items-center justify-between mb-3">
-                <Text className="text-green-600 dark:text-green-400 font-bold text-base">{target?.price}</Text>
-                <Text className="text-gray-500 dark:text-gray-400 text-sm">Quantity: {target?.quantity || 1}</Text>
-              </View>
+                <View className="flex-row items-center justify-between mb-3">
+                  <Text className="text-green-600 dark:text-green-400 font-bold text-base">{target?.price}</Text>
+                  <Text className="text-gray-500 dark:text-gray-400 text-sm">Quantity: {target?.quantity || 1}</Text>
+                </View>
 
-              {/* Buttons */}
-              <View className="flex-row justify-between">
-                <TouchableOpacity
-                  className="bg-green-600 dark:bg-green-500 rounded-lg px-3 py-2 flex-1 mr-2"
-                  onPress={() => {}}
-                >
-                  <Text className="text-white text-center text-sm font-semibold">Add Item</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  className="bg-blue-600 dark:bg-blue-500 rounded-lg px-3 py-2 flex-1 ml-2"
-                  onPress={async () => {
-                    const supported = await Linking.canOpenURL(target?.product_url || '');
-                    if (supported) {
-                      await Linking.openURL(target?.product_url || '');
-                    } else {
-                      console.error('Unable to open URL:', target?.product_url);
-                    }
-                  }}
-                >
-                  <Text className="text-white text-center text-sm font-semibold">Go to Link</Text>
-                </TouchableOpacity>
+                {/* Buttons */}
+                <View className="flex-row justify-between">
+                  <TouchableOpacity
+                    className="bg-green-600 dark:bg-green-500 rounded-lg px-3 py-2 flex-1 mr-2"
+                    onPress={() => {}}
+                  >
+                    <Text className="text-white text-center text-sm font-semibold">Add Item</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    className="bg-blue-600 dark:bg-blue-500 rounded-lg px-3 py-2 flex-1 ml-2"
+                    onPress={async () => {
+                      const supported = await Linking.canOpenURL(target?.product_url || '');
+                      if (supported) {
+                        await Linking.openURL(target?.product_url || '');
+                      } else {
+                        console.error('Unable to open URL:', target?.product_url);
+                      }
+                    }}
+                  >
+                    <Text className="text-white text-center text-sm font-semibold">Go to Link</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
-          </TouchableWithoutFeedback>
-        </View>
-      </TouchableWithoutFeedback>
-    </Modal>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </View>
   );
 };
