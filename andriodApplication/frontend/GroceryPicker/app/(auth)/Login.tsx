@@ -4,6 +4,8 @@ import {
   Pressable,
   Alert,
   ScrollView,
+  View,
+  Animated,
 } from 'react-native';
 import { supabase } from '@/lib/supabase';
 import { Box } from '@/components/ui/box';
@@ -16,7 +18,8 @@ import { Image } from '@/components/ui/image';
 import { EyeIcon, EyeOffIcon, MailIcon, LockIcon } from '@/components/ui/icon';
 import { useRouter } from 'expo-router';
 import { useColorScheme } from 'nativewind';
-import Logo from '../../assets/images/icon.png';
+import { LinearGradient } from 'expo-linear-gradient';
+import Logo from '@/assets/images/icon.png';
 
 export default function Login() {
   const router = useRouter();
@@ -24,6 +27,7 @@ export default function Login() {
   const [password, setPassword] = useState({ value: '', error: '' });
   const [loading, setLoading] = useState(false);
   const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
   async function signInWithEmail() {
     if (email.value.length === 0 || password.value.length === 0) return;
@@ -43,17 +47,71 @@ export default function Login() {
   }
 
   return (
-    <ScrollView
-      className="bg-[#EEEEEE} dark:bg-gray-900"
-      contentContainerStyle={{
-        flexGrow: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}
-    >
-      <Box className="flex-1 px-6 bg-white dark:bg-gray-900 justify-center">
+    <View style={{ flex: 1 }}>
+      {/* Day Background */}
+      <LinearGradient
+        colors={['#87CEEB', '#98D8E8', '#F0F8FF']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={{ position: 'absolute', width: '100%', height: '100%' }}
+      />
+
+      {/* Night Background Overlay */}
+      <Animated.View
+        style={{
+          position: 'absolute',
+          width: '100%',
+          height: '100%',
+          opacity: isDark ? 1 : 0,
+        }}
+      >
+        <LinearGradient
+          colors={['#0f172a', '#1e293b', '#334155']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={{ flex: 1 }}
+        />
+      </Animated.View>
+
+      {/* Stars */}
+      <Animated.View
+        style={{
+          position: 'absolute',
+          width: '100%',
+          height: '100%',
+          opacity: isDark ? 1 : 0,
+        }}
+      >
+        {[...Array(50)].map((_, i) => (
+          <View
+            key={i}
+            style={{
+              position: 'absolute',
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              width: 2,
+              height: 2,
+              backgroundColor: 'white',
+              borderRadius: 1,
+              opacity: 0.3 + Math.random() * 0.7,
+            }}
+          />
+        ))}
+      </Animated.View>
+
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+      <Box className="flex-1 px-6 justify-center">
         <Box className="items-center mb-16">
-          <Image source={Logo} size="2xl" alt="Logo" />
+          <Image
+            source={Logo}
+            className="w-40 h-40 mb-4"
+          />
         </Box>
 
         <VStack space="md">
@@ -82,7 +140,7 @@ export default function Login() {
                   autoCapitalize="none"
                   autoComplete="email"
                   value={email.value}
-                  className="m-0 text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                  className="m-0 text-black dark:text-white"
                   onChangeText={(text) => setEmail({ value: text, error: '' })}
                 />
               </Input>
@@ -106,7 +164,7 @@ export default function Login() {
                   placeholder="Password"
                   secureTextEntry
                   value={password.value}
-                  className="m-0 text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                  className="m-0 text-black dark:text-white"
                   onChangeText={(text) =>
                     setPassword({ value: text, error: '' })
                   }
@@ -150,5 +208,6 @@ export default function Login() {
         </VStack>
       </Box>
     </ScrollView>
+    </View>
   );
 }

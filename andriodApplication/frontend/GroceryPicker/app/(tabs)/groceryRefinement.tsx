@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Alert, Dimensions, TouchableOpacity } from 'react-native';
+import { Alert, Dimensions, TouchableOpacity, Animated, View } from 'react-native';
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
 import { Box } from '@/components/ui/box';
@@ -245,16 +245,57 @@ const ModalPage = () => {
   };
 
   return (
-    <LinearGradient
-      colors={
-        isDark
-          ? ['#1f2937', '#374151', '#4b5563']
-          : ['#f8fafc', '#f1f5f9']
-      }
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={{ flex: 1 }}
-    >
+    <View style={{ flex: 1 }}>
+      {/* Day Background */}
+      <LinearGradient
+        colors={['#87CEEB', '#98D8E8', '#F0F8FF']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={{ position: 'absolute', width: '100%', height: '100%' }}
+      />
+
+      {/* Night Background Overlay */}
+      <Animated.View
+        style={{
+          position: 'absolute',
+          width: '100%',
+          height: '100%',
+          opacity: isDark ? 1 : 0,
+        }}
+      >
+        <LinearGradient
+          colors={['#0f172a', '#1e293b', '#334155']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={{ flex: 1 }}
+        />
+      </Animated.View>
+
+      {/* Stars */}
+      <Animated.View
+        style={{
+          position: 'absolute',
+          width: '100%',
+          height: '100%',
+          opacity: isDark ? 1 : 0,
+        }}
+      >
+        {[...Array(50)].map((_, i) => (
+          <View
+            key={i}
+            style={{
+              position: 'absolute',
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              width: 2,
+              height: 2,
+              backgroundColor: 'white',
+              borderRadius: 1,
+              opacity: 0.3 + Math.random() * 0.7,
+            }}
+          />
+        ))}
+      </Animated.View>
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ flexGrow: 1 }}
@@ -419,7 +460,7 @@ const ModalPage = () => {
           </VStack>
         </VStack>
       </ScrollView>
-    </LinearGradient>
+    </View>
   );
 };
 

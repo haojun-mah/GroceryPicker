@@ -2,15 +2,19 @@ import BackButton from '@/components/BackButton';
 import { Text } from '@/components/ui/text';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useState, useEffect } from 'react';
-import { Pressable, ScrollView } from 'react-native';
+import { Pressable, ScrollView, View, Animated } from 'react-native';
 import OtpInput from 'react-native-animated-otp-input';
 import { supabase } from '@/lib/supabase';
 import * as Linking from 'expo-linking';
 import { Alert, AlertText } from '@/components/ui/alert';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { useColorScheme } from 'nativewind';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const OTPInput = () => {
   const { email } = useLocalSearchParams();
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
   const [countdown, setCountdown] = useState(30);
   const [canResend, setCanResend] = useState(false);
   const [invalidOTP, setInvalidOTP] = useState(false);
@@ -79,14 +83,65 @@ const OTPInput = () => {
   };
 
   return (
-    <ScrollView
-      className="bg-[#EEEEEE] dark:bg-gray-900"
-      contentContainerStyle={{
-        flexGrow: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}
-    >
+    <View style={{ flex: 1 }}>
+      {/* Day Background */}
+      <LinearGradient
+        colors={['#87CEEB', '#98D8E8', '#F0F8FF']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={{ position: 'absolute', width: '100%', height: '100%' }}
+      />
+
+      {/* Night Background Overlay */}
+      <Animated.View
+        style={{
+          position: 'absolute',
+          width: '100%',
+          height: '100%',
+          opacity: isDark ? 1 : 0,
+        }}
+      >
+        <LinearGradient
+          colors={['#0f172a', '#1e293b', '#334155']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={{ flex: 1 }}
+        />
+      </Animated.View>
+
+      {/* Stars */}
+      <Animated.View
+        style={{
+          position: 'absolute',
+          width: '100%',
+          height: '100%',
+          opacity: isDark ? 1 : 0,
+        }}
+      >
+        {[...Array(50)].map((_, i) => (
+          <View
+            key={i}
+            style={{
+              position: 'absolute',
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              width: 2,
+              height: 2,
+              backgroundColor: 'white',
+              borderRadius: 1,
+              opacity: 0.3 + Math.random() * 0.7,
+            }}
+          />
+        ))}
+      </Animated.View>
+
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
       <BackButton goBack={() => router.push('/ResetEmail')} />
       <Text className="text-4xl font-roboto font-semibold mb-4 text-black dark:text-white">
         Enter your OTP
@@ -127,6 +182,7 @@ const OTPInput = () => {
         </Text>
       </Pressable>
     </ScrollView>
+    </View>
   );
 };
 

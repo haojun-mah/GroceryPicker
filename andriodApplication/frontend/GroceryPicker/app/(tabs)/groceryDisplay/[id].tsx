@@ -493,16 +493,58 @@ const GroceryDisplay = () => {
 
   if (!currGroceryList) {
     return (
-      <LinearGradient
-        colors={
-          isDark
-            ? ['#1f2937', '#374151', '#4b5563']
-            : ['#667eea', '#764ba2', '#f093fb']
-        }
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{ flex: 1 }}
-      >
+      <View style={{ flex: 1 }}>
+        {/* Day Background */}
+        <LinearGradient
+          colors={['#87CEEB', '#98D8E8', '#F0F8FF']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={{ position: 'absolute', width: '100%', height: '100%' }}
+        />
+
+        {/* Night Background Overlay */}
+        <Animated.View
+          style={{
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            opacity: isDark ? 1 : 0,
+          }}
+        >
+          <LinearGradient
+            colors={['#0f172a', '#1e293b', '#334155']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={{ flex: 1 }}
+          />
+        </Animated.View>
+
+        {/* Stars */}
+        <Animated.View
+          style={{
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            opacity: isDark ? 1 : 0,
+          }}
+        >
+          {[...Array(50)].map((_, i) => (
+            <View
+              key={i}
+              style={{
+                position: 'absolute',
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                width: 2,
+                height: 2,
+                backgroundColor: 'white',
+                borderRadius: 1,
+                opacity: 0.3 + Math.random() * 0.7,
+              }}
+            />
+          ))}
+        </Animated.View>
+
         <ScrollView contentContainerStyle={{ paddingTop: 52 }}>
           <View className="px-4 gap-4 text-4xl font-bold">
             <Text className="text-4xl font-semibold mb-2 text-black dark:text-white">
@@ -510,21 +552,63 @@ const GroceryDisplay = () => {
             </Text>
           </View>
         </ScrollView>
-      </LinearGradient>
+      </View>
     );
   }
 
   return (
-    <LinearGradient
-      colors={
-        isDark
-          ? ['#1f2937', '#374151', '#4b5563'] // Dark mode gradient
-          : ['#f8fafc', '#f1f5f9'] // Light mode gradient (consistent with other pages)
-      }
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={{ flex: 1 }}
-    >
+    <View style={{ flex: 1 }}>
+      {/* Day Background */}
+      <LinearGradient
+        colors={['#87CEEB', '#98D8E8', '#F0F8FF']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={{ position: 'absolute', width: '100%', height: '100%' }}
+      />
+
+      {/* Night Background Overlay */}
+      <Animated.View
+        style={{
+          position: 'absolute',
+          width: '100%',
+          height: '100%',
+          opacity: isDark ? 1 : 0,
+        }}
+      >
+        <LinearGradient
+          colors={['#0f172a', '#1e293b', '#334155']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={{ flex: 1 }}
+        />
+      </Animated.View>
+
+      {/* Stars */}
+      <Animated.View
+        style={{
+          position: 'absolute',
+          width: '100%',
+          height: '100%',
+          opacity: isDark ? 1 : 0,
+        }}
+      >
+        {[...Array(50)].map((_, i) => (
+          <View
+            key={i}
+            style={{
+              position: 'absolute',
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              width: 2,
+              height: 2,
+              backgroundColor: 'white',
+              borderRadius: 1,
+              opacity: 0.3 + Math.random() * 0.7,
+            }}
+          />
+        ))}
+      </Animated.View>
+
       <EditHeader />
 
       {/* Edit Quantity Modal */}
@@ -672,7 +756,7 @@ const GroceryDisplay = () => {
           })}
         </View>
       </ScrollView>
-    </LinearGradient>
+    </View>
   );
 };
 

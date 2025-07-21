@@ -4,6 +4,8 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  View,
+  Animated,
 } from 'react-native';
 import { VStack } from '@/components/ui/vstack';
 import { Box } from '@/components/ui/box';
@@ -16,10 +18,12 @@ import { supabase } from '@/lib/supabase';
 import { useRouter } from 'expo-router';
 import { useColorScheme } from 'nativewind';
 import * as Linking from 'expo-linking';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function ResetPasswordScreen() {
   const router = useRouter();
   const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
   const prefix = Linking.createURL('/');
 
   const [email, setEmail] = useState({ value: '', error: '' });
@@ -51,10 +55,62 @@ export default function ResetPasswordScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{ flex: 1 }}
-    >
+    <View style={{ flex: 1 }}>
+      {/* Day Background */}
+      <LinearGradient
+        colors={['#87CEEB', '#98D8E8', '#F0F8FF']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={{ position: 'absolute', width: '100%', height: '100%' }}
+      />
+
+      {/* Night Background Overlay */}
+      <Animated.View
+        style={{
+          position: 'absolute',
+          width: '100%',
+          height: '100%',
+          opacity: isDark ? 1 : 0,
+        }}
+      >
+        <LinearGradient
+          colors={['#0f172a', '#1e293b', '#334155']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={{ flex: 1 }}
+        />
+      </Animated.View>
+
+      {/* Stars */}
+      <Animated.View
+        style={{
+          position: 'absolute',
+          width: '100%',
+          height: '100%',
+          opacity: isDark ? 1 : 0,
+        }}
+      >
+        {[...Array(50)].map((_, i) => (
+          <View
+            key={i}
+            style={{
+              position: 'absolute',
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              width: 2,
+              height: 2,
+              backgroundColor: 'white',
+              borderRadius: 1,
+              opacity: 0.3 + Math.random() * 0.7,
+            }}
+          />
+        ))}
+      </Animated.View>
+
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+      >
       <ScrollView
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
@@ -63,7 +119,6 @@ export default function ResetPasswordScreen() {
           paddingHorizontal: 24,
           paddingVertical: 48,
         }}
-        className="bg-[#EEEEEE} dark:bg-gray-900"
       >
         <BackButton goBack={() => router.replace('/Login')} />
 
@@ -114,5 +169,6 @@ export default function ResetPasswordScreen() {
         </Box>
       </ScrollView>
     </KeyboardAvoidingView>
+    </View>
   );
 }

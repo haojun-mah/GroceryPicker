@@ -12,6 +12,7 @@ import {
   Pressable,
   Linking,
   ActivityIndicator,
+  Animated,
 } from 'react-native';
 import { Search, Star, Flame, Tag } from 'lucide-react-native';
 import axios from 'axios';
@@ -22,10 +23,15 @@ import { ProductCatalog, SearchProductsResponse } from './interface';
 import { Modal } from 'react-native'
 import { Button } from '@/components/ui/button';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useColorScheme } from 'nativewind';
+
 
 const GrocerySearch = () => {
   const { session } = useSession();
   const { setIsLoading } = useGroceryContext();
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [suggestions, setSuggestions] = useState<ProductCatalog[] | null>(null);
   const [promotions, setPromotions] = useState<ProductCatalog[] | null>(null);
@@ -216,6 +222,58 @@ const GrocerySearch = () => {
   };
 
   return (
+    <View style={{ flex: 1 }}>
+      {/* Day Background */}
+      <LinearGradient
+        colors={['#87CEEB', '#98D8E8', '#F0F8FF']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={{ position: 'absolute', width: '100%', height: '100%' }}
+      />
+
+      {/* Night Background Overlay */}
+      <Animated.View
+        style={{
+          position: 'absolute',
+          width: '100%',
+          height: '100%',
+          opacity: isDark ? 1 : 0,
+        }}
+      >
+        <LinearGradient
+          colors={['#0f172a', '#1e293b', '#334155']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={{ flex: 1 }}
+        />
+      </Animated.View>
+
+      {/* Stars */}
+      <Animated.View
+        style={{
+          position: 'absolute',
+          width: '100%',
+          height: '100%',
+          opacity: isDark ? 1 : 0,
+        }}
+      >
+        {[...Array(50)].map((_, i) => (
+          <View
+            key={i}
+            style={{
+              position: 'absolute',
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              width: 2,
+              height: 2,
+              backgroundColor: 'white',
+              borderRadius: 1,
+              opacity: 0.3 + Math.random() * 0.7,
+            }}
+          />
+        ))}
+      </Animated.View>
+
     <View className="flex-1 bg-gradient-to-br from-green-50 to-blue-50 dark:from-gray-900 dark:to-slate-800">
       <ScrollView
         className="flex-1"
@@ -225,7 +283,7 @@ const GrocerySearch = () => {
         scrollEventThrottle={400}
       >
         {/* Header */}
-        <View className="bg-white dark:bg-gray-800 pt-12 pb-6 px-6 z-10 shadow-sm">
+        <View className="bg-white/20 dark:bg-black/20 backdrop-blur-md pt-12 pb-6 px-6 z-10">
           <View className="mb-6">
             <Text className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
               Grocery Catalog
@@ -238,12 +296,12 @@ const GrocerySearch = () => {
           {/* Enhanced Search Bar and Suggestions Container */}
           <View className="relative z-50">
             {/* Search Input Wrapper */}
-            <View className="relative bg-gray-200 dark:bg-gray-700 rounded-2xl border-2 border-gray-300 dark:border-gray-600 focus:border-green-500 dark:focus:border-green-400">
+            <View className="relative bg-white/30 dark:bg-black/30 backdrop-blur-md rounded-2xl border-2 border-white/50 dark:border-gray-500 focus:border-green-500 dark:focus:border-green-400">
               <View className="absolute left-5 top-1/2 transform -translate-y-1/2">
                 <Search size={24} color="#9CA3AF" />
               </View>
               <TextInput
-                className="pl-14 pr-6 py-5 text-lg text-gray-900 dark:text-white bg-transparent rounded-2xl"
+                className="pl-14 pr-6 py-5 text-lg text-gray-900 dark:text-white bg-gray-200 rounded-2xl"
                 placeholder="Search for groceries, brands, or categories..."
                 placeholderTextColor="#9CA3AF"
                 value={searchQuery}
@@ -284,7 +342,7 @@ const GrocerySearch = () => {
 
             {/* Suggestions Dropdown */}
             {suggestions !== null && (
-              <View className="absolute top-full w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-2xl shadow-lg z-50">
+              <View className="absolute top-full w-full mt-2 bg-white/90 dark:bg-black/90 backdrop-blur-md border border-white/50 dark:border-gray-500 rounded-2xl shadow-lg z-50">
                 {suggestions.length > 0 ? (
                   suggestions.map((suggestion, idx) => (
                     <TouchableOpacity
@@ -327,7 +385,7 @@ const GrocerySearch = () => {
           <View className="px-6 py-4">
             <View className='flex-row items-center justify-between mb-4'>
               <Text className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                Search Results ({searchResult.length})
+                Search Results
               </Text>
               <Button onPress={() => setSearchResult(null)} className="mb-4 bg-gray-200 dark:bg-gray-700 rounded-lg px-4 py-2">
                 <AntDesign name="back" size={24} color="black" /> 
@@ -337,7 +395,14 @@ const GrocerySearch = () => {
               {searchResult.map((item, idx) => (
                 <Pressable
                   key={idx}
-                  className="flex-row items-center justify-between border-b bg-gray-100 dark:bg-gray-700 rounded-xl p-4 py-4"
+                  className="flex-row items-center justify-between shadow-lg backdrop-blur-lg bg-gray-100 dark:bg-gray-700 rounded-xl p-4 py-4"
+                  style={{
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.15,
+                    shadowRadius: 8,
+                    elevation: 6,
+                  }}
                   onPress={() => setTarget(item)}
                 >
                   {/* Item Image */}
@@ -388,8 +453,8 @@ const GrocerySearch = () => {
           <View>
             <View>
               {/* Hot Items / Promotions Section */}
-              <View className="px-6 py-6">
-                <View className="flex-row items-center mb-4">
+              <View className="px-6">
+                <View className="flex-row items-center">
                   <Flame size={24} color="#F97316" />
                   <Text className="text-xl font-bold text-gray-900 dark:text-white ml-2">
                     Hot Deals & Promotions
@@ -398,7 +463,7 @@ const GrocerySearch = () => {
                 </View>
               </View>
             </View>
-            <View className="px-6 py-4">
+            <View className="px-6 py-2">
               <ScrollView
                 horizontal={true}
                 showsHorizontalScrollIndicator={false}
@@ -410,7 +475,14 @@ const GrocerySearch = () => {
                   promotions.map((item, idx) => (
                     <Pressable
                       key={idx}
-                      className="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-sm border border-gray-100 dark:border-gray-600 w-44 h-64 mr-4"
+                      className="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-lg backdrop-blur-lg w-44 h-80 mr-4"
+                      style={{
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 4 },
+                        shadowOpacity: 0.15,
+                        shadowRadius: 8,
+                        elevation: 6,
+                      }}
                       onPress={() => setTarget(item)}
                     >
                       {/* Item Image */}
@@ -433,19 +505,19 @@ const GrocerySearch = () => {
                       {/* Promotion Description Badge */}
                       {item.promotion_description && (
                         <View className="bg-red-500 dark:bg-red-600 rounded-lg px-2 py-1 mb-2">
-                          <Text className="text-white text-xs font-bold text-center" numberOfLines={2}>
+                          <Text className="text-white text-xs font-bold text-center" numberOfLines={3}>
                             {item.promotion_description}
                           </Text>
                         </View>
                       )}
 
-                      {/* Price and End Date */}
-                      <View className="justify-end">
+                      {/* Price and End Date - Fixed positioning */}
+                      <View className="flex-1 justify-end">
                         <Text className="text-green-600 dark:text-green-400 font-bold text-sm text-center mb-1">
-                          ${item.price}
+                          {item.price}
                         </Text>
                         {item.promotion_end_date_text && (
-                          <Text className="text-gray-400 dark:text-gray-500 text-xs text-center" numberOfLines={1}>
+                          <Text className="text-gray-400 dark:text-gray-500 text-xs text-center" numberOfLines={2}>
                             Ends: {item.promotion_end_date_text}
                           </Text>
                         )}
@@ -461,7 +533,14 @@ const GrocerySearch = () => {
               {itemDisplay.map((item, idx) => (
                 <Pressable
                   key={idx}
-                  className="flex-row items-center justify-between border-b bg-gray-100 dark:bg-gray-700 rounded-xl p-4 py-4"
+                  className="flex-row items-center justify-between shadow-lg backdrop-blur-lg bg-gray-100 dark:bg-gray-700 rounded-xl p-4 py-4"
+                  style={{
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.15,
+                    shadowRadius: 8,
+                    elevation: 6,
+                  }}
                   onPress={() => setTarget(item)}
                 >
                   {/* Item Image */}
@@ -573,6 +652,7 @@ const GrocerySearch = () => {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
+    </View>
     </View>
   );
 };
