@@ -547,7 +547,7 @@ const GroceryDisplay = () => {
           ))}
         </Animated.View>
 
-        <ScrollView contentContainerStyle={{ paddingTop: 52 }}>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: 52 }}>
           <View className="px-4 gap-4 text-4xl font-bold">
             <Text className="text-4xl font-semibold mb-2 text-black dark:text-white">
               Optimised Grocery List
@@ -735,7 +735,7 @@ const GroceryDisplay = () => {
               return null;
             }
             return (
-              <View key={`${shops}-${idx}`} className="items-start w-full">
+              <View key={`${shops}-${idx}`} className="items-start w-full pb-4">
                 <Text className="text-xl font-semibold mb-1 text-black dark:text-white">
                   {shops}
                 </Text>

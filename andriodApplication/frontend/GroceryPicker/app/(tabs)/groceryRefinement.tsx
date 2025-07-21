@@ -306,6 +306,7 @@ const ModalPage = () => {
             padding: 20,
           }}
           style={{ backgroundColor: 'transparent' }}
+          showsVerticalScrollIndicator={false}
         >
         <VStack className="flex-1 justify-center" space="lg">
           {/* Header */}

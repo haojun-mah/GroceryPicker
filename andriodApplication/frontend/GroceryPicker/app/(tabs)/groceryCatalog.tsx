@@ -274,7 +274,6 @@ const GrocerySearch = () => {
         ))}
       </Animated.View>
 
-    <View className="flex-1 bg-gradient-to-br from-green-50 to-blue-50 dark:from-gray-900 dark:to-slate-800">
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
@@ -652,7 +651,6 @@ const GrocerySearch = () => {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
-    </View>
     </View>
   );
 };
