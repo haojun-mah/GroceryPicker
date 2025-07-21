@@ -100,7 +100,7 @@ describe('RAG Retrieval Service - Core Functionality', () => {
       mockSupabase.rpc.mockResolvedValue({ data: mockProducts, error: null } as any);
 
       const result = await fetchProductPrices('test query', 0.5, 10, {
-        exclude: ['Giant', 'Cold Storage'],
+        exclude: ['Cold Storage'],
       });
 
       expect(result).toEqual(mockProducts);
@@ -108,7 +108,7 @@ describe('RAG Retrieval Service - Core Functionality', () => {
         query_embedding: mockEmbedding,
         match_threshold: 0.5,
         match_count: 10,
-        exclude_supermarkets: ['Giant', 'Cold Storage'],
+        exclude_supermarkets: ['Cold Storage'],
       });
     });
   });
