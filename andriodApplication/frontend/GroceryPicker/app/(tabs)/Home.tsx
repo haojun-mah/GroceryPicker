@@ -84,7 +84,7 @@ export default function HomePage() {
       colors={
         isDark
           ? ['#1f2937', '#374151', '#4b5563']
-          : ['#667eea', '#764ba2', '#f093fb']
+          : ['#f0fdf4', '#dbeafe', '#fef3c7']
       }
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
@@ -98,23 +98,22 @@ export default function HomePage() {
         <View className="flex-1 px-6 relative justify-center items-center">
           {/* Header Section */}
           <View className="items-center py-8 w-full max-w-sm">
-            <View className="flex-row items-center justify-items-center">
-              <Text
-                className={`text-4xl font-bold ${isDark ? 'text-white' : 'text-black'} mb-3 text-center`}
-              >
-                Grocery Picker
-              </Text>
-            </View>
-
-            <Text
-              className={`text-xl ${isDark ? 'text-white/90' : 'text-black/80'} mb-5 font-medium text-center`}
+            <View className="flex-row items-center justify-items-center">            <Text
+              className={`text-4xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-3 text-center`}
             >
-              Smart Shopping Made Simple
+              Grocery Picker
             </Text>
+          </View>
 
-            <Text
-              className={`text-base ${isDark ? 'text-white/80' : 'text-black/80'} text-center leading-6 max-w-xs`}
-            >
+          <Text
+            className={`text-xl ${isDark ? 'text-white/90' : 'text-gray-800'} mb-5 font-medium text-center`}
+          >
+            Smart Shopping Made Simple
+          </Text>
+
+          <Text
+            className={`text-base ${isDark ? 'text-white/80' : 'text-gray-700'} text-center leading-6 max-w-xs`}
+          >
               Transform your shopping experience with AI-powered grocery lists
               that save time and reduce waste
             </Text>
@@ -123,48 +122,48 @@ export default function HomePage() {
           {/* Statistics */}
           <View className="flex-row gap-1 mb-8 w-full max-w-sm">
             <View
-              className={`flex-1 ${isDark ? 'bg-white/5' : 'bg-white/10'} backdrop-blur-md rounded-2xl p-4 items-center border ${isDark ? 'border-white/10' : 'border-white/20'}`}
+              className={`flex-1 ${isDark ? 'bg-white/5' : 'bg-white/20'} backdrop-blur-md rounded-2xl p-4 items-center border ${isDark ? 'border-white/10' : 'border-white/30'}`}
             >
               <Text className="text-lg mb-1">📝</Text>
               <Text
-                className={`${isDark ? 'text-white' : 'text-black'} font-bold text-xl`}
+                className={`${isDark ? 'text-white' : 'text-gray-900'} font-bold text-xl`}
               >
                 {noListCreated}
               </Text>
               <Text
-                className={`${isDark ? 'text-white/80' : 'text-black/80'} text-sm text-center`}
+                className={`${isDark ? 'text-white/80' : 'text-gray-700'} text-sm text-center`}
               >
                 Lists Created
               </Text>
             </View>
 
             <View
-              className={`flex-1 ${isDark ? 'bg-white/5' : 'bg-white/10'} backdrop-blur-md rounded-2xl p-4 items-center border ${isDark ? 'border-white/10' : 'border-white/20'}`}
+              className={`flex-1 ${isDark ? 'bg-white/5' : 'bg-white/20'} backdrop-blur-md rounded-2xl p-4 items-center border ${isDark ? 'border-white/10' : 'border-white/30'}`}
             >
               <Text className="text-lg mb-1">🛍️</Text>
               <Text
-                className={`${isDark ? 'text-white' : 'text-black'} font-bold text-xl`}
+                className={`${isDark ? 'text-white' : 'text-gray-900'} font-bold text-xl`}
               >
                 {noItems}
               </Text>
               <Text
-                className={`${isDark ? 'text-white/80' : 'text-black/80'} text-sm text-center text-wrap`}
+                className={`${isDark ? 'text-white/80' : 'text-gray-700'} text-sm text-center text-wrap`}
               >
                 Items Managed
               </Text>
             </View>
 
             <View
-              className={`flex-1 ${isDark ? 'bg-white/5' : 'bg-white/10'} backdrop-blur-md rounded-2xl p-4 items-center border ${isDark ? 'border-white/10' : 'border-white/20'}`}
+              className={`flex-1 ${isDark ? 'bg-white/5' : 'bg-white/20'} backdrop-blur-md rounded-2xl p-4 items-center border ${isDark ? 'border-white/10' : 'border-white/30'}`}
             >
               <Text className="text-lg mb-1">🛒</Text>
               <Text
-                className={`${isDark ? 'text-white' : 'text-black'} font-bold text-xl`}
+                className={`${isDark ? 'text-white' : 'text-gray-900'} font-bold text-xl`}
               >
                 {noListCompleted}
               </Text>
               <Text
-                className={`${isDark ? 'text-white/80' : 'text-black/80'} text-sm text-center text-wrap`}
+                className={`${isDark ? 'text-white/80' : 'text-gray-700'} text-sm text-center text-wrap`}
               >
                 List Completed
               </Text>

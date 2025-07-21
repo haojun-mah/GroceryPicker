@@ -97,7 +97,7 @@ const GroceryInputPage = () => {
       colors={
         isDark
           ? ['#1f2937', '#374151', '#4b5563']
-          : ['#667eea', '#764ba2', '#f093fb']
+          : ['#f8fafc', '#f1f5f9']
       }
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
@@ -125,14 +125,14 @@ const GroceryInputPage = () => {
         >
           {/* Header Section */}
           <VStack space="md" className="items-center mb-8">
-            <Heading className="text-4xl font-bold text-center text-black dark:text-white">
+            <Heading className="text-4xl font-bold text-center text-gray-900 dark:text-white">
               Create Grocery List
             </Heading>
             <VStack space="xs" className="items-center">
-              <Text className="text-sm text-black/70 dark:text-white/80 text-center">
+              <Text className="text-sm text-gray-700 dark:text-white/80 text-center">
                 Unsure of what groceries?
               </Text>
-              <Text className="text-sm text-black/70 dark:text-white/80 text-center">
+              <Text className="text-sm text-gray-700 dark:text-white/80 text-center">
                 Describe it and we will do the work!
               </Text>
             </VStack>
@@ -142,17 +142,17 @@ const GroceryInputPage = () => {
           <VStack className="w-full" space="xl">
             {/* Grocery Text Area */}
             <VStack space="sm" className="w-full">
-              <Text className="text-lg font-medium text-black dark:text-white text-left">
+              <Text className="text-lg font-medium text-gray-800 dark:text-white text-left">
                 What groceries do you need?
               </Text>
-              <Input className="min-h-32 bg-white/90 dark:bg-gray-700/90 rounded-xl shadow-sm backdrop-blur-md border border-gray-200 dark:border-gray-600">
+              <Input className="min-h-32 bg-white/95 dark:bg-gray-700/90 rounded-xl shadow-sm backdrop-blur-md border border-gray-300 dark:border-gray-600">
                 <InputField
                   placeholder="Enter groceries or description..."
                   value={groceryTextArea}
                   onChangeText={setGroceryTextArea}
                   multiline
                   textAlignVertical="top"
-                  className="text-black dark:text-white p-4"
+                  className="text-gray-900 dark:text-white p-4"
                   placeholderTextColor={isDark ? '#9CA3AF' : '#6B7280'}
                 />
               </Input>
@@ -160,7 +160,7 @@ const GroceryInputPage = () => {
 
             {/* Grocery Shops Selector */}
             <VStack space="sm" className="w-full">
-              <Text className="text-lg font-medium text-black dark:text-white text-left">
+              <Text className="text-lg font-medium text-gray-800 dark:text-white text-left">
                 Select Grocery Shops
               </Text>
               <DropdownSelector
@@ -201,7 +201,7 @@ const GroceryInputPage = () => {
                 colors={
                   isDark
                     ? ['#4f46e5', '#7c3aed', '#db2777']
-                    : ['#ff6b6b', '#ffa726', '#ffcc02']
+                    : ['#6366f1', '#8b5cf6', '#ec4899']
                 }
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}

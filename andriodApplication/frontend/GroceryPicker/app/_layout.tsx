@@ -2,8 +2,10 @@ import { Redirect, Stack } from 'expo-router';
 import React from 'react';
 import '../global.css';
 import { SessionProvider, useSession } from '@/context/authContext';
-import { GroceryContextProvider } from '@/context/groceryContext';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import 'cross-fetch/polyfill';
+
+const queryClient = new QueryClient();
 
 export default function RootLayout() {
   // session checks
@@ -13,11 +15,13 @@ export default function RootLayout() {
   }
 
   return (
-    <SessionProvider>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-      </Stack>
-    </SessionProvider>
+    <QueryClientProvider client={queryClient}>
+      <SessionProvider>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        </Stack>
+      </SessionProvider>
+    </QueryClientProvider>
   );
 }

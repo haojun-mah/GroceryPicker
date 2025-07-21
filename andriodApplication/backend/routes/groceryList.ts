@@ -4,8 +4,9 @@ import { refineGroceryListController } from '../controllers/refineGroceryListCon
 import { findBestPricesForGroceryList } from '../controllers/optimiseListController';
 import { saveGroceryList } from '../controllers/saveListController';
 import { getAllUserGroceryLists } from '../controllers/getListsController';
-import verifyToken from '../middleware/auth';
 import { updateGroceryList } from '../controllers/updateGroceryListController';
+import { addItemToList } from '../controllers/addItemController';
+import verifyToken from '../middleware/auth';
 
 const groceryListRouter = Router();
 
@@ -26,5 +27,8 @@ groceryListRouter.get('/getAll', verifyToken, getAllUserGroceryLists);
 
 // batch update of grocery lists and their items
 groceryListRouter.patch('/update', verifyToken, updateGroceryList);
+
+// Enhanced list management routes
+groceryListRouter.post('/add-item', verifyToken, addItemToList);
 
 export default groceryListRouter;
