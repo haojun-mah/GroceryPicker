@@ -246,8 +246,10 @@ const GroceryDisplay = () => {
         console.log('🗑️ Deleting items:', selectedItemsToEdit);
         updatedList = {
           ...currGroceryList,
-          grocery_list_items: currGroceryList.grocery_list_items.filter(
-            (i) => !selectedItemsToEdit.includes(i.item_id),
+          grocery_list_items: currGroceryList.grocery_list_items.map((i) =>
+            selectedItemsToEdit.includes(i.item_id)
+              ? { ...i, item_status: 'deleted' }
+              : i,
           ),
         };
 

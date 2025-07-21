@@ -345,17 +345,20 @@ const DropdownCard = ({
           <View className="flex-row items-start justify-between">
             <View className="flex-1">
               {!expanded &&
-                outsideText.map((e, i) => (
-                  <Text
-                    key={`${e.item_id}-${i}`}
-                    size="xs"
-                    className="text-black dark:text-white text-md"
-                  >
-                    {e.product?.name || e.name} -{' '}
-                    {e.amount === 0 ? 'Not optimized' : e.amount} ({e.quantity}{' '}
-                    {e.unit}/{e.product?.price || 'No price'})
-                  </Text>
-                ))}
+                outsideText.map((e, i) => {
+                  if (e.item_status === 'deleted') return null;
+                  return (
+                    <Text
+                      key={`${e.item_id}-${i}`}
+                      size="xs"
+                      className="text-black dark:text-white text-md"
+                    >
+                      {e.product?.name || e.name} -{' '}
+                      {e.amount === 0 ? 'Not optimized' : e.amount} ({e.quantity}{' '}
+                      {e.unit}/{e.product?.price || 'No price'})
+                    </Text>
+                  );
+                })}
               {expanded && (
                 <View className="flex-row items-center gap-2">
                   <Text className="text-base font-semibold text-black dark:text-white">
@@ -400,7 +403,7 @@ const DropdownCard = ({
             <View className="mt-2 space-y-2">
               {insideText.map((item, idx) => {
                 const visualState = getItemVisualState(item);
-
+                if (item.item_status === 'deleted') return null;
                 return (
                   <Pressable
                     key={`${item.item_id}-${idx}`}

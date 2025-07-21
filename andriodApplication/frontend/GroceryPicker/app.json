@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "GroceryPicker",
-    "slug": "GroceryPicker",
+    "slug": "app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -34,7 +34,10 @@
               "host": "auth/ResetPassword"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },
@@ -63,9 +66,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "646f6a84-a9a9-4b4e-aecd-fae0a855bdf6"
+        "projectId": "76bbf570-3756-4bbe-af52-c10992148dbd"
       }
     },
-    "owner": "haojunmah"
+    "owner": "grocery-picker"
   }
 }
