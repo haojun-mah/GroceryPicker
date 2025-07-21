@@ -29,7 +29,7 @@ import { useColorScheme } from 'nativewind';
 
 const GrocerySearch = () => {
   const { session } = useSession();
-  const { setIsLoading } = useGroceryContext();
+  const { groceryListHistory, setIsLoading } = useGroceryContext();
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -38,6 +38,7 @@ const GrocerySearch = () => {
   const [searchResult, setSearchResult] = useState<ProductCatalog[] | null>(null);
   const [itemDisplay, setItemDisplay] = useState<ProductCatalog[] | null>(null);
   const [target, setTarget] = useState<ProductCatalog | null>(null);
+  const [showAddToList, setShowAddToList] = useState<boolean>(false);
   
   // Pagination states
   const [offset, setOffset] = useState<number>(0);
@@ -425,9 +426,6 @@ const GrocerySearch = () => {
                     <Text className="text-green-600 dark:text-green-400 font-bold text-lg">
                       {item.price}
                     </Text>
-                    <TouchableOpacity className="bg-green-600 dark:bg-green-500 rounded-lg px-3 py-1 mt-2">
-                      <Text className="text-white text-xs font-semibold">Add</Text>
-                    </TouchableOpacity>
                   </View>
                 </Pressable>
               ))}
@@ -474,7 +472,7 @@ const GrocerySearch = () => {
                   promotions.map((item, idx) => (
                     <Pressable
                       key={idx}
-                      className="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-lg backdrop-blur-lg w-44 h-80 mr-4"
+                      className="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-lg backdrop-blur-lg w-44 h-72 mr-4"
                       style={{
                         shadowColor: '#000',
                         shadowOffset: { width: 0, height: 4 },
@@ -510,17 +508,15 @@ const GrocerySearch = () => {
                         </View>
                       )}
 
-                      {/* Price and End Date - Fixed positioning */}
-                      <View className="flex-1 justify-end">
-                        <Text className="text-green-600 dark:text-green-400 font-bold text-sm text-center mb-1">
-                          {item.price}
+                      {/* Price and End Date */}
+                      <Text className="text-green-600 dark:text-green-400 font-bold text-sm text-center mb-1">
+                        {item.price}
+                      </Text>
+                      {item.promotion_end_date_text && (
+                        <Text className="text-gray-400 dark:text-gray-500 text-xs text-center" numberOfLines={2}>
+                          Ends: {item.promotion_end_date_text}
                         </Text>
-                        {item.promotion_end_date_text && (
-                          <Text className="text-gray-400 dark:text-gray-500 text-xs text-center" numberOfLines={2}>
-                            Ends: {item.promotion_end_date_text}
-                          </Text>
-                        )}
-                      </View>
+                      )}
                     </Pressable>
                   ))
                 )}
@@ -563,9 +559,6 @@ const GrocerySearch = () => {
                     <Text className="text-green-600 dark:text-green-400 font-bold text-lg">
                       {item.price}
                     </Text>
-                    <TouchableOpacity className="bg-green-600 dark:bg-green-500 rounded-lg px-3 py-1 mt-2">
-                      <Text className="text-white text-xs font-semibold">Add</Text>
-                    </TouchableOpacity>
                   </View>
                 </Pressable>
               ))}
@@ -628,7 +621,10 @@ const GrocerySearch = () => {
                 <View className="flex-row justify-between">
                   <TouchableOpacity
                     className="bg-green-600 dark:bg-green-500 rounded-lg px-3 py-2 flex-1 mr-2"
-                    onPress={() => {}}
+                    onPress={() => {
+                      setTarget(null);
+                      setShowAddToList(true);
+                    }}
                   >
                     <Text className="text-white text-center text-sm font-semibold">Add Item</Text>
                   </TouchableOpacity>
@@ -646,6 +642,50 @@ const GrocerySearch = () => {
                     <Text className="text-white text-center text-sm font-semibold">Go to Link</Text>
                   </TouchableOpacity>
                 </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+      <Modal 
+        visible={showAddToList}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowAddToList(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setShowAddToList(false)}>
+          <View className="flex-1 justify-center items-center bg-black/50">
+            <TouchableWithoutFeedback>
+              <View
+                className="bg-white dark:bg-gray-800 rounded-2xl p-4 w-10/12 max-h-3/4 shadow-lg"
+                style={{
+                  width: '80%', // 80% of the screen width
+                  height: '60%', // 60% of the screen height
+                  padding: 16,
+                  borderRadius: 16,
+                }}
+              >
+                  <Text className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                    Add to Grocery List
+                  </Text>
+                <ScrollView className='flex-1' showsVerticalScrollIndicator={false}>
+                  
+                  {groceryListHistory !== null && groceryListHistory.length > 0 ? (
+                    groceryListHistory.map((list, index) => (
+                      <Pressable onPress={() => {
+                        // wait for logic
+                        setShowAddToList(false);
+                      }} key={index} className="mb-4">
+                        <Text className="text-gray-900 dark:text-white font-bold">{list.title}</Text>
+                        <Text className="text-gray-500 dark:text-gray-400">{list.metadata}</Text>
+                      </Pressable>
+                    ))
+                  ) : (
+                    <Text className="text-gray-500 dark:text-gray-400 text-center mt-10">
+                      No grocery lists found
+                    </Text>
+                  )}
+                </ScrollView>
               </View>
             </TouchableWithoutFeedback>
           </View>

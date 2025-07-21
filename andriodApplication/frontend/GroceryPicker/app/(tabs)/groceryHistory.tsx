@@ -561,13 +561,14 @@ const GroceryListHistoryPage = () => {
                   onPress={() => handleListPress(list.list_id)}
                   onLongPress={() => handleLongPress(list.list_id)}
                   className={`${isSelected ? 'opacity-80' : ''}`}
-                >                    <Card
-                      className={`bg-white/95 dark:bg-gray-700/90 rounded-xl border shadow-lg backdrop-blur-sm ${
-                        isSelected
-                          ? 'border-2 border-blue-500 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-900/30'
-                          : 'border border-gray-300 dark:border-gray-600'
-                      }`}
-                    >
+                >
+                  <Card
+                    className={`bg-white/95 dark:bg-gray-700/90 rounded-xl border shadow-lg backdrop-blur-sm ${
+                      isSelected
+                        ? 'border-2 border-blue-500 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-900/30'
+                        : 'border border-gray-300 dark:border-gray-600'
+                    }`}
+                  >
                     <View className="flex-row items-center justify-between">
                       <View className="flex-1">
                         <Text className="text-xl font-semibold text-gray-900 dark:text-white">
