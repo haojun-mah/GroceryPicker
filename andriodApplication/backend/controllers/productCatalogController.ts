@@ -72,38 +72,64 @@ export const searchProducts: RequestHandler<
     const isSearch = !!(query && typeof query === 'string' && query.trim().length > 0);
 
     if (isSearch) {
-      // SEARCH MODE: Try semantic search first
-      const embedding = await getEmbedding(query);
-      if (embedding) {
-        const rpcCall = supabase.rpc('search_products_semantic', {
-          query_embedding: embedding,
-          search_query: query,
-          filter_supermarket: supermarket || null,
-          filter_has_promotion: hasPromotion === 'true',
-          result_limit: limitNum,
-          result_offset: offsetNum,
-          match_threshold: 0.5,
-        });
-        const { data, error } = await rpcCall;
-        if (error) {
-          console.error('Semantic search error:', error);
-        } else {
-          results = data;
+      // SEARCH MODE: Try semantic search first using the robust RAG embedding function
+      const embedding = await getEmbedding(query, { type: 'query' });
+
+      if (!embedding) {
+        console.warn(`Failed to generate embedding for query: "${query}". Falling back to text search.`);
+      } else {
+        // Use the improved semantic search function with database-level filtering
+        try {
+          const { data, error } = await supabase.rpc(
+            'search_products_semantic_improved',
+            {
+              query_embedding: embedding,
+              match_threshold: 1.0,
+              match_count: limitNum,
+              result_offset: offsetNum,
+              include_supermarket: supermarket || null,
+              has_promotion: hasPromotion === 'true' ? true : (hasPromotion === 'false' ? false : null),
+            }
+          );
+          
+          if (error) {
+            console.error('Semantic search error:', error.message);
+          } else if (data) {
+            results = Array.isArray(data) ? (data as ProductCatalog[]) : [];
+          }
+        } catch (semanticError: any) {
+          console.error('Unexpected error during semantic search:', semanticError.message);
         }
       }
-      // Fallback to traditional text search
-      if (!results) {
-        let dbQuery = supabase
-          .from('products')
-          .select(SELECT_FIELDS)
-          .ilike('name', `%${query}%`);
-        if (supermarket) dbQuery = dbQuery.eq('supermarket', supermarket);
-        if (hasPromotion === 'true') dbQuery = dbQuery.not('promotion_description', 'is', null);
-        dbQuery = dbQuery.range(offsetNum, offsetNum + limitNum - 1);
-        const { data, error } = await dbQuery;
-        if (error) {
-          const err = new ControllerError(500, 'Text search error', error.message);
-          console.error(err);
+      
+      // Fallback to traditional text search if semantic search failed or returned no results
+      if (!results || results.length === 0) {
+        console.log(`Semantic search returned no results for "${query}". Falling back to text search.`);
+        try {
+          let dbQuery = supabase
+            .from('products')
+            .select(SELECT_FIELDS)
+            .ilike('name', `%${query}%`);
+          if (supermarket) dbQuery = dbQuery.eq('supermarket', supermarket);
+          if (hasPromotion === 'true') dbQuery = dbQuery.not('promotion_description', 'is', null);
+          dbQuery = dbQuery.range(offsetNum, offsetNum + limitNum - 1);
+          const { data, error } = await dbQuery;
+          if (error) {
+            const err = new ControllerError(500, 'Text search error', error.message);
+            console.error(err);
+            res.status(500).json({
+              results: [],
+              query: query || '',
+              resultCount: 0,
+              offset: offsetNum,
+              limit: limitNum,
+              isSearch: true
+            });
+            return;
+          }
+          results = data;
+        } catch (textSearchError: any) {
+          console.error('Unexpected error during text search fallback:', textSearchError.message);
           res.status(500).json({
             results: [],
             query: query || '',
@@ -114,7 +140,6 @@ export const searchProducts: RequestHandler<
           });
           return;
         }
-        results = data;
       }
     } else {
       // CATALOG MODE: Return paginated product list
