@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Alert, Dimensions, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
 import { Box } from '@/components/ui/box';
@@ -245,22 +246,26 @@ const ModalPage = () => {
   };
 
   return (
-    <LinearGradient
-      colors={
-        isDark
-          ? ['#1f2937', '#374151', '#4b5563']
-          : ['#f8fafc', '#f1f5f9']
-      }
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={{ flex: 1 }}
-    >
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{ flexGrow: 1 }}
-        style={{ backgroundColor: 'transparent' }}
+    <SafeAreaView style={{ flex: 1 }} edges={['top', 'left', 'right']}>
+      <LinearGradient
+        colors={
+          isDark
+            ? ['#1f2937', '#374151', '#4b5563']
+            : ['#f8fafc', '#f1f5f9']
+        }
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ flex: 1 }}
       >
-        <VStack className="flex-1 p-6 justify-center" space="lg">
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{ 
+            flexGrow: 1,
+            padding: 20,
+          }}
+          style={{ backgroundColor: 'transparent' }}
+        >
+        <VStack className="flex-1 justify-center" space="lg">
           {/* Header */}
           <VStack space="md" className="items-center">
             <Heading className="text-4xl font-bold text-center text-gray-900 dark:text-white">
@@ -283,7 +288,7 @@ const ModalPage = () => {
               <Text className="text-lg font-medium text-gray-800 dark:text-white">
                 Your Grocery List
               </Text>
-              <Box className="min-h-80 bg-white/95 dark:bg-gray-700/90 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm backdrop-blur-sm">
+              <Box className="h-48 bg-white/95 dark:bg-gray-700/90 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm backdrop-blur-sm">
                 <Textarea className="w-full h-full rounded-xl bg-transparent border-0">
                   <TextareaInput
                     className="text-gray-900 dark:text-white p-4"
@@ -420,6 +425,7 @@ const ModalPage = () => {
         </VStack>
       </ScrollView>
     </LinearGradient>
+    </SafeAreaView>
   );
 };
 
