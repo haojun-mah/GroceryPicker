@@ -393,14 +393,14 @@ export default function HomePage() {
               <View className="items-center py-8 w-full max-w-sm">
                 <View className="flex-row items-center justify-items-center">
                   <Text
-                    className={`text-4xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-3 text-center`}
+                    className={`text-4xl font-bold ${isDark ? 'text-gray-400' : 'text-gray-900'} mb-3 text-center`}
                   >
                     Grocery Picker
                   </Text>
                 </View>
 
                 <Text
-                  className={`text-xl ${isDark ? 'text-white/90' : 'text-gray-800'} mb-5 font-medium text-center`}
+                  className={`text-xl ${isDark ? 'text-gray-400' : 'text-gray-800'} mb-5 font-medium text-center`}
                 >
                   Smart Shopping Made Simple
                 </Text>
@@ -425,7 +425,7 @@ export default function HomePage() {
                     {noListCreated}
                   </Text>
                   <Text
-                    className={`${isDark ? 'text-white/80' : 'text-gray-700'} text-sm text-center text-wrap`}
+                    className={`${isDark ? 'text-white/80' : 'text-gray-700'} dark:text-white/80 text-sm text-center text-wrap`}
                   >
                     Lists Created
                   </Text>
@@ -436,12 +436,12 @@ export default function HomePage() {
                 >
                   <Text className="text-lg mb-1">🛍️</Text>
                   <Text
-                    className={`${isDark ? 'text-white' : 'text-gray-900'} font-bold text-xl`}
+                    className={`${isDark ? 'text-white' : 'text-gray-900'} fdark:text-white/80 ont-bold text-xl`}
                   >
                     {noItems}
                   </Text>
                   <Text
-                    className={`${isDark ? 'text-white/80' : 'text-gray-700'} text-sm text-center text-wrap`}
+                    className={`${isDark ? 'text-white/80' : 'text-gray-700'} text-sm dark:text-white/80 ext-center text-wrap`}
                   >
                     Items Managed
                   </Text>
@@ -457,7 +457,7 @@ export default function HomePage() {
                     {noListCompleted}
                   </Text>
                   <Text
-                    className={`${isDark ? 'text-white/80' : 'text-gray-700'} text-sm text-center text-wrap`}
+                    className={`${isDark ? 'text-white/80' : 'text-gray-700'} text-sm text-center tdark:text-white/80 ext-wrap`}
                   >
                     List Completed
                   </Text>

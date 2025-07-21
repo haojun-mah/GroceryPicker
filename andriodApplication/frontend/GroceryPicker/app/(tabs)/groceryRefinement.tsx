@@ -345,7 +345,7 @@ const ModalPage = () => {
                     }
                     textAlignVertical="top"
                     placeholder="Your grocery list will appear here..."
-                    placeholderTextColor={isDark ? '#9CA3AF' : '#6B7280'}
+                    placeholderTextColor={isDark ? 'white' : 'black '}
                   />
                 </Textarea>
               </Box>

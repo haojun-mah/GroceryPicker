@@ -282,7 +282,7 @@ const GrocerySearch = () => {
         scrollEventThrottle={400}
       >
         {/* Header */}
-        <View className="bg-white/20 dark:bg-black/20 backdrop-blur-md pt-12 pb-6 px-6 z-10">
+        <View className="bg-transparent backdrop-blur-md pt-12 pb-6 px-6 z-10">
           <View className="mb-6">
             <Text className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
               Grocery Catalog
