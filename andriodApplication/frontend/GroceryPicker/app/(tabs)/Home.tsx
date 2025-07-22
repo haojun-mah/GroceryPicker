@@ -13,8 +13,6 @@ import { ControllerError, SavedGroceryList } from './interface';
 import { useGroceryContext } from '@/context/groceryContext';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-
 export default function HomePage() {
   const { colorScheme, setColorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
@@ -278,7 +276,7 @@ export default function HomePage() {
             }}
           />
           {/* Sun rays */}
-          {sunRays.map((ray, i) => (
+          {[...Array(8)].map((ray, i) => (
             <View
               key={i}
               style={{

@@ -222,7 +222,7 @@ const GroceryInputPage = () => {
                 title="Select Grocery Shops"
                 items={SUPERMARKET}
                 selectedItems={selectedGroceryShop}
-                onSelectionChange={setSelectedGroceryShop}
+                onSelectionChange={(e) => setSelectedGroceryShop(e as ("FairPrice" | "Cold Storage" | "Sheng Siong")[])}
               />
             </View>
 
