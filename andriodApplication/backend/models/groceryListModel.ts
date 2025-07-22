@@ -46,8 +46,6 @@ export async function saveUserGroceryList(
     product_id: item.product_id || null, // direct mapping to products table
     amount: item.amount !== undefined ? item.amount : 0, // default to 0 if not provided
   }));
-  
-  console.log(itemsToInsert);
 
   const { error: itemsError } = await supabase
     .from('grocery_list_items')
