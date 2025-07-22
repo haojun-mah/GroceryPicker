@@ -24,7 +24,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 // Main Grocery Input Component
 const GroceryInputPage = () => {
   const [groceryTextArea, setGroceryTextArea] = useState('');
-  const [selectedGroceryShop, setSelectedGroceryShop] = useState(ALLOWED_SUPERMARKETS.map(x => x));
+  const [selectedGroceryShop, setSelectedGroceryShop] = useState(['FairPrice']);
   const [selectGroceryShopAlert, setSelectGroceryShopAlert] = useState(false);
 
   const { session } = useSession();
