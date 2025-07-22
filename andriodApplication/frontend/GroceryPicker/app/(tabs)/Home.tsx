@@ -438,7 +438,7 @@ export default function HomePage() {
                     {noListCompleted}
                   </Text>
                   <Text
-                    className={`${isDark ? 'text-white/80' : 'text-gray-700'} text-sm text-center tdark:text-white/80 ext-wrap`}
+                    className={`${isDark ? 'text-white/80' : 'text-gray-700'} text-sm text-center dark:text-white/80 text-wrap`}
                   >
                     List Completed
                   </Text>
