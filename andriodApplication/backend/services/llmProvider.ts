@@ -17,7 +17,7 @@ export class GeminiProvider implements LLMProvider {
   constructor() {
     const apiKey = process.env.LLM_KEY;
     if (!apiKey) {
-      throw new Error('GEMINI_API_KEY is not defined');
+      throw new Error('LLM_KEY is not defined');
     }
     this.ai = new GoogleGenerativeAI(apiKey);
   }
