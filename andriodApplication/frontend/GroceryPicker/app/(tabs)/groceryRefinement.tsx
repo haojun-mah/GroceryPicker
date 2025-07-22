@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Alert, Dimensions, TouchableOpacity } from 'react-native';
+import { Alert, Dimensions, TouchableOpacity, View, Animated } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
 import { Box } from '@/components/ui/box';
@@ -245,22 +246,69 @@ const ModalPage = () => {
   };
 
   return (
-    <LinearGradient
-      colors={
-        isDark
-          ? ['#1f2937', '#374151', '#4b5563']
-          : ['#f8fafc', '#f1f5f9']
-      }
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={{ flex: 1 }}
-    >
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{ flexGrow: 1 }}
-        style={{ backgroundColor: 'transparent' }}
+    <View style={{ flex: 1 }}>
+      {/* Day Background */}
+      <LinearGradient
+        colors={['#87CEEB', '#98D8E8', '#F0F8FF']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={{ position: 'absolute', width: '100%', height: '100%' }}
+      />
+
+      {/* Night Background Overlay */}
+      <Animated.View
+        style={{
+          position: 'absolute',
+          width: '100%',
+          height: '100%',
+          opacity: isDark ? 1 : 0,
+        }}
       >
-        <VStack className="flex-1 p-6 justify-center" space="lg">
+        <LinearGradient
+          colors={['#0f172a', '#1e293b', '#334155']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={{ flex: 1 }}
+        />
+      </Animated.View>
+
+      {/* Stars */}
+      <Animated.View
+        style={{
+          position: 'absolute',
+          width: '100%',
+          height: '100%',
+          opacity: isDark ? 1 : 0,
+        }}
+      >
+        {[...Array(50)].map((_, i) => (
+          <View
+            key={i}
+            style={{
+              position: 'absolute',
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              width: 2,
+              height: 2,
+              backgroundColor: 'white',
+              borderRadius: 1,
+              opacity: 0.3 + Math.random() * 0.7,
+            }}
+          />
+        ))}
+      </Animated.View>
+
+    <SafeAreaView style={{ flex: 1 }} edges={['top', 'left', 'right']}>
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{ 
+            flexGrow: 1,
+            padding: 20,
+          }}
+          style={{ backgroundColor: 'transparent' }}
+          showsVerticalScrollIndicator={false}
+        >
+        <VStack className="flex-1 justify-center" space="lg">
           {/* Header */}
           <VStack space="md" className="items-center">
             <Heading className="text-4xl font-bold text-center text-gray-900 dark:text-white">
@@ -283,7 +331,7 @@ const ModalPage = () => {
               <Text className="text-lg font-medium text-gray-800 dark:text-white">
                 Your Grocery List
               </Text>
-              <Box className="min-h-80 bg-white/95 dark:bg-gray-700/90 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm backdrop-blur-sm">
+              <Box className="h-48 bg-white/95 dark:bg-gray-700/90 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm backdrop-blur-sm">
                 <Textarea className="w-full h-full rounded-xl bg-transparent border-0">
                   <TextareaInput
                     className="text-gray-900 dark:text-white p-4"
@@ -297,7 +345,7 @@ const ModalPage = () => {
                     }
                     textAlignVertical="top"
                     placeholder="Your grocery list will appear here..."
-                    placeholderTextColor={isDark ? '#9CA3AF' : '#6B7280'}
+                    placeholderTextColor={isDark ? 'white' : 'black'}
                   />
                 </Textarea>
               </Box>
@@ -419,7 +467,8 @@ const ModalPage = () => {
           </VStack>
         </VStack>
       </ScrollView>
-    </LinearGradient>
+    </SafeAreaView>
+    </View>
   );
 };
 

@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { Alert, TouchableOpacity } from 'react-native';
+import { Alert, TouchableOpacity, Animated, View, TextInput, Dimensions } from 'react-native';
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
 import { Box } from '@/components/ui/box';
 import { Text } from '@/components/ui/text';
-import { Input, InputField } from '@/components/ui/input';
 import { ScrollView } from 'react-native';
 import { Heading } from '@/components/ui/heading';
 import { useSession } from '@/context/authContext';
@@ -32,6 +31,10 @@ const GroceryInputPage = () => {
     useGroceryContext();
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
+  
+  // Get screen dimensions for textarea height
+  const { height: screenHeight } = Dimensions.get('window');
+  const textareaHeight = screenHeight * 0.3; // 30% of screen height
 
   const postData = async () => {
     try {
@@ -93,16 +96,57 @@ const GroceryInputPage = () => {
   };
 
   return (
-    <LinearGradient
-      colors={
-        isDark
-          ? ['#1f2937', '#374151', '#4b5563']
-          : ['#f8fafc', '#f1f5f9']
-      }
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={{ flex: 1 }}
-    >
+    <View style={{ flex: 1 }}>
+      {/* Day Background */}
+      <LinearGradient
+        colors={['#87CEEB', '#98D8E8', '#F0F8FF']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={{ position: 'absolute', width: '100%', height: '100%' }}
+      />
+
+      {/* Night Background Overlay */}
+      <Animated.View
+        style={{
+          position: 'absolute',
+          width: '100%',
+          height: '100%',
+          opacity: isDark ? 1 : 0,
+        }}
+      >
+        <LinearGradient
+          colors={['#0f172a', '#1e293b', '#334155']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={{ flex: 1 }}
+        />
+      </Animated.View>
+
+      {/* Stars */}
+      <Animated.View
+        style={{
+          position: 'absolute',
+          width: '100%',
+          height: '100%',
+          opacity: isDark ? 1 : 0,
+        }}
+      >
+        {[...Array(50)].map((_, i) => (
+          <View
+            key={i}
+            style={{
+              position: 'absolute',
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              width: 2,
+              height: 2,
+              backgroundColor: 'white',
+              borderRadius: 1,
+              opacity: 0.3 + Math.random() * 0.7,
+            }}
+          />
+        ))}
+      </Animated.View>
       <ScrollView
         className="flex-1"
         contentContainerStyle={{
@@ -115,51 +159,62 @@ const GroceryInputPage = () => {
         showsVerticalScrollIndicator={false}
       >
         {/* Centered Content Container */}
-        <VStack
+        <View
           className="w-full max-w-md"
-          space="lg"
           style={{
             alignItems: 'center',
             justifyContent: 'center',
           }}
         >
           {/* Header Section */}
-          <VStack space="md" className="items-center mb-8">
+          <View className="items-center mb-8 gap-4">
             <Heading className="text-4xl font-bold text-center text-gray-900 dark:text-white">
               Create Grocery List
             </Heading>
-            <VStack space="xs" className="items-center">
+            <View className="items-center gap-1">
               <Text className="text-sm text-gray-700 dark:text-white/80 text-center">
                 Unsure of what groceries?
               </Text>
               <Text className="text-sm text-gray-700 dark:text-white/80 text-center">
                 Describe it and we will do the work!
               </Text>
-            </VStack>
-          </VStack>
+            </View>
+          </View>
 
           {/* Input Form Section */}
-          <VStack className="w-full" space="xl">
+          <View className="w-full">
             {/* Grocery Text Area */}
-            <VStack space="sm" className="w-full">
+            <View className="w-full gap-2 mb-4">
               <Text className="text-lg font-medium text-gray-800 dark:text-white text-left">
                 What groceries do you need?
               </Text>
-              <Input className="min-h-32 bg-white/95 dark:bg-gray-700/90 rounded-xl shadow-sm backdrop-blur-md border border-gray-300 dark:border-gray-600">
-                <InputField
-                  placeholder="Enter groceries or description..."
-                  value={groceryTextArea}
-                  onChangeText={setGroceryTextArea}
-                  multiline
-                  textAlignVertical="top"
-                  className="text-gray-900 dark:text-white p-4"
-                  placeholderTextColor={isDark ? '#9CA3AF' : '#6B7280'}
-                />
-              </Input>
-            </VStack>
+              <TextInput
+                style={{
+                  height: textareaHeight,
+                  backgroundColor: isDark ? 'rgba(55, 65, 81, 0.9)' : 'rgba(255, 255, 255, 0.95)',
+                  borderRadius: 12,
+                  borderWidth: 1,
+                  borderColor: isDark ? 'rgba(75, 85, 99, 1)' : 'rgba(209, 213, 219, 1)',
+                  padding: 16,
+                  fontSize: 16,
+                  color: isDark ? 'white' : 'rgb(17, 24, 39)',
+                  textAlignVertical: 'top',
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 4,
+                  elevation: 2,
+                }}
+                placeholder="Enter groceries or description..."
+                placeholderTextColor={isDark ? '#9CA3AF' : '#6B7280'}
+                value={groceryTextArea}
+                onChangeText={setGroceryTextArea}
+                multiline
+              />
+            </View>
 
             {/* Grocery Shops Selector */}
-            <VStack space="sm" className="w-full">
+            <View className="w-full gap-2 mb-8">
               <Text className="text-lg font-medium text-gray-800 dark:text-white text-left">
                 Select Grocery Shops
               </Text>
@@ -167,9 +222,9 @@ const GroceryInputPage = () => {
                 title="Select Grocery Shops"
                 items={SUPERMARKET}
                 selectedItems={selectedGroceryShop}
-                onSelectionChange={setSelectedGroceryShop}
+                onSelectionChange={(e) => setSelectedGroceryShop(e as ("FairPrice" | "Cold Storage" | "Sheng Siong")[])}
               />
-            </VStack>
+            </View>
 
             {/* Alert Message */}
             {selectGroceryShopAlert && (
@@ -233,10 +288,10 @@ const GroceryInputPage = () => {
                 </HStack>
               </LinearGradient>
             </TouchableOpacity>
-          </VStack>
-        </VStack>
+          </View>
+        </View>
       </ScrollView>
-    </LinearGradient>
+    </View>
   );
 };
 

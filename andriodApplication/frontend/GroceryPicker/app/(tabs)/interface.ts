@@ -202,3 +202,11 @@ export interface ProductCatalog{
   product_url: string;
   promotion_end_date_text: string | null;
 }
+
+export interface AddItemRequestBody {
+  list_id: string;
+  product_id: string;
+  name?: string;
+  custom_price?: number;
+  amount?: number;
+}

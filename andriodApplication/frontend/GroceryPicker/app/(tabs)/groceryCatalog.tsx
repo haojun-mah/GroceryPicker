@@ -12,26 +12,34 @@ import {
   Pressable,
   Linking,
   ActivityIndicator,
+  Animated,
 } from 'react-native';
 import { Search, Star, Flame, Tag } from 'lucide-react-native';
 import axios from 'axios';
 import { backend_url } from '@/lib/api';
 import { useSession } from '@/context/authContext';
 import { useGroceryContext } from '@/context/groceryContext';
-import { ProductCatalog, SearchProductsResponse } from './interface';
+import { AddItemRequestBody, ProductCatalog, SearchProductsResponse } from './interface';
 import { Modal } from 'react-native'
 import { Button } from '@/components/ui/button';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useColorScheme } from 'nativewind';
+import EvilIcons from '@expo/vector-icons/EvilIcons';
 import AntDesign from '@expo/vector-icons/AntDesign';
+
 
 const GrocerySearch = () => {
   const { session } = useSession();
-  const { setIsLoading } = useGroceryContext();
+  const { groceryListHistory, setIsLoading } = useGroceryContext();
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [suggestions, setSuggestions] = useState<ProductCatalog[] | null>(null);
   const [promotions, setPromotions] = useState<ProductCatalog[] | null>(null);
   const [searchResult, setSearchResult] = useState<ProductCatalog[] | null>(null);
   const [itemDisplay, setItemDisplay] = useState<ProductCatalog[] | null>(null);
   const [target, setTarget] = useState<ProductCatalog | null>(null);
+  const [showAddToList, setShowAddToList] = useState<boolean>(false);
   
   // Pagination states
   const [offset, setOffset] = useState<number>(0);
@@ -39,6 +47,7 @@ const GrocerySearch = () => {
   const [hasMoreItems, setHasMoreItems] = useState<boolean>(true);
   const [searchOffset, setSearchOffset] = useState<number>(0);
   const [hasMoreSearchResults, setHasMoreSearchResults] = useState<boolean>(true);
+  const [amountPurchased, setAmountPurchased] = useState<string>('1');
 
   // Initially get to populate page
   useEffect(() => {
@@ -51,7 +60,7 @@ const GrocerySearch = () => {
       setItemDisplay(itemDisplay); 
       
       const promotion = await search(true);
-      setPromotions(promotion);
+      setPromotions(promotion || []);
       setSearchResult(null);
     };
     fetchData();
@@ -216,7 +225,58 @@ const GrocerySearch = () => {
   };
 
   return (
-    <View className="flex-1 bg-gradient-to-br from-green-50 to-blue-50 dark:from-gray-900 dark:to-slate-800">
+    <View style={{ flex: 1 }}>
+      {/* Day Background */}
+      <LinearGradient
+        colors={['#87CEEB', '#98D8E8', '#F0F8FF']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={{ position: 'absolute', width: '100%', height: '100%' }}
+      />
+
+      {/* Night Background Overlay */}
+      <Animated.View
+        style={{
+          position: 'absolute',
+          width: '100%',
+          height: '100%',
+          opacity: isDark ? 1 : 0,
+        }}
+      >
+        <LinearGradient
+          colors={['#0f172a', '#1e293b', '#334155']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={{ flex: 1 }}
+        />
+      </Animated.View>
+
+      {/* Stars */}
+      <Animated.View
+        style={{
+          position: 'absolute',
+          width: '100%',
+          height: '100%',
+          opacity: isDark ? 1 : 0,
+        }}
+      >
+        {[...Array(50)].map((_, i) => (
+          <View
+            key={i}
+            style={{
+              position: 'absolute',
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              width: 2,
+              height: 2,
+              backgroundColor: 'white',
+              borderRadius: 1,
+              opacity: 0.3 + Math.random() * 0.7,
+            }}
+          />
+        ))}
+      </Animated.View>
+
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
@@ -225,7 +285,7 @@ const GrocerySearch = () => {
         scrollEventThrottle={400}
       >
         {/* Header */}
-        <View className="bg-white dark:bg-gray-800 pt-12 pb-6 px-6 z-10 shadow-sm">
+        <View className="bg-transparent backdrop-blur-md pt-12 pb-6 px-6 z-10">
           <View className="mb-6">
             <Text className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
               Grocery Catalog
@@ -238,14 +298,18 @@ const GrocerySearch = () => {
           {/* Enhanced Search Bar and Suggestions Container */}
           <View className="relative z-50">
             {/* Search Input Wrapper */}
-            <View className="relative bg-gray-200 dark:bg-gray-700 rounded-2xl border-2 border-gray-300 dark:border-gray-600 focus:border-green-500 dark:focus:border-green-400">
-              <View className="absolute left-5 top-1/2 transform -translate-y-1/2">
-                <Search size={24} color="#9CA3AF" />
+            <View className="relative bg-white/30 dark:bg-black/30 backdrop-blur-md rounded-2xl border-2 border-white/50 dark:border-gray-500 focus:border-green-500 dark:focus:border-green-400">
+              <View className="absolute left-5 top-1/2 z-10" style={{ transform: [{ translateY: -12 }] }}>
+                <EvilIcons 
+                  name="search" 
+                  size={24} 
+                  color={isDark ? '#ffffff' : '#374151'} 
+                />
               </View>
               <TextInput
-                className="pl-14 pr-6 py-5 text-lg text-gray-900 dark:text-white bg-transparent rounded-2xl"
-                placeholder="Search for groceries, brands, or categories..."
-                placeholderTextColor="#9CA3AF"
+                className="pl-14 pr-6 py-6 text-lg text-gray-900 dark:text-white bg-transparent rounded-2xl"
+                placeholder="Search for groceries..."
+                placeholderTextColor={isDark ? '#9CA3AF' : '#6B7280'}
                 value={searchQuery}
                 onChangeText={async (text) => {
                   setSearchQuery(text);
@@ -284,7 +348,7 @@ const GrocerySearch = () => {
 
             {/* Suggestions Dropdown */}
             {suggestions !== null && (
-              <View className="absolute top-full w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-2xl shadow-lg z-50">
+              <View className="absolute top-full w-full mt-2 bg-white/90 dark:bg-black/90 backdrop-blur-md border border-white/50 dark:border-gray-500 rounded-2xl shadow-lg z-50">
                 {suggestions.length > 0 ? (
                   suggestions.map((suggestion, idx) => (
                     <TouchableOpacity
@@ -327,17 +391,27 @@ const GrocerySearch = () => {
           <View className="px-6 py-4">
             <View className='flex-row items-center justify-between mb-4'>
               <Text className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                Search Results ({searchResult.length})
+                Search Results
               </Text>
-              <Button onPress={() => setSearchResult(null)} className="mb-4 bg-gray-200 dark:bg-gray-700 rounded-lg px-4 py-2">
-                <AntDesign name="back" size={24} color="black" /> 
+              <Button onPress={() => {
+                setSearchResult(null);
+                setSearchQuery('');
+              }} className="mb-4 bg-gray-200 dark:bg-gray-700 rounded-lg px-4 py-2">
+                <AntDesign name="back" size={24} color={isDark ? "white" : "black"} />
               </Button>
             </View>
             <View className="space-y-4 gap-2">
               {searchResult.map((item, idx) => (
                 <Pressable
                   key={idx}
-                  className="flex-row items-center justify-between border-b bg-gray-100 dark:bg-gray-700 rounded-xl p-4 py-4"
+                  className="flex-row items-center justify-between shadow-lg backdrop-blur-lg bg-gray-100 dark:bg-gray-700 rounded-xl p-4 py-4"
+                  style={{
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.15,
+                    shadowRadius: 8,
+                    elevation: 6,
+                  }}
                   onPress={() => setTarget(item)}
                 >
                   {/* Item Image */}
@@ -361,9 +435,6 @@ const GrocerySearch = () => {
                     <Text className="text-green-600 dark:text-green-400 font-bold text-lg">
                       {item.price}
                     </Text>
-                    <TouchableOpacity className="bg-green-600 dark:bg-green-500 rounded-lg px-3 py-1 mt-2">
-                      <Text className="text-white text-xs font-semibold">Add</Text>
-                    </TouchableOpacity>
                   </View>
                 </Pressable>
               ))}
@@ -388,8 +459,8 @@ const GrocerySearch = () => {
           <View>
             <View>
               {/* Hot Items / Promotions Section */}
-              <View className="px-6 py-6">
-                <View className="flex-row items-center mb-4">
+              <View className="px-6">
+                <View className="flex-row items-center">
                   <Flame size={24} color="#F97316" />
                   <Text className="text-xl font-bold text-gray-900 dark:text-white ml-2">
                     Hot Deals & Promotions
@@ -398,7 +469,7 @@ const GrocerySearch = () => {
                 </View>
               </View>
             </View>
-            <View className="px-6 py-4">
+            <View className="px-6 py-2">
               <ScrollView
                 horizontal={true}
                 showsHorizontalScrollIndicator={false}
@@ -410,14 +481,21 @@ const GrocerySearch = () => {
                   promotions.map((item, idx) => (
                     <Pressable
                       key={idx}
-                      className="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-sm border border-gray-100 dark:border-gray-600 w-44 h-64 mr-4"
+                      className="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-lg backdrop-blur-lg w-44 h-72 mr-4"
+                      style={{
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 4 },
+                        shadowOpacity: 0.15,
+                        shadowRadius: 8,
+                        elevation: 6,
+                      }}
                       onPress={() => setTarget(item)}
                     >
                       {/* Item Image */}
                       <View className="w-full h-28 bg-gray-100 dark:bg-gray-700 rounded-lg items-center justify-center mb-2">
                         <Image
                           source={{ uri: item.image_url || "/placeholder.svg?height=96&width=96" }}
-                          className="w-20 h-20"
+                          className="w-28 h-28"
                           resizeMode="contain"
                         />
                       </View>
@@ -433,23 +511,21 @@ const GrocerySearch = () => {
                       {/* Promotion Description Badge */}
                       {item.promotion_description && (
                         <View className="bg-red-500 dark:bg-red-600 rounded-lg px-2 py-1 mb-2">
-                          <Text className="text-white text-xs font-bold text-center" numberOfLines={2}>
+                          <Text className="text-white text-xs font-bold text-center" numberOfLines={3}>
                             {item.promotion_description}
                           </Text>
                         </View>
                       )}
 
                       {/* Price and End Date */}
-                      <View className="justify-end">
-                        <Text className="text-green-600 dark:text-green-400 font-bold text-sm text-center mb-1">
-                          ${item.price}
+                      <Text className="text-green-600 dark:text-green-400 font-bold text-sm text-center mb-1">
+                        {item.price}
+                      </Text>
+                      {item.promotion_end_date_text && (
+                        <Text className="text-gray-400 dark:text-gray-500 text-xs text-center" numberOfLines={2}>
+                          Ends: {item.promotion_end_date_text}
                         </Text>
-                        {item.promotion_end_date_text && (
-                          <Text className="text-gray-400 dark:text-gray-500 text-xs text-center" numberOfLines={1}>
-                            Ends: {item.promotion_end_date_text}
-                          </Text>
-                        )}
-                      </View>
+                      )}
                     </Pressable>
                   ))
                 )}
@@ -461,7 +537,14 @@ const GrocerySearch = () => {
               {itemDisplay.map((item, idx) => (
                 <Pressable
                   key={idx}
-                  className="flex-row items-center justify-between border-b bg-gray-100 dark:bg-gray-700 rounded-xl p-4 py-4"
+                  className="flex-row items-center justify-between shadow-lg backdrop-blur-lg bg-gray-100 dark:bg-gray-700 rounded-xl p-4 py-4"
+                  style={{
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.15,
+                    shadowRadius: 8,
+                    elevation: 6,
+                  }}
                   onPress={() => setTarget(item)}
                 >
                   {/* Item Image */}
@@ -485,9 +568,6 @@ const GrocerySearch = () => {
                     <Text className="text-green-600 dark:text-green-400 font-bold text-lg">
                       {item.price}
                     </Text>
-                    <TouchableOpacity className="bg-green-600 dark:bg-green-500 rounded-lg px-3 py-1 mt-2">
-                      <Text className="text-white text-xs font-semibold">Add</Text>
-                    </TouchableOpacity>
                   </View>
                 </Pressable>
               ))}
@@ -531,7 +611,7 @@ const GrocerySearch = () => {
                 <View className="w-full h-40 bg-gray-100 dark:bg-gray-700 rounded-xl mb-3 items-center justify-center">
                   <Image
                     source={{ uri: target?.image_url || '/placeholder.svg?height=120&width=120' }}
-                    className="w-24 h-24"
+                    className="w-40 h-40"
                     resizeMode="contain"
                   />
                 </View>
@@ -550,7 +630,9 @@ const GrocerySearch = () => {
                 <View className="flex-row justify-between">
                   <TouchableOpacity
                     className="bg-green-600 dark:bg-green-500 rounded-lg px-3 py-2 flex-1 mr-2"
-                    onPress={() => {}}
+                    onPress={() => {
+                      setShowAddToList(true);
+                    }}
                   >
                     <Text className="text-white text-center text-sm font-semibold">Add Item</Text>
                   </TouchableOpacity>
@@ -567,6 +649,117 @@ const GrocerySearch = () => {
                   >
                     <Text className="text-white text-center text-sm font-semibold">Go to Link</Text>
                   </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+      <Modal 
+        visible={showAddToList}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowAddToList(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setShowAddToList(false)}>
+          <View className="flex-1 justify-center items-center bg-black/50">
+            <TouchableWithoutFeedback>
+              <View
+                className="bg-white dark:bg-gray-800 rounded-2xl p-4 w-10/12 max-h-3/4 shadow-lg"
+                style={{
+                  width: '80%', // 80% of the screen width
+                  height: '60%', // 60% of the screen height
+                  padding: 16,
+                  borderRadius: 16,
+                }}
+              >
+                  <Text className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                    Add to Grocery List
+                  </Text>
+                <ScrollView className='flex-1' showsVerticalScrollIndicator={false}>
+                  
+                  {groceryListHistory !== null && groceryListHistory.length > 0 ? (
+                    groceryListHistory
+                      .filter((list) => list.list_status === 'incomplete')
+                      .map((list, index) => (
+                      <Pressable onPress={async () => {
+                        try {
+                          // Check if session and access token exist
+                          if (!session?.access_token) {
+                            console.error('No access token found. Please log in again.');
+                            return;
+                          }
+
+                          const parsedAmount = parseFloat(amountPurchased);
+                          if (isNaN(parsedAmount) || parsedAmount <= 0) {
+                            console.error('Invalid amount purchased');
+                            return;
+                          }
+
+                          const updatedList: AddItemRequestBody = {
+                            list_id: list.list_id,
+                            product_id: target?.product_id || '',
+                            amount: parsedAmount,
+                          };
+
+                          console.log('Adding item to list:', updatedList); // Debug log
+
+                          const response = await axios.post(
+                            `${backend_url}/lists/add-item`,
+                            updatedList,
+                            {
+                              headers: {
+                                Authorization: `Bearer ${session.access_token}`,
+                                'Content-Type': 'application/json',
+                              },
+                            }
+                          );
+
+                          console.log('Response status:', response.status); // Debug log
+                          console.log('Response data:', response.data); // Debug log
+
+                          if (response.status === 200) {
+                            console.log('Item added to grocery list successfully');
+                            // Reset amount after successful addition
+                            setAmountPurchased('1');
+                            setTarget(null);
+                            setShowAddToList(false);
+                          } else {
+                            console.error('Failed to add item to grocery list:', response.statusText);
+                          }
+                        } catch (error: any) {
+                          console.error('Error adding item to grocery list:', error);
+                          console.error('Actual error:', error.response?.data || error.message);
+                        }
+                      }} key={index} className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                        <Text className="text-gray-900 dark:text-white font-bold text-base mb-1">
+                          {list.title}
+                        </Text>
+                        <Text className="text-gray-500 dark:text-gray-400 text-sm">
+                          {list.metadata || 'No description'}
+                        </Text>
+                      </Pressable>
+                    ))
+                  ) : (
+                    <Text className="text-gray-500 dark:text-gray-400 text-center mt-10">
+                      No grocery lists found
+                    </Text>
+                  )}
+                </ScrollView>
+
+                {/* Amount Purchased Input */}
+                <View className="mt-4">
+                  <Text className="text-gray-900 dark:text-white font-bold mb-2">
+                    Amount Purchased
+                  </Text>
+                  <TextInput
+                    className="bg-gray-100 dark:bg-gray-700 rounded-lg px-4 py-2 text-gray-900 dark:text-white"
+                    placeholder="Enter amount"
+                    placeholderTextColor={isDark ? '#9CA3AF' : '#6B7280'}
+                    keyboardType="numeric"
+                    value={amountPurchased}
+                    onChangeText={setAmountPurchased}
+                  />
                 </View>
               </View>
             </TouchableWithoutFeedback>

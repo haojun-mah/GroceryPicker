@@ -1,43 +1,33 @@
 import React from 'react';
-import { View, Text, Platform } from 'react-native';
-import { Button, ButtonGroup } from './ui/button';
+import { View, TouchableOpacity } from 'react-native';
 import { useColorScheme } from 'nativewind';
-
-// Use a more robust import for APK builds
-const Feather = require('@expo/vector-icons/Feather').default;
+import Feather from '@expo/vector-icons/Feather';
 
 export const ColorModeSwitch = () => {
   const { colorScheme, toggleColorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
   return (
-    <View className="flex-row items-center gap-2 p-4">
-      <ButtonGroup>
-        {colorScheme === 'light' ? (
-          <Button className="bg-black w-10 h-10" onPress={toggleColorScheme}>
-            <View
-              style={{
-                justifyContent: 'center',
-                alignItems: 'center',
-                flex: 1,
-              }}
-            >
-              <Feather name="moon" size={16} color="white" />
-            </View>
-          </Button>
-        ) : (
-          <Button className="bg-white w-10 h-10" onPress={toggleColorScheme}>
-            <View
-              style={{
-                justifyContent: 'center',
-                alignItems: 'center',
-                flex: 1,
-              }}
-            >
-              <Feather name="sun" size={16} color="black" />
-            </View>
-          </Button>
-        )}
-      </ButtonGroup>
+    <View className="p-2">
+      <TouchableOpacity
+        onPress={toggleColorScheme}
+        className={`w-10 h-10 rounded-full items-center justify-center ${
+          isDark ? 'bg-white' : 'bg-black'
+        }`}
+        style={{
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.25,
+          shadowRadius: 4,
+          elevation: 5,
+        }}
+      >
+        <Feather
+          name={isDark ? 'sun' : 'moon'}
+          size={16}
+          color={isDark ? 'black' : 'white'}
+        />
+      </TouchableOpacity>
     </View>
   );
 };
