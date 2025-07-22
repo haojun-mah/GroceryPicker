@@ -729,16 +729,7 @@ const GrocerySearch = () => {
                           }
                         } catch (error: any) {
                           console.error('Error adding item to grocery list:', error);
-                          
-                          // Check if it's actually a success but returns 201 (created)
-                          if (error.response?.status === 201) {
-                            console.log('Item created successfully (201 status)');
-                            setAmountPurchased('1');
-                            setTarget(null);
-                            setShowAddToList(false);
-                          } else {
-                            console.error('Actual error:', error.response?.data || error.message);
-                          }
+                          console.error('Actual error:', error.response?.data || error.message);
                         }
                       }} key={index} className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
                         <Text className="text-gray-900 dark:text-white font-bold text-base mb-1">
