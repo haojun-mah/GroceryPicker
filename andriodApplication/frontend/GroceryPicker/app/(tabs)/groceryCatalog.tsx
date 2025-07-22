@@ -718,7 +718,7 @@ const GrocerySearch = () => {
                           console.log('Response status:', response.status); // Debug log
                           console.log('Response data:', response.data); // Debug log
 
-                          if (response.status === 200 || response.status === 201) {
+                          if (response.status === 200) {
                             console.log('Item added to grocery list successfully');
                             // Reset amount after successful addition
                             setAmountPurchased('1');
