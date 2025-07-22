@@ -173,7 +173,6 @@ export const GROCERY_LIST_STATUS_COLORS: Record<GroceryListStatus, string> = {
 export const ALLOWED_SUPERMARKETS = [
   'FairPrice',
   'Cold Storage',
-  'Giant',
   'Sheng Siong',
 ] as const;
 export type SupermarketName = (typeof ALLOWED_SUPERMARKETS)[number];
@@ -181,6 +180,25 @@ export type SupermarketName = (typeof ALLOWED_SUPERMARKETS)[number];
 export const SUPERMARKET = [
   'FairPrice',
   'Cold Storage',
-  'Giant',
   'Sheng Siong',
 ];
+
+export interface SearchProductsResponse {
+  results: ProductCatalog[];
+  query: string;
+  resultCount: number;
+  offset: number;
+  limit: number;
+  isSearch: boolean;
+}
+export interface ProductCatalog{
+  product_id: string;
+  name: string;
+  price: string;
+  image_url: string;
+  supermarket: string;
+  quantity: string;
+  promotion_description: string | null;
+  product_url: string;
+  promotion_end_date_text: string | null;
+}
