@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { ScrollView, View, Animated, Dimensions } from 'react-native';
+import { ScrollView, View, Animated, Dimensions, TouchableWithoutFeedback } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
@@ -90,44 +90,20 @@ export default function HomePage() {
     }
   };
 
-  // Now define swipeGesture AFTER the animation functions
-  const swipeGesture = Gesture.Pan()
-    .onUpdate((event) => {
-      const progress = Math.abs(event.translationX) / (SCREEN_WIDTH * 0.3);
-      translateX.setValue(event.translationX);
-      
-      if (event.translationX > 50 && isDark) {
-        // Swiping right from dark to light
-        const lightProgress = Math.min(progress, 1);
-        backgroundOpacity.setValue(1 - lightProgress);
-        sunScale.setValue(0.8 + (0.4 * lightProgress));
-        moonScale.setValue(1.2 - (0.4 * lightProgress));
-        starsOpacity.setValue(1 - lightProgress);
-      } else if (event.translationX < -50 && !isDark) {
-        // Swiping left from light to dark
-        const darkProgress = Math.min(progress, 1);
-        backgroundOpacity.setValue(darkProgress);
-        moonScale.setValue(0.8 + (0.4 * darkProgress));
-        sunScale.setValue(1.2 - (0.4 * darkProgress));
-        starsOpacity.setValue(darkProgress);
-      }
-    })
-    .onEnd(() => {
-      // Toggle the color scheme on any swipe
+  // Handle double-tap gesture
+  let lastTap = 0;
+  const handleDoubleTap = () => {
+    const now = Date.now();
+    if (now - lastTap < 300) {
+      // Toggle the color scheme
       if (isDark) {
         setColorScheme('light');
-        animateToLight();
       } else {
         setColorScheme('dark');
-        animateToDark();
       }
-
-      // Reset translateX for smooth animation
-      Animated.spring(translateX, {
-        toValue: 0,
-        useNativeDriver: true,
-      }).start();
-    });
+    }
+    lastTap = now;
+  };
 
   useEffect(() => {
     // Start continuous rotation animations
@@ -157,11 +133,16 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    if (isDark) {
-      animateToDark();
-    } else {
-      animateToLight();
-    }
+    // Animate to the current mode when color scheme changes
+    const animationDelay = setTimeout(() => {
+      if (isDark) {
+        animateToDark();
+      } else {
+        animateToLight();
+      }
+    }, 150); // Small delay to prevent conflicts with gesture
+
+    return () => clearTimeout(animationDelay);
   }, [isDark]);
 
   const fetchGroceryHistory = async () => {
@@ -219,7 +200,7 @@ export default function HomePage() {
   });
 
   return (
-    <GestureDetector gesture={swipeGesture}>
+    <TouchableWithoutFeedback onPress={handleDoubleTap}>
       <View style={{ flex: 1 }}>
         {/* Day Background */}
         <LinearGradient
@@ -436,12 +417,12 @@ export default function HomePage() {
                 >
                   <Text className="text-lg mb-1">🛍️</Text>
                   <Text
-                    className={`${isDark ? 'text-white' : 'text-gray-900'} fdark:text-white/80 ont-bold text-xl`}
+                    className={`${isDark ? 'text-white' : 'text-gray-900'} dark:text-white/80 font-bold text-xl`}
                   >
                     {noItems}
                   </Text>
                   <Text
-                    className={`${isDark ? 'text-white/80' : 'text-gray-700'} text-sm dark:text-white/80 ext-center text-wrap`}
+                    className={`${isDark ? 'text-white/80' : 'text-gray-700'} text-sm dark:text-white/80 text-center text-wrap`}
                   >
                     Items Managed
                   </Text>
@@ -549,6 +530,6 @@ export default function HomePage() {
           </ScrollView>
         </Animated.View>
       </View>
-    </GestureDetector>
+    </TouchableWithoutFeedback>
   );
 }
