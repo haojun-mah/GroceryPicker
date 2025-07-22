@@ -40,7 +40,6 @@ const GrocerySearch = () => {
   const [itemDisplay, setItemDisplay] = useState<ProductCatalog[] | null>(null);
   const [target, setTarget] = useState<ProductCatalog | null>(null);
   const [showAddToList, setShowAddToList] = useState<boolean>(false);
-  const [amountPurchased, setAmountPurchased] = useState<string>('1');
   
   // Pagination states
   const [offset, setOffset] = useState<number>(0);
@@ -48,6 +47,7 @@ const GrocerySearch = () => {
   const [hasMoreItems, setHasMoreItems] = useState<boolean>(true);
   const [searchOffset, setSearchOffset] = useState<number>(0);
   const [hasMoreSearchResults, setHasMoreSearchResults] = useState<boolean>(true);
+  const [amountPurchased, setAmountPurchased] = useState<string>('1');
 
   // Initially get to populate page
   useEffect(() => {
@@ -60,7 +60,7 @@ const GrocerySearch = () => {
       setItemDisplay(itemDisplay); 
       
       const promotion = await search(true);
-      setPromotions(promotion);
+      setPromotions(promotion || []);
       setSearchResult(null);
     };
     fetchData();
@@ -673,56 +673,82 @@ const GrocerySearch = () => {
                   borderRadius: 16,
                 }}
               >
-                <Text className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                  Add to Grocery List
-                </Text>
-                <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+                  <Text className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                    Add to Grocery List
+                  </Text>
+                <ScrollView className='flex-1' showsVerticalScrollIndicator={false}>
+                  
                   {groceryListHistory !== null && groceryListHistory.length > 0 ? (
                     groceryListHistory
                       .filter((list) => list.list_status === 'incomplete')
                       .map((list, index) => (
-                        <Pressable
-                          onPress={async () => {
-                            try {
-                              if (!amountPurchased || isNaN(amountPurchased)) {
-                                console.error('Invalid amount purchased');
-                                return;
-                              }
+                      <Pressable onPress={async () => {
+                        try {
+                          // Check if session and access token exist
+                          if (!session?.access_token) {
+                            console.error('No access token found. Please log in again.');
+                            return;
+                          }
 
-                              const updatedList: AddItemRequestBody = {
-                                list_id: list.list_id,
-                                product_id: target?.product_id || '',
-                                amount_purchased: parseFloat(amountPurchased), // Include the amount purchased
-                              };
+                          const parsedAmount = parseFloat(amountPurchased);
+                          if (!parsedAmount || isNaN(parsedAmount) || parsedAmount <= 0) {
+                            console.error('Invalid amount purchased');
+                            return;
+                          }
 
-                              const response = await axios.post(
-                                `${backend_url}/lists/add-item`,
-                                updatedList,
-                                {
-                                  headers: {
-                                    Authorization: `Bearer ${session.access_token}`, // Ensure the token is valid
-                                  },
-                                }
-                              );
+                          const updatedList: AddItemRequestBody = {
+                            list_id: list.list_id,
+                            product_id: target?.product_id || '',
+                            amount: parsedAmount,
+                          };
 
-                              if (response.status === 200) {
-                                console.log('Item added to grocery list successfully');
-                              } else {
-                                console.error('Failed to add item to grocery list:', response.statusText);
-                              }
-                            } catch (error) {
-                              console.error('Error adding item to grocery list:', error);
-                            } finally {
-                              setShowAddToList(false);
+                          console.log('Adding item to list:', updatedList); // Debug log
+
+                          const response = await axios.post(
+                            `${backend_url}/lists/add-item`,
+                            updatedList,
+                            {
+                              headers: {
+                                Authorization: `Bearer ${session.access_token}`,
+                                'Content-Type': 'application/json',
+                              },
                             }
-                          }}
-                          key={index}
-                          className="mb-4"
-                        >
-                          <Text className="text-gray-900 dark:text-white font-bold">{list.title}</Text>
-                          <Text className="text-gray-500 dark:text-gray-400">{list.metadata}</Text>
-                        </Pressable>
-                      ))
+                          );
+
+                          console.log('Response status:', response.status); // Debug log
+                          console.log('Response data:', response.data); // Debug log
+
+                          if (response.status === 200 || response.status === 201) {
+                            console.log('Item added to grocery list successfully');
+                            // Reset amount after successful addition
+                            setAmountPurchased('1');
+                            setTarget(null);
+                            setShowAddToList(false);
+                          } else {
+                            console.error('Failed to add item to grocery list:', response.statusText);
+                          }
+                        } catch (error: any) {
+                          console.error('Error adding item to grocery list:', error);
+                          
+                          // Check if it's actually a success but returns 201 (created)
+                          if (error.response?.status === 201) {
+                            console.log('Item created successfully (201 status)');
+                            setAmountPurchased('1');
+                            setTarget(null);
+                            setShowAddToList(false);
+                          } else {
+                            console.error('Actual error:', error.response?.data || error.message);
+                          }
+                        }
+                      }} key={index} className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                        <Text className="text-gray-900 dark:text-white font-bold text-base mb-1">
+                          {list.title}
+                        </Text>
+                        <Text className="text-gray-500 dark:text-gray-400 text-sm">
+                          {list.metadata || 'No description'}
+                        </Text>
+                      </Pressable>
+                    ))
                   ) : (
                     <Text className="text-gray-500 dark:text-gray-400 text-center mt-10">
                       No grocery lists found
