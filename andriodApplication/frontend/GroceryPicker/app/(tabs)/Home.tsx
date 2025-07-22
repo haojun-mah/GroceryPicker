@@ -278,7 +278,7 @@ export default function HomePage() {
             }}
           />
           {/* Sun rays */}
-          {[...Array(8)].map((_, i) => (
+          {sunRays.map((ray, i) => (
             <View
               key={i}
               style={{
