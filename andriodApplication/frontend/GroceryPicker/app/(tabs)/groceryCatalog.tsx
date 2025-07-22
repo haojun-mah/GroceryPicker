@@ -691,7 +691,7 @@ const GrocerySearch = () => {
                           }
 
                           const parsedAmount = parseFloat(amountPurchased);
-                          if (!parsedAmount || isNaN(parsedAmount) || parsedAmount <= 0) {
+                          if (isNaN(parsedAmount) || parsedAmount <= 0) {
                             console.error('Invalid amount purchased');
                             return;
                           }
