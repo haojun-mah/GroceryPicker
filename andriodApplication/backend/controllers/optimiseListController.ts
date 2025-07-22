@@ -69,9 +69,7 @@ export const findBestPricesForGroceryList: RequestHandler<
     
     // Auto-convert incorrect request format: when supermarketFilter is an array instead of {exclude: []}
     if (Array.isArray(supermarketFilter)) {
-      console.warn('SupermarketFilter received as array, converting to proper format:', supermarketFilter);
       supermarketFilter = { exclude: supermarketFilter };
-      console.log('Converted to:', supermarketFilter);
     }
 
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -145,8 +143,6 @@ export const findBestPricesForGroceryList: RequestHandler<
     const optimizedCount = allItems.filter(item => item.product_id !== null).length;
     const totalCount = allItems.length;
     
-    console.log(`Optimization result: ${optimizedCount}/${totalCount} items optimized`);
-    
     // Use the title and metadata from generatedResult as-is
     const title = generatedResult.title;
     const metadata = generatedResult.metadata;
@@ -167,7 +163,6 @@ export const findBestPricesForGroceryList: RequestHandler<
       res.status(savedList.statusCode).json(err);
       return;
     }
-    console.log('Optimise Successful: ', savedList);
     res.status(201).json(savedList);
   } catch (error: any) {
     console.error('Product optimization and save error:', error.message);

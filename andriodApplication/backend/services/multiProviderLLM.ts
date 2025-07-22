@@ -23,8 +23,6 @@ class MultiProviderLLM {
       console.error('No LLM providers available. Please set LLM_KEY or GROQ_API_KEY.');
       process.exit(1);
     }
-
-    console.log(`LLM providers available: ${this.getAvailableProviders().join(', ')}`);
   }
 
   private getAvailableProviders(): string[] {
@@ -66,28 +64,23 @@ class MultiProviderLLM {
     // Try Gemini first (your primary provider)
     if (this.geminiClient) {
       try {
-        console.log('Attempting generation with Gemini...');
         const result = await this.generateWithGemini(prompt, instruction);
         
         if (result && result.trim().length > 0 && !result.includes('!@#$%^')) {
-          console.log('✓ Gemini generation successful');
           return result;
         }
         throw new Error('Invalid response from Gemini');
       } catch (error) {
-        console.warn('Gemini failed:', error instanceof Error ? error.message : 'Unknown error');
-        console.log('Falling back to Groq...');
+        console.warn('Gemini failed, falling back to Groq:', error instanceof Error ? error.message : 'Unknown error');
       }
     }
 
     // Fallback to Groq
     if (this.groqClient) {
       try {
-        console.log('Attempting generation with Groq...');
         const result = await this.generateWithGroq(prompt, instruction);
         
         if (result && result.trim().length > 0 && !result.includes('!@#$%^')) {
-          console.log('✓ Groq generation successful');
           return result;
         }
         throw new Error('Invalid response from Groq');

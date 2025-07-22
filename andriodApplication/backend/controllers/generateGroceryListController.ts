@@ -59,7 +59,6 @@ export const generateGroceryList: RequestHandler<
   // Enhanced LLM call with multi-provider fallback
   try {
     const llmOutputString: string = await generate(input, instruction);
-    console.log('Generate GroceryList LLM Output:\n', llmOutputString); // Log raw output for debugging
 
     try {
       // --- EXISTING PARSING LOGIC (unchanged) ---

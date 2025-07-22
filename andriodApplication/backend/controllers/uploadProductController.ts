@@ -77,9 +77,6 @@ export const scraperUploadController = async (
       return;
     }
 
-    console.log(
-      `[Controller] Successfully ingested ${result.count} products from scraper.`,
-    );
     res
       .status(200)
       .json({

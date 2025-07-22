@@ -60,7 +60,6 @@ export const refineGroceryListController: RequestHandler<
   // Enhanced LLM call with multi-provider fallback
   try {
     const llmOutputString: string = await generate(input, instruction);
-    console.log('Refinement LLM output:\n', llmOutputString); // Log raw output for debugging
 
     try {
       // --- EXISTING PARSING LOGIC (unchanged) ---
