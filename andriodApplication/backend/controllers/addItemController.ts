@@ -157,7 +157,7 @@ export const addItemToList: RequestHandler<
           item: newItem
         }
       );
-      res.status(201).json(successResponse);
+      res.status(200).json(successResponse);
     }
   } catch (error: any) {
     console.error('Add item to list error:', error.message);
