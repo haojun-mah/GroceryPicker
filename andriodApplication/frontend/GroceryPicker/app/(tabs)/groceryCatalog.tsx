@@ -30,7 +30,6 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 
 const GrocerySearch = () => {
   const { session } = useSession();
-  const { groceryListHistory, setGroceryListHistory, setIsLoading, setRefreshVersion, refreshVersion } = useGroceryContext();
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -850,9 +849,6 @@ const GrocerySearch = () => {
                             setAmountPurchased('1');
                             setTarget(null);
                             setShowAddToList(false);
-                            
-                            // Trigger grocery list refresh
-                            setRefreshVersion((prev) => prev + 1);
                           } else {
                             console.error('Failed to add item to grocery list:', response.statusText);
                           }
