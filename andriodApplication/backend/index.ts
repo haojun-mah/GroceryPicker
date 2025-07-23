@@ -8,11 +8,26 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Add request logging middleware
+app.use((req: Request, res: Response, next) => {
+  console.log(`${req.method} ${req.path} - ${req.ip}`);
+  next();
+});
+
 app.use(cors()); // for dev all origins allowed. before pushing to prod, modify to allow certain origins only
 app.use(express.json());
 
 app.use('/lists', groceryListRouter);
 app.use('/products', productRouter);
+
+// Global error handler
+app.use((error: any, req: Request, res: Response, next: any) => {
+  console.error(`Unhandled error on ${req.method} ${req.path}:`, error);
+  res.status(500).json({ 
+    error: 'Internal server error',
+    timestamp: new Date().toISOString()
+  });
+});
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Backend server is running.');
@@ -35,7 +50,7 @@ app.get('/health', (req: Request, res: Response) => {
 // Start the server
 app.listen(port, () => {
   console.log(`Backend server listening on port ${port}`);
-  console.log(
-    `Supabase URL: ${process.env.SUPABASE_URL ? 'Configured' : 'NOT CONFIGURED'}`,
-  );
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`Supabase: ${process.env.SUPABASE_URL ? 'Configured' : 'NOT CONFIGURED'}`);
+  console.log(`LLM Providers: ${process.env.LLM_KEY ? 'Gemini' : ''} ${process.env.GROQ_API_KEY ? 'Groq' : ''}`);
 });

@@ -18,10 +18,13 @@ export const findBestPricesForGroceryList: RequestHandler<
   AiPromptRequestBody,
   {}
 > = async (req, res) => {
+  const userId = req.user?.id;
+  
+  console.log(`Optimize grocery list - User: ${userId} - Input: ${req.body.message?.substring(0, 50)}...`);
+  
   try {
-    const userId = req.user?.id;
-
     if (!userId) {
+      console.warn(`Unauthorized optimize attempt from ${req.ip}`);
       const err = new ControllerError(401, 'User not authenticated');
       res.status(401).json(err);
       return;
@@ -93,12 +96,14 @@ export const findBestPricesForGroceryList: RequestHandler<
       }
     }
 
+    console.log(`Starting RAG optimization for ${items.length} items - User: ${userId}`);
     const results: EnhancedGroceryPriceResponse[] | ControllerError = await findBestProductsForGroceryListEnhanced(
       items,
       supermarketFilter,
     );
 
     if ('statusCode' in results) {
+      console.warn(`RAG optimization failed - User: ${userId} - Error: ${results.message}`);
       const err = new ControllerError(
         results.statusCode,
         results.message,
@@ -111,6 +116,8 @@ export const findBestPricesForGroceryList: RequestHandler<
     // Transform the enhanced results into items suitable for saving
     // Create a map for quick lookup of optimized results
     const resultsMap = new Map(results.map(result => [result.item, result]));
+    
+    console.log(`RAG optimization completed - ${results.length} products found for ${items.length} items`);
     
     // Create items for ALL requested grocery items
     const allItems: GeneratedGroceryItem[] = items.map(item => {
@@ -148,6 +155,8 @@ export const findBestPricesForGroceryList: RequestHandler<
     const metadata = generatedResult.metadata;
 
     // Save the optimized list to the database
+    console.log(`Saving optimized list - User: ${userId} - Optimized: ${optimizedCount}/${totalCount} items`);
+    
     const savedList = await saveUserGroceryList(userId, {
       title,
       metadata,
@@ -155,6 +164,7 @@ export const findBestPricesForGroceryList: RequestHandler<
     });
 
     if ('statusCode' in savedList) {
+      console.warn(`Save optimized list failed - User: ${userId} - Error: ${savedList.message}`);
       const err = new ControllerError(
         savedList.statusCode,
         savedList.message,
@@ -163,9 +173,11 @@ export const findBestPricesForGroceryList: RequestHandler<
       res.status(savedList.statusCode).json(err);
       return;
     }
+    
+    console.log(`Optimized list saved - User: ${userId} - List ID: ${savedList.list_id} - Success rate: ${optimizedCount}/${totalCount}`);
     res.status(201).json(savedList);
   } catch (error: any) {
-    console.error('Product optimization and save error:', error.message);
+    console.error(`Product optimization error - User: ${userId}:`, error);
     const err = new ControllerError(
       500,
       'Failed to optimize and save grocery list.',

@@ -61,17 +61,23 @@ class MultiProviderLLM {
   }
 
   async generate(prompt: string, instruction: string): Promise<string> {
+    const startTime = Date.now();
+    console.log(`LLM request started - length: ${prompt.length} chars`);
+    
     // Try Gemini first (your primary provider)
     if (this.geminiClient) {
       try {
         const result = await this.generateWithGemini(prompt, instruction);
         
         if (result && result.trim().length > 0 && !result.includes('!@#$%^')) {
+          const duration = Date.now() - startTime;
+          console.log(`Gemini success - ${duration}ms, response: ${result.length} chars`);
           return result;
         }
         throw new Error('Invalid response from Gemini');
       } catch (error) {
-        console.warn('Gemini failed, falling back to Groq:', error instanceof Error ? error.message : 'Unknown error');
+        const duration = Date.now() - startTime;
+        console.warn(`Gemini failed (${duration}ms), falling back to Groq:`, error instanceof Error ? error.message : 'Unknown error');
       }
     }
 
@@ -81,14 +87,19 @@ class MultiProviderLLM {
         const result = await this.generateWithGroq(prompt, instruction);
         
         if (result && result.trim().length > 0 && !result.includes('!@#$%^')) {
+          const duration = Date.now() - startTime;
+          console.log(`Groq success - ${duration}ms, response: ${result.length} chars`);
           return result;
         }
         throw new Error('Invalid response from Groq');
       } catch (error) {
-        console.error('Groq failed:', error instanceof Error ? error.message : 'Unknown error');
+        const duration = Date.now() - startTime;
+        console.error(`Groq failed (${duration}ms):`, error instanceof Error ? error.message : 'Unknown error');
       }
     }
 
+    const duration = Date.now() - startTime;
+    console.error(`All LLM providers failed (${duration}ms)`);
     throw new Error('All LLM providers failed');
   }
 }
