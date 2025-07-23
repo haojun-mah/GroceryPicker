@@ -18,6 +18,20 @@ app.get('/', (req: Request, res: Response) => {
   res.send('Backend server is running.');
 });
 
+// Health check endpoint for wake-up service
+app.get('/health', (req: Request, res: Response) => {
+  const uptime = process.uptime();
+  const isColdStart = uptime < 30;
+  
+  console.log(`Health check - uptime: ${Math.round(uptime)}s, cold start: ${isColdStart}`);
+  
+  res.status(200).json({
+    status: 'ok',
+    uptime: Math.round(uptime),
+    coldStart: isColdStart,
+  });
+});
+
 // Start the server
 app.listen(port, () => {
   console.log(`Backend server listening on port ${port}`);
