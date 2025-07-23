@@ -1,15 +1,20 @@
 import { RequestHandler } from 'express';
-import { findBestProductsForGroceryListEnhanced } from '../services/ragGenerationService';
-import { saveUserGroceryList } from '../models/groceryListModel';
-import { generateGroceryList } from './generateGroceryListController';
+import { 
+  generateStructuredGroceryList,
+  validateGroceryItems,
+  normalizeSupermarketFilter,
+  optimizeGroceryItems,
+  addItemsToList,
+  checkAuthentication
+} from '../utils/groceryUtils';
 import { 
   ControllerError, 
+  AiPromptRequestBody,
+  ControllerSuccess,
+  GroceryMetadataTitleOutput,
+  SupermarketFilter,
   GeneratedGroceryItem,
   SavedGroceryList,
-  AiPromptRequestBody,
-  GroceryMetadataTitleOutput,
-  EnhancedGroceryPriceResponse,
-  SupermarketFilter,
 } from '../interfaces';
 
 export const findBestPricesForGroceryList: RequestHandler<
@@ -19,163 +24,82 @@ export const findBestPricesForGroceryList: RequestHandler<
   {}
 > = async (req, res) => {
   const userId = req.user?.id;
+  const { existingListId } = req.body;
   
-  console.log(`Optimize grocery list - User: ${userId} - Input: ${req.body.message?.substring(0, 50)}...`);
+  console.log(`Optimize grocery list - User: ${userId} - Input: ${req.body.message?.substring(0, 50)}... - ExistingList: ${existingListId || 'new'}`);
   
   try {
-    if (!userId) {
+    // Check authentication
+    const authError = checkAuthentication(userId);
+    if (authError) {
       console.warn(`Unauthorized optimize attempt from ${req.ip}`);
-      const err = new ControllerError(401, 'User not authenticated');
-      res.status(401).json(err);
+      res.status(authError.statusCode).json(authError);
       return;
     }
 
     // Generate the structured grocery list from user input
     let generatedResult: GroceryMetadataTitleOutput;
-
     try {
-      generatedResult = await new Promise<GroceryMetadataTitleOutput>(
-        (resolve, reject) => {
-          const mockRes = {
-            status: (code: number) => ({
-              json: (data: any) => {
-                if (code === 200) {
-                  resolve(data as GroceryMetadataTitleOutput);
-                } else {
-                  reject(data);
-                }
-              },
-            }),
-          };
-          generateGroceryList(
-            { body: req.body } as any,
-            mockRes as any,
-            () => {}, // next function
-          );
-        },
-      );
+      generatedResult = await generateStructuredGroceryList(req.body);
     } catch (generationError: any) {
-      const err =
-        generationError instanceof ControllerError
-          ? generationError
-          : new ControllerError(
-              generationError.statusCode || 500,
-              generationError.message || 'Generation failed',
-              generationError.details,
-            );
+      const err = generationError instanceof ControllerError
+        ? generationError
+        : new ControllerError(
+            generationError.statusCode || 500,
+            generationError.message || 'Generation failed',
+            generationError.details,
+          );
       res.status(err.statusCode).json(err);
       return;
     }
 
     const items = generatedResult.items;
-    let supermarketFilter: SupermarketFilter = generatedResult.supermarketFilter ?? { exclude: [] };
-    
-    // Auto-convert incorrect request format: when supermarketFilter is an array instead of {exclude: []}
-    if (Array.isArray(supermarketFilter)) {
-      supermarketFilter = { exclude: supermarketFilter };
-    }
+    const supermarketFilter = normalizeSupermarketFilter(generatedResult.supermarketFilter);
 
-    if (!items || !Array.isArray(items) || items.length === 0) {
-      const err = new ControllerError(
-        400,
-        'Items array is required and cannot be empty',
-      );
-      res.status(400).json(err);
+    // Validate grocery items
+    const validationError = validateGroceryItems(items);
+    if (validationError) {
+      res.status(validationError.statusCode).json(validationError);
       return;
     }
 
-    // Validate each item has required fields
-    for (const item of items) {
-      if (!item.name || typeof item.quantity !== 'number' || !item.unit) {
-        const err = new ControllerError(
-          400,
-          'Each item must have name, quantity, and unit',
-        );
-        res.status(400).json(err);
-        return;
-      }
-    }
-
-    console.log(`Starting RAG optimization for ${items.length} items - User: ${userId}`);
-    const results: EnhancedGroceryPriceResponse[] | ControllerError = await findBestProductsForGroceryListEnhanced(
-      items,
-      supermarketFilter,
-    );
-
-    if ('statusCode' in results) {
-      console.warn(`RAG optimization failed - User: ${userId} - Error: ${results.message}`);
-      const err = new ControllerError(
-        results.statusCode,
-        results.message,
-        results.details,
-      );
-      res.status(results.statusCode).json(err);
+    // Optimize grocery items using RAG service
+    const optimizationResult = await optimizeGroceryItems(items, supermarketFilter, userId!);
+    if ('statusCode' in optimizationResult) {
+      res.status(optimizationResult.statusCode).json(optimizationResult);
       return;
     }
 
-    // Transform the enhanced results into items suitable for saving
-    // Create a map for quick lookup of optimized results
-    const resultsMap = new Map(results.map(result => [result.item, result]));
-    
-    console.log(`RAG optimization completed - ${results.length} products found for ${items.length} items`);
-    
-    // Create items for ALL requested grocery items
-    const allItems: GeneratedGroceryItem[] = items.map(item => {
-      const result = resultsMap.get(item.name);
-      
-      if (result && result.selectedProduct) {
-        // Item was successfully optimized
-        return {
-          name: item.name,
-          quantity: item.quantity,
-          unit: item.unit,
-          product_id: result.selectedProduct.product_id,
-          amount: result.amount,
-          product: result.selectedProduct, // Include full product data
-        };
-      } else {
-        // Item couldn't be optimized (e.g., due to supermarket exclusion)
-        return {
-          name: item.name,
-          quantity: item.quantity,
-          unit: item.unit,
-          product_id: null, // Keep null for database integrity
-          amount: 0, // Use 0 instead of null - means "no optimization data"
-          product: undefined, // No product data available
-        };
-      }
-    });
-
-    // Count how many items were successfully optimized
-    const optimizedCount = allItems.filter(item => item.product_id !== null).length;
-    const totalCount = allItems.length;
+    const { allItems, optimizedCount, totalCount } = optimizationResult;
     
     // Use the title and metadata from generatedResult as-is
     const title = generatedResult.title;
     const metadata = generatedResult.metadata;
 
-    // Save the optimized list to the database
-    console.log(`Saving optimized list - User: ${userId} - Optimized: ${optimizedCount}/${totalCount} items`);
-    
-    const savedList = await saveUserGroceryList(userId, {
-      title,
-      metadata,
-      items: allItems,
+    // Handle saving the optimized items (either new list or add to existing)
+    const saveResult = await addItemsToList(userId!, allItems, {
+      listId: existingListId,
+      listTitle: existingListId ? undefined : title,
+      listMetadata: existingListId ? undefined : metadata,
     });
-
-    if ('statusCode' in savedList) {
-      console.warn(`Save optimized list failed - User: ${userId} - Error: ${savedList.message}`);
-      const err = new ControllerError(
-        savedList.statusCode,
-        savedList.message,
-        savedList.details,
-      );
-      res.status(savedList.statusCode).json(err);
+    
+    if ('statusCode' in saveResult) {
+      const logMessage = existingListId 
+        ? `Add items to existing list failed - User: ${userId} - Error: ${saveResult.message}`
+        : `Save optimized list failed - User: ${userId} - Error: ${saveResult.message}`;
+      console.warn(logMessage);
+      res.status(saveResult.statusCode).json(saveResult);
       return;
     }
     
-    console.log(`Optimized list saved - User: ${userId} - List ID: ${savedList.list_id} - Success rate: ${optimizedCount}/${totalCount}`);
-    res.status(201).json(savedList);
+    // Log success and respond with the actual saved list
+    if (existingListId) {
+      console.log(`Items added to existing list - User: ${userId} - List ID: ${saveResult.list_id} - Success rate: ${optimizedCount}/${totalCount}`);
+      res.status(200).json(saveResult);
+    } else {
+      console.log(`Optimized list saved - User: ${userId} - List ID: ${saveResult.list_id} - Success rate: ${optimizedCount}/${totalCount}`);
+      res.status(201).json(saveResult);
+    }
   } catch (error: any) {
     console.error(`Product optimization error - User: ${userId}:`, error);
     const err = new ControllerError(

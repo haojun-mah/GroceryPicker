@@ -1,5 +1,6 @@
 import supabase from '../config/supabase';
 import { ControllerError } from '../interfaces';
+import { validateRequiredFields, handleModelError, handleDatabaseError } from '../utils/groceryUtils';
 
 /*
   Handles pushing scraped grocery data into DB.
@@ -27,21 +28,16 @@ export async function upsertScrapedProducts(
     return new ControllerError(400, 'No product data provided for upsertion.');
   }
 
-  const validProducts = products.filter(
-    (p) =>
-      p.name &&
-      typeof p.name === 'string' &&
-      p.supermarket &&
-      typeof p.supermarket === 'string' &&
-      p.quantity &&
-      typeof p.quantity === 'string' &&
-      p.price !== undefined &&
-      p.price !== null &&
-      typeof p.price === 'string' &&
-      p.embedding &&
-      Array.isArray(p.embedding) &&
-      p.embedding.length > 0,
-  );
+  // Validate products using utility function
+  const validProducts = products.filter(p => {
+    const validation = validateRequiredFields(p, 
+      ['name', 'supermarket', 'quantity', 'price'], 
+      'product'
+    );
+    return validation === null && 
+           Array.isArray(p.embedding) && 
+           p.embedding.length > 0;
+  });
 
   if (validProducts.length === 0) {
     return new ControllerError(
@@ -77,25 +73,15 @@ export async function upsertScrapedProducts(
       .limit(1);
 
     if (error) {
-      console.error('Model: Error upserting scraped products:', error.message);
-      return new ControllerError(
-        500,
-        'Failed to upsert scraped products into database.',
-        error.message,
-      );
+      return handleDatabaseError('upsert scraped products', error);
     }
 
     return { count: data ? data.length : 0 };
   } catch (unexpectedError: any) {
-    const errorMessage =
-      unexpectedError instanceof Error
-        ? unexpectedError.message
-        : 'An unknown internal error occurred.';
-    console.error(`[Model Error] upsertScrapedProducts: ${errorMessage}`);
-    return new ControllerError(
-      500,
-      'An unexpected error occurred during product data upsertion.',
-      errorMessage,
+    return handleModelError(
+      'upsertScrapedProducts',
+      unexpectedError,
+      'An unexpected error occurred during product data upsertion.'
     );
   }
 }

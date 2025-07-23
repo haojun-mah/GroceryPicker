@@ -5,6 +5,7 @@ import { GroceryItem, SupermarketFilter } from './groceryList';
 export interface AiPromptRequestBody {
   message: string;
   supermarketFilter?: SupermarketFilter;
+  existingListId?: string; // For adding grocery input to existing lists
 }
 
 export interface GroceryMetadataTitleOutput {

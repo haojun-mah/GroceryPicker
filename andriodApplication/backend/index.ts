@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import express, { Request, Response } from 'express';
-import groceryListRouter from './routes/groceryList';
-import productRouter from './routes/product';
+import groceryListRouter from './routes/lists';
+import productRouter from './routes/products';
 import cors from 'cors';
 
 dotenv.config();

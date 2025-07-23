@@ -6,6 +6,13 @@ import {
   SavedGroceryListItem,
   isValidGroceryListStatus,
 } from '../interfaces';
+import {
+  handleDatabaseError,
+  verifyListOwnership,
+  insertGroceryItems,
+  parsePrice,
+  sortGroceryItemsByName,
+} from '../utils/groceryUtils';
 
 // Function to save a new grocery list and its items
 export async function saveUserGroceryList(
@@ -26,42 +33,58 @@ export async function saveUserGroceryList(
     .single();
 
   if (listError) {
-    console.error('Model: Error inserting grocery list:', listError);
-    return new ControllerError(
-      500,
-      'Failed to save grocery list.',
-      listError.message,
-    );
+    return handleDatabaseError('save grocery list', listError);
   }
 
   const savedListId = list.list_id;
 
-  // Prepare the items to be inserted, linking them to the new list's ID
-  const itemsToInsert = items.map((item) => ({
-    list_id: savedListId,
-    name: item.name,
-    quantity: item.quantity,
-    unit: item.unit,
-    item_status: 'incomplete', // default status
-    product_id: item.product_id || null, // direct mapping to products table
-    amount: item.amount !== undefined ? item.amount : 0, // default to 0 if not provided
-  }));
-
-  const { error: itemsError } = await supabase
-    .from('grocery_list_items')
-    .insert(itemsToInsert);
-
-  if (itemsError) {
-    console.error('Model: Error inserting grocery list items:', itemsError);
-    return new ControllerError(
-      500,
-      'Failed to save grocery list items.',
-      itemsError.message,
-    );
+  // Insert items using utility function
+  const itemInsertError = await insertGroceryItems(savedListId, items);
+  if (itemInsertError) {
+    return itemInsertError;
   }
 
   // Refetch the complete list with its items to return to the client
   return await getGroceryListById(savedListId, userId);
+}
+
+/*
+  Function to add new items to an existing grocery list
+  
+  - Verifies list ownership before adding items (security)
+  - Inserts items with default 'incomplete' status
+  - Supports both basic grocery items and optimized items with product_ids
+  - Returns the complete updated list with all items
+  - Handles item format conversion internally for flexibility
+  
+  Parameters:
+  - userId: User ID for ownership verification
+  - listId: Target list ID to add items to
+  - items: Array of grocery items to add (without item_id/list_id as they're auto-generated)
+          Can accept both SavedGroceryListItem format or GeneratedGroceryItem format
+  
+  Returns: Updated SavedGroceryList or ControllerError
+*/
+// Function to add items to an existing grocery list
+export async function addItemsToExistingList(
+  userId: string,
+  listId: string,
+  items: (Omit<SavedGroceryListItem, 'item_id' | 'list_id'> | any)[]
+): Promise<SavedGroceryList | ControllerError> {
+  // Verify list ownership first using utility function
+  const ownershipResult = await verifyListOwnership(listId, userId);
+  if ('statusCode' in ownershipResult) {
+    return ownershipResult;
+  }
+
+  // Insert items using utility function
+  const itemInsertError = await insertGroceryItems(listId, items);
+  if (itemInsertError) {
+    return itemInsertError;
+  }
+
+  // Return the updated list with all items
+  return await getGroceryListById(listId, userId);
 }
 
 // Function to get a single list by its ID (and check ownership)
@@ -71,8 +94,7 @@ export async function getGroceryListById(
 ): Promise<SavedGroceryList | ControllerError> {
   const { data, error } = await supabase
     .from('grocery_lists')
-    .select(
-      `
+    .select(`
       *,
       grocery_list_items (
         *,
@@ -80,20 +102,15 @@ export async function getGroceryListById(
           product_id, name, price, supermarket, quantity, product_url, image_url
         )
       )
-    `,
-    )
+    `)
     .eq('list_id', listId)
     .eq('user_id', userId)
     .single();
 
   if (error) {
-    console.error('Model: Error fetching single list:', error);
-    return new ControllerError(
-      404,
-      'List not found or you do not have permission to view it.',
-      error.message,
-    );
+    return handleDatabaseError('fetch single list', error, 'List not found or you do not have permission to view it.');
   }
+  
   return data;
 }
 
@@ -119,23 +136,13 @@ export async function getAllUserLists(
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Model: Error fetching all user lists:', error);
-    return new ControllerError(
-      500,
-      'Failed to fetch grocery lists.',
-      error.message,
-    );
+    return handleDatabaseError('fetch all user lists', error);
   }
 
-  // Sort grocery list items by product name
+  // Sort grocery list items by product name using utility function
   const sortedData = (data || []).map(list => ({
     ...list,
-    grocery_list_items: list.grocery_list_items.sort((a: any, b: any) => {
-      // Get product names, fallback to item name if no product
-      const nameA = a.product?.name || a.name || '';
-      const nameB = b.product?.name || b.name || '';
-      return nameA.localeCompare(nameB, undefined, { sensitivity: 'accent' });
-    })
+    grocery_list_items: sortGroceryItemsByName(list.grocery_list_items)
   }));
 
   return sortedData || [];
@@ -251,10 +258,9 @@ export async function updateGroceryListsAndItems(
                 .single();
 
               if (!productError && productData && productData.price) {
-                // Remove currency symbols and parse
-                const cleanPriceString = productData.price.replace(/[$,]/g, '');
-                const priceNumber = parseFloat(cleanPriceString);
-                if (!isNaN(priceNumber)) {
+                // Parse price using utility function
+                const priceNumber = parsePrice(productData.price);
+                if (priceNumber !== null) {
                   updateData.purchased_price = priceNumber;
                 }
               }
