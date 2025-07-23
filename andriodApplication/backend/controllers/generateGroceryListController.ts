@@ -9,12 +9,13 @@ import {
 
 /*
   Handles the logic where it converts users unstructured grocery
-  list/input into structured and refined grocery lists. 
-  It then returns the structed list to the user for refinement. Note that the
-  list is NOT OPTIMIZED
-  yet.
+  list/input into structured and refined grocery lists.
+  
+  Returns structured list for further refinement/optimization.
+  Note: Generated items are NOT OPTIMIZED yet (no product matching).
+  Use the optimize endpoint for RAG-based product selection and adding to existing lists.
 
-  Req Type: String
+  Req Type: AiPromptRequestBody { message: string, supermarketFilter?: SupermarketFilter }
   Res Type: GroceryMetadataTitleOutput
 */
 
@@ -102,6 +103,18 @@ export const generateGroceryList: RequestHandler<
       if (arrayGrocery.length === 0 && lines.length > 1) {
         throw new Error('No valid grocery items found in LLM output');
       }
+
+      if (arrayGrocery.length === 0) {
+        console.warn(`No valid items generated for input: "${input.substring(0, 50)}..." - User: ${userId}`);
+        const err = new ControllerError(
+          500,
+          'Grocery generation failed - no valid items produced.',
+        );
+        res.status(500).json(err);
+        return;
+      }
+
+      // Return structured list for further processing (optimization or saving)
       const output: GroceryMetadataTitleOutput = {
         title: title,
         metadata: metadata,
@@ -109,17 +122,8 @@ export const generateGroceryList: RequestHandler<
         supermarketFilter: req.body.supermarketFilter,
       };
 
-      if (output.items.length === 0) {
-        console.warn(`No valid items generated for input: "${input.substring(0, 50)}..." - User: ${userId}`);
-        const err = new ControllerError(
-          500,
-          'Grocery generation failed - no valid items produced.',
-        );
-        res.status(500).json(err);
-      } else {
-        console.log(`Generated ${output.items.length} items: "${output.title}" - User: ${userId}`);
-        res.status(200).json(output);
-      }
+      console.log(`Generated ${output.items.length} items: "${output.title}" - User: ${userId}`);
+      res.status(200).json(output);
     } catch (parseError) {
       console.error(`Error parsing LLM output - User: ${userId}:`, parseError);
       const err = new ControllerError(
