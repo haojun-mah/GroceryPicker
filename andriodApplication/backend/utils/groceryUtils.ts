@@ -169,7 +169,23 @@ export const insertGroceryItems = async (
 
 // =================== PARSING UTILITIES ===================
 
-// Helper function to parse product quantity and extract numeric value and unit
+/**
+ * Parses product quantity information to extract numeric value and unit.
+ * 
+ * Supported formats:
+ * - "480g" -> { quantity: 480, unit: "g" }
+ * - "1.2kg" -> { quantity: 1.2, unit: "kg" }
+ * - "330ml" -> { quantity: 330, unit: "ml" }
+ * - "1$" -> { quantity: 1, unit: "$" }
+ * - "480g (6 per pack)" -> { quantity: 480, unit: "g" } (takes the first number/unit pair)
+ * 
+ * Edge cases:
+ * - If no match is found, defaults to { quantity: 1, unit: "piece" }.
+ * - Handles both integer and decimal quantities.
+ * 
+ * @param {string} productQuantityInfo - The product quantity string to parse.
+ * @returns {{ quantity: number; unit: string }} - The parsed quantity and unit.
+ */
 export const parseProductQuantity = (productQuantityInfo: string): { quantity: number; unit: string } => {
   let extractedQuantity = 1; // Default quantity
   let extractedUnit = 'piece'; // Default unit
