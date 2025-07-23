@@ -19,7 +19,7 @@ import axios from 'axios';
 import { backend_url } from '@/lib/api';
 import { useSession } from '@/context/authContext';
 import { useGroceryContext } from '@/context/groceryContext';
-import { AddItemRequestBody, ProductCatalog, SearchProductsResponse } from './interface';
+import { AddItemRequestBody, ProductCatalog, SearchProductsResponse, SavedGroceryList } from './interface';
 import { Modal } from 'react-native'
 import { Button } from '@/components/ui/button';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -30,7 +30,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 
 const GrocerySearch = () => {
   const { session } = useSession();
-  const { groceryListHistory, setIsLoading } = useGroceryContext();
+  const { groceryListHistory, setGroceryListHistory, setIsLoading, setRefreshVersion, refreshVersion } = useGroceryContext();
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -48,6 +48,8 @@ const GrocerySearch = () => {
   const [searchOffset, setSearchOffset] = useState<number>(0);
   const [hasMoreSearchResults, setHasMoreSearchResults] = useState<boolean>(true);
   const [amountPurchased, setAmountPurchased] = useState<string>('1');
+  const [showCreateNewList, setShowCreateNewList] = useState<boolean>(false);
+  const [newListName, setNewListName] = useState<string>('');
 
   // Initially get to populate page
   useEffect(() => {
@@ -78,7 +80,7 @@ const GrocerySearch = () => {
         }
       });
 
-      if (response.status === 200) {
+      if (response.status === 200 || response.status === 201) {
         const results: SearchProductsResponse = response.data;
         console.log(`Fetched ${results.results.length} items at offset ${currentOffset}`);
         
@@ -208,6 +210,39 @@ const GrocerySearch = () => {
       setIsLoading(false);
     }
   }
+
+  // Function to fetch grocery lists
+  const fetchGroceryLists = async () => {
+    try {
+      if (!session?.access_token) return;
+      
+      console.log('🔍 Fetching grocery lists for catalog...');
+      const response = await fetch(`${backend_url}/lists/getAll`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data: SavedGroceryList[] = await response.json();
+        console.log('🔍 Fetched grocery lists for catalog:', data);
+        setGroceryListHistory(data);
+      } else {
+        console.error('🔍 Error fetching grocery lists for catalog:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Failed to fetch grocery lists for catalog:', error);
+    }
+  };
+
+  // Refresh grocery lists when refreshVersion changes
+  useEffect(() => {
+    if (session) {
+      fetchGroceryLists();
+    }
+  }, [refreshVersion]);
 
   // Handle scroll to bottom
   const handleScroll = ({ nativeEvent }: any) => {
@@ -678,6 +713,97 @@ const GrocerySearch = () => {
                   </Text>
                 <ScrollView className='flex-1' showsVerticalScrollIndicator={false}>
                   
+                  {/* Create New List Option */}
+                  <Pressable 
+                    onPress={() => setShowCreateNewList(!showCreateNewList)}
+                    className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border-2 border-blue-200 dark:border-blue-600 border-dashed"
+                  >
+                    <Text className="text-blue-600 dark:text-blue-400 font-bold text-base text-center">
+                      {showCreateNewList ? '✕ Cancel' : '+ Create New List'}
+                    </Text>
+                  </Pressable>
+
+                  {/* New List Name Input */}
+                  {showCreateNewList && (
+                    <View className="mb-4">
+                      <Text className="text-gray-900 dark:text-white font-bold mb-2">
+                        New List Name
+                      </Text>
+                      <TextInput
+                        className="bg-gray-100 dark:bg-gray-700 rounded-lg px-4 py-2 text-gray-900 dark:text-white mb-3"
+                        placeholder="Enter list name"
+                        placeholderTextColor={isDark ? '#9CA3AF' : '#6B7280'}
+                        value={newListName}
+                        onChangeText={setNewListName}
+                      />
+                      <TouchableOpacity
+                        className="bg-blue-600 dark:bg-blue-500 rounded-lg px-4 py-2"
+                        onPress={async () => {
+                          try {
+                            // Check if session and access token exist
+                            if (!session?.access_token) {
+                              console.error('No access token found. Please log in again.');
+                              return;
+                            }
+
+                            if (!newListName.trim()) {
+                              console.error('Please enter a list name');
+                              return;
+                            }
+
+                            const parsedAmount = parseFloat(amountPurchased);
+                            if (isNaN(parsedAmount) || parsedAmount <= 0) {
+                              console.error('Invalid amount purchased');
+                              return;
+                            }
+
+                            const newListRequest: AddItemRequestBody = {
+                              list_name: newListName.trim(),
+                              product_id: target?.product_id || '',
+                              amount: parsedAmount,
+                            };
+
+                            console.log('Creating new list with item:', newListRequest); // Debug log
+
+                            const response = await axios.post(
+                              `${backend_url}/lists/add-item`,
+                              newListRequest,
+                              {
+                                headers: {
+                                  Authorization: `Bearer ${session.access_token}`,
+                                  'Content-Type': 'application/json',
+                                },
+                              }
+                            );
+
+                            console.log('Response status:', response.status); // Debug log
+                            console.log('Response data:', response.data); // Debug log
+
+                            if (response.status === 200 || response.status === 201) {
+                              console.log('New list created and item added successfully');
+                              // Reset fields after successful creation
+                              setAmountPurchased('1');
+                              setNewListName('');
+                              setShowCreateNewList(false);
+                              setTarget(null);
+                              setShowAddToList(false);
+                              
+                              // Trigger grocery list refresh
+                              setRefreshVersion((prev) => prev + 1);
+                            } else {
+                              console.error('Failed to create new list:', response.statusText);
+                            }
+                          } catch (error: any) {
+                            console.error('Error creating new list:', error);
+                            console.error('Actual error:', error.response?.data || error.message);
+                          }
+                        }}
+                      >
+                        <Text className="text-white text-center font-semibold">Create List & Add Item</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+
                   {groceryListHistory !== null && groceryListHistory.length > 0 ? (
                     groceryListHistory
                       .filter((list) => list.list_status === 'incomplete')
@@ -718,12 +844,15 @@ const GrocerySearch = () => {
                           console.log('Response status:', response.status); // Debug log
                           console.log('Response data:', response.data); // Debug log
 
-                          if (response.status === 200) {
+                          if (response.status === 200 || response.status === 201) {
                             console.log('Item added to grocery list successfully');
                             // Reset amount after successful addition
                             setAmountPurchased('1');
                             setTarget(null);
                             setShowAddToList(false);
+                            
+                            // Trigger grocery list refresh
+                            setRefreshVersion((prev) => prev + 1);
                           } else {
                             console.error('Failed to add item to grocery list:', response.statusText);
                           }
