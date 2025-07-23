@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Alert, Dimensions, TouchableOpacity, View, Animated } from 'react-native';
+import { Alert, Dimensions, TouchableOpacity, View, Animated, Modal, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
@@ -35,11 +35,17 @@ const ModalPage = () => {
     AiPromptRequestBody | undefined
   >(undefined);
 
+  // Modal state for selecting existing lists
+  const [showExistingListModal, setShowExistingListModal] = useState(false);
+  const [selectedAction, setSelectedAction] = useState<'refine' | 'optimize' | null>(null);
+  const [selectedListId, setSelectedListId] = useState<string | null>(null);
+
   const {
     setIsLoading,
     groceryRefinement,
     setGroceryRefinement,
     setGroceryListHistory,
+    groceryListHistory,
     isLoading,
     setRefreshVersion,
   } = useGroceryContext();
@@ -182,67 +188,148 @@ const ModalPage = () => {
         return;
       }
 
-      // Fix: Use the correct endpoint - /lists/getAll
-      console.log('🔄 Fetching updated grocery list history...');
-      const allListsResponse = await fetch(`${backend_url}/lists/getAll`, {
-        // Fixed to /lists/getAll
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`,
-        },
-      });
-
-      if (allListsResponse.ok) {
-        const allList: SavedGroceryList[] = await allListsResponse.json();
-        console.log('🔄 Updated grocery list history:', allList);
-
-        // Validate the response
-        if (!Array.isArray(allList)) {
-          console.error('❌ Invalid grocery list history response:', allList);
-          Alert.alert('Error', 'Failed to fetch updated grocery lists.');
-          setIsLoading(false);
-          return;
-        }
-
-        // Verify the optimized list is in the updated history
-        const listExists = allList.some(
-          (list) => list.list_id === optimisedList.list_id,
-        );
-        if (!listExists) {
-          console.warn(
-            '⚠️ Optimized list not found in updated history, adding it manually',
-          );
-          allList.push(optimisedList);
-        }
-
-        // Update the context with the new list
-        setGroceryListHistory(allList);
-        setRefreshVersion((prev) => prev + 1);
-        setIsLoading(false);
-
-        // Navigate to the optimized list
-        console.log(
-          '🔍 Navigating to optimized list with ID:',
-          optimisedList.list_id,
-        );
-        router.replace(`/groceryDisplay/${optimisedList.list_id}`);
-
-        // Clear the refinement state after navigation
-        setTimeout(() => {
-          setGroceryRefinement(null);
-        }, 100);
+      // OPTIMIZATION: Update context immediately instead of refetching all lists
+      console.log('🔄 Adding new list to context...');
+      if (groceryListHistory) {
+        // Add the new list to the beginning of the array (most recent first)
+        const updatedHistory = [optimisedList, ...groceryListHistory];
+        setGroceryListHistory(updatedHistory);
       } else {
-        console.error(
-          '❌ Failed to fetch updated grocery lists:',
-          allListsResponse.status,
-        );
-        Alert.alert('Error', 'Failed to fetch updated grocery lists.');
-        setIsLoading(false);
+        // If no history exists, create new array with just this list
+        setGroceryListHistory([optimisedList]);
       }
+      
+      setRefreshVersion((prev) => prev + 1);
+      setIsLoading(false);
+
+      // Navigate to the optimized list
+      console.log('🔍 Navigating to optimized list with ID:', optimisedList.list_id);
+      router.replace(`/groceryDisplay/${optimisedList.list_id}`);
+
+      // Clear the refinement state after navigation
+      setTimeout(() => {
+        setGroceryRefinement(null);
+      }, 100);
     } catch (error) {
       console.error('❌ Error in findCheapest:', error);
       Alert.alert('Error', 'An error occurred while optimizing your list.');
       setIsLoading(false);
     }
+  };
+
+  const addToExistingList = async (existingListId: string) => {
+    try {
+      if (!generateRefinementGrocery?.message?.length) {
+        Alert.alert('Error', 'Your list is empty.');
+        return;
+      }
+
+      setIsLoading(true);
+      setShowExistingListModal(false);
+
+      const requestBody = {
+        ...generateRefinementGrocery,
+        existingListId: existingListId,
+      };
+
+      // Use the same optimize endpoint but with existingListId
+      const response = await fetch(`${backend_url}/lists/optimise`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('❌ Add to existing list failed:', response.status, errorData);
+
+        if (errorData.message) {
+          Alert.alert('Error', errorData.message);
+        } else {
+          Alert.alert(
+            'Error',
+            'Failed to add items to existing list. Please try again.',
+          );
+        }
+
+        setIsLoading(false);
+        return;
+      }
+
+      const updatedList: SavedGroceryList = await response.json();
+      console.log('🔍 Items added to existing list:', updatedList);
+
+      // Validate the response
+      if (!updatedList || !updatedList.list_id) {
+        console.error('❌ Invalid response structure:', updatedList);
+        Alert.alert('Error', 'Invalid response from server.');
+        setIsLoading(false);
+        return;
+      }
+
+      // OPTIMIZATION: Update the specific list in context instead of refetching all
+      console.log('🔄 Updating list in context...');
+      if (groceryListHistory) {
+        const updatedHistory = groceryListHistory.map(list => 
+          list.list_id === updatedList.list_id ? updatedList : list
+        );
+        setGroceryListHistory(updatedHistory);
+      }
+      
+      setRefreshVersion((prev) => prev + 1);
+      setIsLoading(false);
+
+      // Navigate to the updated list
+      console.log('🔍 Navigating to updated list with ID:', updatedList.list_id);
+      router.replace(`/groceryDisplay/${updatedList.list_id}`);
+
+      // Clear the refinement state after navigation
+      setTimeout(() => {
+        setGroceryRefinement(null);
+      }, 100);
+
+      Alert.alert('Success', 'Items added to your existing list!');
+    } catch (error) {
+      console.error('❌ Error in addToExistingList:', error);
+      Alert.alert('Error', 'An error occurred while adding items to the list.');
+      setIsLoading(false);
+    }
+  };
+
+  const handleActionButtonPress = (action: 'refine' | 'optimize') => {
+    setSelectedAction(action);
+    
+    if (action === 'refine') {
+      // For refining, directly call the refine function
+      refineMyList();
+    } else if (action === 'optimize') {
+      // For optimizing, show modal to choose between new list or existing list
+      setShowExistingListModal(true);
+    }
+  };
+
+  const closeModal = () => {
+    setShowExistingListModal(false);
+    setSelectedListId(null);
+  };
+
+  const handleExistingListSelection = (listId: string) => {
+    setSelectedListId(listId);
+  };
+
+  const confirmListSelection = () => {
+    if (selectedListId) {
+      addToExistingList(selectedListId);
+      setSelectedListId(null);
+    }
+  };
+
+  const createNewListFromModal = () => {
+    setShowExistingListModal(false);
+    findCheapest();
   };
 
   return (
@@ -370,7 +457,7 @@ const ModalPage = () => {
             <VStack space="md" className="w-full">
               {/* Refine Button */}
               <TouchableOpacity
-                onPress={refineMyList}
+                onPress={() => handleActionButtonPress('refine')}
                 disabled={isLoading}
                 activeOpacity={0.8}
                 style={{
@@ -398,7 +485,7 @@ const ModalPage = () => {
                   }}
                 >
                   <HStack className="items-center" space="sm">
-                    {isLoading ? (
+                    {isLoading && selectedAction === 'refine' ? (
                       <>
                         <Text className="text-white font-bold text-lg">
                           Processing...
@@ -416,9 +503,9 @@ const ModalPage = () => {
                 </LinearGradient>
               </TouchableOpacity>
 
-              {/* Find Cheapest Button */}
+              {/* Optimize & Save Button */}
               <TouchableOpacity
-                onPress={findCheapest}
+                onPress={() => handleActionButtonPress('optimize')}
                 disabled={isLoading}
                 activeOpacity={0.8}
                 style={{
@@ -446,17 +533,17 @@ const ModalPage = () => {
                   }}
                 >
                   <HStack className="items-center" space="sm">
-                    {isLoading ? (
+                    {isLoading && selectedAction === 'optimize' ? (
                       <>
                         <Text className="text-white font-bold text-lg">
-                          Finding Best Deals...
+                          Optimizing...
                         </Text>
                       </>
                     ) : (
                       <>
-                        <AntDesign name="search1" size={20} color="white" />
+                        <AntDesign name="save" size={20} color="white" />
                         <Text className="text-white font-bold text-lg">
-                          Find Cheapest
+                          Optimise & Save List
                         </Text>
                       </>
                     )}
@@ -468,6 +555,201 @@ const ModalPage = () => {
         </VStack>
       </ScrollView>
     </SafeAreaView>
+
+    {/* Existing List Selection Modal */}
+    <Modal
+      visible={showExistingListModal}
+      transparent={true}
+      animationType="slide"
+      onRequestClose={closeModal}
+    >
+      <TouchableOpacity 
+        style={{
+          flex: 1,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+        activeOpacity={1}
+        onPress={closeModal}
+      >
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={(e) => e.stopPropagation()}
+          style={{
+            backgroundColor: isDark ? '#1f2937' : '#ffffff',
+            borderRadius: 16,
+            padding: 20,
+            width: '90%',
+            maxHeight: '70%',
+          }}
+        >
+          <VStack space="lg">
+            {/* Modal Header */}
+            <HStack className="justify-between items-center">
+              <Heading className="text-xl font-bold text-gray-900 dark:text-white">
+                Choose Where to Save
+              </Heading>
+              <TouchableOpacity
+                onPress={closeModal}
+                style={{
+                  padding: 8,
+                  borderRadius: 8,
+                  backgroundColor: isDark ? '#374151' : '#f3f4f6',
+                }}
+              >
+                <AntDesign 
+                  name="close" 
+                  size={20} 
+                  color={isDark ? '#ffffff' : '#000000'} 
+                />
+              </TouchableOpacity>
+            </HStack>
+
+            {/* Instructions */}
+            <Text className="text-sm text-gray-600 dark:text-gray-300">
+              Select an incomplete list to add items to, or create a new list:
+            </Text>
+
+            {/* List of existing grocery lists */}
+            <FlatList
+              data={groceryListHistory?.filter(list => 
+                list.list_status === 'incomplete'
+              ) || []}
+              keyExtractor={(item) => item.list_id}
+              showsVerticalScrollIndicator={false}
+              style={{ maxHeight: 300 }}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  onPress={() => handleExistingListSelection(item.list_id)}
+                  style={{
+                    padding: 16,
+                    marginVertical: 4,
+                    backgroundColor: selectedListId === item.list_id 
+                      ? (isDark ? '#1e40af' : '#dbeafe') 
+                      : (isDark ? '#374151' : '#f9fafb'),
+                    borderRadius: 12,
+                    borderWidth: selectedListId === item.list_id ? 2 : 1,
+                    borderColor: selectedListId === item.list_id 
+                      ? '#3b82f6' 
+                      : (isDark ? '#4b5563' : '#e5e7eb'),
+                  }}
+                >
+                  <HStack className="justify-between items-center">
+                    <VStack space="xs" className="flex-1">
+                      <Text className={`font-semibold ${selectedListId === item.list_id 
+                        ? (isDark ? 'text-white' : 'text-blue-900')
+                        : 'text-gray-900 dark:text-white'
+                      }`}>
+                        {item.title}
+                      </Text>
+                      <Text className={`text-sm ${selectedListId === item.list_id 
+                        ? (isDark ? 'text-blue-200' : 'text-blue-700')
+                        : 'text-gray-600 dark:text-gray-300'
+                      }`}>
+                        {item.grocery_list_items.length} items • {item.list_status}
+                      </Text>
+                      {item.metadata && (
+                        <Text className={`text-xs ${selectedListId === item.list_id 
+                          ? (isDark ? 'text-blue-300' : 'text-blue-600')
+                          : 'text-gray-500 dark:text-gray-400'
+                        }`}>
+                          {item.metadata}
+                        </Text>
+                      )}
+                    </VStack>
+                    {selectedListId === item.list_id && (
+                      <AntDesign 
+                        name="checkcircle" 
+                        size={24} 
+                        color="#3b82f6" 
+                      />
+                    )}
+                  </HStack>
+                </TouchableOpacity>
+              )}
+              ListEmptyComponent={() => (
+                <Box className="p-8 items-center">
+                  <Text className="text-gray-500 dark:text-gray-400 text-center">
+                    No incomplete lists found.
+                  </Text>
+                  <Text className="text-sm text-gray-400 dark:text-gray-500 text-center mt-2">
+                    Only incomplete lists can be modified.
+                  </Text>
+                  <Text className="text-sm text-gray-400 dark:text-gray-500 text-center mt-1">
+                    Create a new list instead!
+                  </Text>
+                </Box>
+              )}
+            />
+
+            {/* Action Buttons */}
+            <VStack space="md">
+              {/* Add to Selected List Button */}
+              <TouchableOpacity
+                onPress={confirmListSelection}
+                disabled={!selectedListId}
+                style={{
+                  padding: 16,
+                  backgroundColor: selectedListId ? '#3b82f6' : (isDark ? '#374151' : '#e5e7eb'),
+                  borderRadius: 12,
+                  alignItems: 'center',
+                  opacity: selectedListId ? 1 : 0.5,
+                }}
+              >
+                <HStack className="items-center" space="sm">
+                  <AntDesign 
+                    name="pluscircleo" 
+                    size={20} 
+                    color={selectedListId ? '#ffffff' : (isDark ? '#9ca3af' : '#6b7280')} 
+                  />
+                  <Text className={`font-bold text-lg ${selectedListId 
+                    ? 'text-white' 
+                    : (isDark ? 'text-gray-400' : 'text-gray-500')
+                  }`}>
+                    {selectedListId ? 'Add to Selected List' : 'Select a List First'}
+                  </Text>
+                </HStack>
+              </TouchableOpacity>
+
+              {/* Bottom Action Buttons */}
+              <HStack space="md">
+                <TouchableOpacity
+                  onPress={closeModal}
+                  style={{
+                    flex: 1,
+                    padding: 12,
+                    backgroundColor: isDark ? '#374151' : '#f3f4f6',
+                    borderRadius: 8,
+                    alignItems: 'center',
+                  }}
+                >
+                  <Text className="font-medium text-gray-700 dark:text-gray-300">
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  onPress={createNewListFromModal}
+                  style={{
+                    flex: 1,
+                    padding: 12,
+                    backgroundColor: '#10b981',
+                    borderRadius: 8,
+                    alignItems: 'center',
+                  }}
+                >
+                  <Text className="font-medium text-white">
+                    Create New List
+                  </Text>
+                </TouchableOpacity>
+              </HStack>
+            </VStack>
+          </VStack>
+        </TouchableOpacity>
+      </TouchableOpacity>
+    </Modal>
+
     </View>
   );
 };

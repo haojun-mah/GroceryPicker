@@ -2,12 +2,14 @@
 import { backend_url } from './api';
 
 let isWakingUp = false;
+let hasWokenUp = false;
 
 /**
  * Wake up the backend server to avoid cold starts
  */
 export async function wakeUpBackend(): Promise<void> {
-  if (isWakingUp) return;
+  // Skip if already woken up or currently waking up
+  if (isWakingUp || hasWokenUp) return;
   
   isWakingUp = true;
   console.log('Waking up backend');
@@ -20,6 +22,7 @@ export async function wakeUpBackend(): Promise<void> {
 
     if (response.ok) {
       console.log('Backend awake');
+      hasWokenUp = true;
     }
   } catch (error) {
     console.warn('Failed to wake up backend:', error);
