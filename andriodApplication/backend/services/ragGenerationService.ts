@@ -110,7 +110,7 @@ export async function generateBestPriceResponse(
     try {
       const selection = JSON.parse(content);
       const selectedProduct = topProducts[selection.productNumber - 1];
-      let amount = Math.ceil(selection.amount || 1); // Ensure whole number
+      const amount = Math.ceil(selection.amount || 1); // Ensure whole number
 
       if (!selectedProduct) {
         // Fallback to first product
