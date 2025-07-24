@@ -18,7 +18,6 @@ import { Search, Star, Flame, Tag } from 'lucide-react-native';
 import axios from 'axios';
 import { backend_url } from '@/lib/api';
 import { useSession } from '@/context/authContext';
-import { useGroceryContext } from '@/context/groceryContext';
 import { AddItemRequestBody, ProductCatalog, SearchProductsResponse, SavedGroceryList } from './interface';
 import { Modal } from 'react-native'
 import { Button } from '@/components/ui/button';
@@ -26,11 +25,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useColorScheme } from 'nativewind';
 import EvilIcons from '@expo/vector-icons/EvilIcons';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { useGroceryContext } from '@/context/groceryContext';
 
 
 const GrocerySearch = () => {
   const { session } = useSession();
   const { colorScheme } = useColorScheme();
+  const { refreshVersion, groceryListHistory, setIsLoading, setGroceryListHistory, setRefreshVersion } = useGroceryContext();
   const isDark = colorScheme === 'dark';
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [suggestions, setSuggestions] = useState<ProductCatalog[] | null>(null);
