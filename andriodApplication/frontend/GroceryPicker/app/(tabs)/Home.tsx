@@ -162,17 +162,18 @@ export default function HomePage() {
           data
             .flatMap(list =>
               list.grocery_list_items.filter(item =>
-                list.list_status === "purchased" || item.item_status === 'purchased'
+                list.list_status === "purchased" || (item.item_status === 'purchased' && (list.list_status === 'incomplete' || list.list_status === 'archived'))
               )
             )
             .reduce((acc, item) => {
               let price = 0;
 
-              if (item.purchased_price != null) {
+              if (item.purchased_price) {
                 price = item.purchased_price;
-              } else if (item.product?.price != null) {
-                price = parseFloat(item.product.price as string);
+              } else if (item.product?.price) {
+                price = parseFloat((item.product.price as string).replace(/\$/g, '').trim());
               }
+              console.log(item.purchased_price, item.product?.name, price);
 
               const amount = item.amount ?? 1;
               return acc + (isNaN(price) ? 0 : price * amount);
