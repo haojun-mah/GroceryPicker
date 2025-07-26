@@ -105,10 +105,10 @@ export default function Login(){
         contentContainerStyle={{
           flexGrow: 1,
           justifyContent: 'center',
-          alignItems: 'center',
+          // Remove alignItems: 'center' for full width
         }}
       >
-      <Box className="flex-1 px-6 justify-center">
+      <Box className="w-full max-w-md px-6 self-center">
         <Box className="items-center mb-16">
           <Image
             source={Logo}
