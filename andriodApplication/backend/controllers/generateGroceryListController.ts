@@ -9,12 +9,13 @@ import {
 
 /*
   Handles the logic where it converts users unstructured grocery
-  list/input into structured and refined grocery lists. 
-  It then returns the structed list to the user for refinement. Note that the
-  list is NOT OPTIMIZED
-  yet.
+  list/input into structured and refined grocery lists.
+  
+  Returns structured list for further refinement/optimization.
+  Note: Generated items are NOT OPTIMIZED yet (no product matching).
+  Use the optimize endpoint for RAG-based product selection and adding to existing lists.
 
-  Req Type: String
+  Req Type: AiPromptRequestBody { message: string, supermarketFilter?: SupermarketFilter }
   Res Type: GroceryMetadataTitleOutput
 */
 
@@ -25,6 +26,10 @@ export const generateGroceryList: RequestHandler<
   {}
 > = async (req, res) => {
   const input = req.body.message;
+  const userId = req.user?.id;
+  
+  console.log(`Generate grocery list request - User: ${userId} - Input length: ${input?.length || 0} chars`);
+  
   const instruction = `You are an expert grocery list generator. Your sole purpose is to create and structure grocery lists based on user input, which can include groceries, recipes, ingredients, or even vague descriptions.
 
   **Output Rules:**
@@ -98,6 +103,18 @@ export const generateGroceryList: RequestHandler<
       if (arrayGrocery.length === 0 && lines.length > 1) {
         throw new Error('No valid grocery items found in LLM output');
       }
+
+      if (arrayGrocery.length === 0) {
+        console.warn(`No valid items generated for input: "${input.substring(0, 50)}..." - User: ${userId}`);
+        const err = new ControllerError(
+          500,
+          'Grocery generation failed - no valid items produced.',
+        );
+        res.status(500).json(err);
+        return;
+      }
+
+      // Return structured list for further processing (optimization or saving)
       const output: GroceryMetadataTitleOutput = {
         title: title,
         metadata: metadata,
@@ -105,20 +122,10 @@ export const generateGroceryList: RequestHandler<
         supermarketFilter: req.body.supermarketFilter,
       };
 
-      if (output.items.length === 0) {
-        const err = new ControllerError(
-          500,
-          'Grocery generation failed - no valid items produced.',
-        );
-        res.status(500).json(err);
-      } else {
-        res.status(200).json(output);
-      }
+      console.log(`Generated ${output.items.length} items: "${output.title}" - User: ${userId}`);
+      res.status(200).json(output);
     } catch (parseError) {
-      console.error(
-        'Error parsing LLM output (CSV) or validating structure:',
-        parseError,
-      );
+      console.error(`Error parsing LLM output - User: ${userId}:`, parseError);
       const err = new ControllerError(
         500,
         'Failed to parse LLM response into a valid grocery list format.',
@@ -130,7 +137,7 @@ export const generateGroceryList: RequestHandler<
       return;
     }
   } catch (error) {
-    console.error('Error generating list with multi-provider LLM:', error);
+    console.error(`Error generating list - User: ${userId}:`, error);
     const errorMessage =
       error instanceof Error
         ? error.message

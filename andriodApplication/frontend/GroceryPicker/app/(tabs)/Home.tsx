@@ -9,9 +9,8 @@ import { useSession } from '@/context/authContext';
 import { useColorScheme } from 'nativewind';
 import { useEffect, useRef, useState } from 'react';
 import { backend_url } from '@/lib/api';
-import { ControllerError, SavedGroceryList } from './interface';
+import { ControllerError, SavedGroceryList, SavedGroceryListItem } from './interface';
 import { useGroceryContext } from '@/context/groceryContext';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 
 export default function HomePage() {
   const { colorScheme, setColorScheme } = useColorScheme();
@@ -19,8 +18,8 @@ export default function HomePage() {
   const { session } = useSession();
   const [noListCreated, setNoListCreated] = useState<number>(0);
   const [noItems, setNoItems] = useState<number>(0);
-  const [noListCompleted, setNoListCompleted] = useState<number>(0);
-  const { refreshVersion, groceryListHistory, setGroceryListHistory } = useGroceryContext();
+  const [totalExpenditure, setTotalExpenditure] = useState<number>(0);
+  const { refreshVersion, setGroceryListHistory } = useGroceryContext();
 
   // Animation values
   const translateX = useRef(new Animated.Value(0)).current;
@@ -159,9 +158,28 @@ export default function HomePage() {
         console.log('🔍 Fetched grocery lists:', data);
         setNoListCreated(data.length);
         setNoItems(data.flatMap((list) => list.grocery_list_items).length);
-        setNoListCompleted(
-          data.filter((list) => list.list_status === 'purchased').length,
+        setTotalExpenditure(
+          data
+            .flatMap(list =>
+              list.grocery_list_items.filter(item =>
+                list.list_status === "purchased" || (item.item_status === 'purchased' && (list.list_status === 'incomplete' || list.list_status === 'archived'))
+              )
+            )
+            .reduce((acc, item) => {
+              let price = 0;
+
+              if (item.purchased_price) {
+                price = item.purchased_price;
+              } else if (item.product?.price) {
+                price = parseFloat((item.product.price as string).replace(/\$/g, '').trim());
+              }
+              console.log(item.purchased_price, item.product?.name, price);
+
+              const amount = item.amount ?? 1;
+              return acc + (isNaN(price) ? 0 : price * amount);
+            }, 0)
         );
+
         setGroceryListHistory(data);
       } else {
         const error: ControllerError = await response.json();
@@ -433,12 +451,12 @@ export default function HomePage() {
                   <Text
                     className={`${isDark ? 'text-white' : 'text-gray-900'} font-bold text-xl`}
                   >
-                    {noListCompleted}
+                    ${totalExpenditure.toFixed(2)}
                   </Text>
                   <Text
                     className={`${isDark ? 'text-white/80' : 'text-gray-700'} text-sm text-center dark:text-white/80 text-wrap`}
                   >
-                    List Completed
+                    Total Expenditure
                   </Text>
                 </View>
               </View>

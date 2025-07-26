@@ -58,6 +58,7 @@ export function sanitizeSupermarketFilter(
 export interface AiPromptRequestBody {
   message: string;
   supermarketFilter?: SupermarketFilter;
+  existingListId?: string; // Optional - for adding to existing lists
 }
 
 export interface GroceryMetadataTitleOutput {
@@ -204,7 +205,8 @@ export interface ProductCatalog{
 }
 
 export interface AddItemRequestBody {
-  list_id: string;
+  list_id?: string; // Now optional
+  list_name?: string; // Required when list_id is not provided
   product_id: string;
   name?: string;
   custom_price?: number;

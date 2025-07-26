@@ -33,11 +33,11 @@ export async function generateBestPriceResponse(
   | ControllerError
 > {
   try {
-    // Fetch fewer, higher quality products
+    // Fetch optimal number of products for cross-supermarket comparison
     const products = await fetchProductPrices(
       userQuery,
-      0.6,
-      5,
+      0.5, // Slightly lower threshold for more variety
+      8, // Fetch exactly what we need for LLM
       supermarketFilter,
     );
 
@@ -49,22 +49,33 @@ export async function generateBestPriceResponse(
       return new ControllerError(404, 'No products found matching your query.');
     }
 
-    // Send top 5 products to LLM for selection
-    const topProducts = products.slice(0, 5);
+    // Send all fetched products to LLM for comparison
+    const topProducts = products.slice(0, 8); // Safety slice in case we get fewer results
     const productData = formatProductsForLLMSelection(topProducts);
 
     // Build the system prompt for the LLM
     const systemMessage = [
-      'You are a grocery selection assistant. Given a user request and product options, select the best matching product and determine the amount to buy.',
+      'You are a grocery selection assistant. Your goal is to find the CHEAPEST TOTAL COST to fulfill the user\'s request.',
+      '',
+      'IMPORTANT: Calculate the total cost for each option:',
+      '1. Match the product to what the user wants',
+      '2. Calculate how many units needed (e.g., for "100 eggs" with "30 eggs pack" = 4 packs needed)',
+      '3. Calculate total cost = (price per unit) × (number of units needed)',
+      '4. Choose the option with the LOWEST TOTAL COST',
+      '',
+      'Example: User wants "100 eggs"',
+      '- Option A: 30 eggs pack at $5 each → need 4 packs → total $20',
+      '- Option B: 12 eggs pack at $2 each → need 9 packs → total $18',
+      '- Choose Option B (cheaper total cost)',
       '',
       'You must return ONLY a valid, pretty-printed JSON object with this exact structure:',
       '{',
-      '  "productNumber": 1,',
-      '  "amount": 2',
+      '  "productNumber": 2,',
+      '  "amount": 9',
       '}',
       '',
-      'productNumber: The number (1, 2, 3, 4, or 5) of the best matching product',
-      'amount: The number of units the user should buy, always as a whole number (round up if needed)',
+      'productNumber: The number (1, 2, 3, 4, 5, 6, 7, or 8) of the product with LOWEST TOTAL COST',
+      'amount: How many units needed to meet the user\'s requirement',
       'Do not include any text or explanation outside the JSON object.',
     ].join('\n');
 
@@ -75,7 +86,7 @@ export async function generateBestPriceResponse(
       'Available products:',
       productData,
       '',
-      'Select the best product number and amount needed.',
+      'Calculate the total cost for each product option and select the one with the CHEAPEST TOTAL COST to fulfill the request.',
     ].join('\n');
 
     const response = await groq.chat.completions.create({
@@ -99,7 +110,7 @@ export async function generateBestPriceResponse(
     try {
       const selection = JSON.parse(content);
       const selectedProduct = topProducts[selection.productNumber - 1];
-      const amount = Math.ceil(selection.amount || 1); // Ensure whole number here only
+      const amount = Math.ceil(selection.amount || 1); // Ensure whole number
 
       if (!selectedProduct) {
         // Fallback to first product

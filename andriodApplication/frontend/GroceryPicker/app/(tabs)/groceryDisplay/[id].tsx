@@ -26,6 +26,9 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { backend_url } from '@/lib/api';
 import { useSession } from '@/context/authContext';
 import { Image } from '@/components/ui/image';
+import axios from 'axios';
+import { ProductCatalog } from '../interface';
+import EvilIcons from '@expo/vector-icons/EvilIcons';
 
 const GroceryDisplay = () => {
   const { session } = useSession();
@@ -45,13 +48,21 @@ const GroceryDisplay = () => {
     useState(false);
   const [showEditHeader, setShowEditHeader] = useState(false);
 
-  // Modal state for edit quantity
+  // Modal state for edit quantity & change item
   const [showEditQuantityModal, setShowEditQuantityModal] = useState(false);
   const [editingItem, setEditingItem] = useState<SavedGroceryListItem | null>(
     null,
   );
   const [newQuantity, setNewQuantity] = useState('');
   const [newPrice, setNewPrice] = useState('');
+  const [showChangeItemModal, setShowChangeItemModal] = useState(false);
+
+  // Replacement item modal state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<ProductCatalog[]>([]);
+  const [selectedReplacement, setSelectedReplacement] = useState<ProductCatalog | null>(null);
+  const [replacementAmount, setReplacementAmount] = useState('1');
+  const [isSearching, setIsSearching] = useState(false);
 
   // Animation ref for header
   const headerAnimation = useRef(new Animated.Value(0)).current;
@@ -71,6 +82,21 @@ const GroceryDisplay = () => {
     setEditingItem(null);
     setNewQuantity('');
     setNewPrice('');
+
+    // Exit selection mode when closing the modal
+    exitSelectionMode();
+  };
+
+  // Close replacement modal and reset state
+  const closeReplacementModal = () => {
+    console.log('🔵 Closing replacement modal');
+    setShowChangeItemModal(false);
+    setSearchQuery('');
+    setSearchResults([]);
+    setSelectedReplacement(null);
+    setReplacementAmount('1');
+    setIsSearching(false);
+    setEditingItem(null);
 
     // Exit selection mode when closing the modal
     exitSelectionMode();
@@ -268,7 +294,8 @@ const GroceryDisplay = () => {
           const itemToEdit = currGroceryList.grocery_list_items.find(
             (item) => item.item_id === selectedItemsToEdit[0],
           );
-          if (itemToEdit) {
+          const isPurchased = itemToEdit?.item_status === 'purchased';
+          if (itemToEdit && isPurchased) {
             setEditingItem(itemToEdit);
             setNewQuantity(String(itemToEdit.quantity));
 
@@ -282,6 +309,13 @@ const GroceryDisplay = () => {
             setNewPrice(displayPrice);
             setShowEditQuantityModal(true);
             return; // Don't exit selection mode yet - will exit when modal is closed
+          } else if (itemToEdit && !isPurchased) {
+            setEditingItem(itemToEdit);
+            setShowChangeItemModal(true);
+
+            return;
+          } else {
+            return;
           }
         }
         break;
@@ -378,6 +412,93 @@ const GroceryDisplay = () => {
     }
   };
 
+  // Search for replacement items
+  const searchReplacementItems = async (query: string) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const response = await axios.get(`${backend_url}/products/suggestions?q=${query}&limit=20`, {
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      });
+
+      if (response.status === 200) {
+        setSearchResults(response.data || []);
+      } else {
+        console.error('Search failed:', response.statusText);
+        setSearchResults([]);
+      }
+    } catch (error) {
+      console.error('Error searching for items:', error);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // Handle item replacement
+  const handleItemReplacement = async () => {
+    if (!editingItem || !selectedReplacement || !currGroceryList) return;
+
+    const amount = parseFloat(replacementAmount);
+    if (isNaN(amount) || amount <= 0) {
+      Alert.alert('Invalid Input', 'Please enter a valid amount.');
+      return;
+    }
+    try {
+      const deleteReq = await fetch(`${backend_url}/lists/update`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify([
+          {
+            list_id: currGroceryList.list_id,
+            grocery_list_items: [
+              {
+                item_id: editingItem.item_id,
+                item_status: 'deleted',
+              },
+            ],
+          },
+        ]),
+      });
+
+      if (!deleteReq.ok) {
+        const error = await deleteReq.json();
+        throw new Error(`Error deleting item: ${error.message}`);
+      }
+      const response = await axios.post(
+        `${backend_url}/lists/add-item`,
+        { list_id: currGroceryList.list_id,
+          ...selectedReplacement,
+          amount: replacementAmount || 1},
+        {
+          headers: {
+            Authorization: `Bearer ${session?.access_token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      if (!response.data.success) {
+        throw new Error('Failed to add replacement item');
+      }
+      console.log('✅ Replacement item added successfully');
+      setRefreshVersion((prev) => prev + 1);
+      closeReplacementModal();
+    } catch (error) {
+      console.error('❌ Error deleting item:', error);
+      Alert.alert('Error', 'Failed to delete item. Please try again.');
+      return;
+    }
+  };
+
   // Global Edit Header Component
   const EditHeader = () => {
     // Check if the selected item is purchased (only relevant when exactly 1 item is selected)
@@ -388,7 +509,6 @@ const GroceryDisplay = () => {
           )
         : null;
 
-    const canEditQuantity = selectedItem?.item_status === 'purchased';
 
     return (
       <Animated.View
@@ -464,17 +584,19 @@ const GroceryDisplay = () => {
             </Pressable>
 
             {/* Only show edit quantity button when exactly 1 item is selected AND it's purchased */}
-            {selectedItemsToEdit.length === 1 && canEditQuantity && (
-              <Pressable
-                onPress={() => handleEditAction('edit-quantity')}
-                className={`p-2 rounded-full ${isDark ? 'bg-gray-600' : 'bg-gray-100'}`}
-              >
-                <AntDesign
-                  name="edit"
-                  size={20}
-                  color={isDark ? '#3B82F6' : '#2563EB'}
-                />
-              </Pressable>
+            {selectedItemsToEdit.length === 1 && (
+              <>
+                <Pressable
+                  onPress={() => handleEditAction('edit-quantity')}
+                  className={`p-2 rounded-full ${isDark ? 'bg-gray-600' : 'bg-gray-100'}`}
+                >
+                  <AntDesign
+                    name="edit"
+                    size={20}
+                    color={isDark ? '#3B82F6' : '#2563EB'}
+                  />
+                </Pressable>
+              </>
             )}
 
             <Pressable
@@ -640,7 +762,7 @@ const GroceryDisplay = () => {
               <Text
                 className={`text-xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}
               >
-                Edit Item
+                Edit Price at time of Purchase
               </Text>
 
               {editingItem && (
@@ -712,6 +834,247 @@ const GroceryDisplay = () => {
           </Pressable>
         </KeyboardAvoidingView>
       </Modal>
+
+      {/* Replace Item Modal */}
+      <Modal
+        visible={showChangeItemModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={closeReplacementModal}
+      >
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          showsVerticalScrollIndicator={false}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1 }}
+        >
+          <Pressable
+            className="flex-1 bg-black/50 justify-center items-center"
+            onPress={closeReplacementModal}
+          >
+            <Pressable
+              className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 mx-4 w-11/12 max-w-md max-h-5/6`}
+              onPress={(e) => e.stopPropagation()}
+            >
+              <Text
+                className={`text-xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}
+              >
+                Replace Item
+              </Text>
+
+              {editingItem && (
+                <>
+                  {/* Current Item Info */}
+                  <View className="flex-row items-center mb-4 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                    <Image
+                      source={{
+                        uri: editingItem.product?.image_url || '',
+                      }}
+                      alt="Current item"
+                      className="w-12 h-12 rounded-lg bg-gray-300 mr-3"
+                    />
+                    <View className="flex-1">
+                      <Text className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                        Replacing: {editingItem.product?.name || editingItem.name}
+                      </Text>
+                      <Text className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                        Current amount: {editingItem.quantity}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Search Bar */}
+                  <View className="mb-4">
+                    <Text
+                      className={`text-sm font-medium mb-2 ${isDark ? 'text-white' : 'text-gray-700'}`}
+                    >
+                      Search for replacement item
+                    </Text>
+                    <View className="relative">
+                      <View className="absolute left-3 top-1/2 z-10" style={{ transform: [{ translateY: -12 }] }}>
+                        <EvilIcons 
+                          name="search" 
+                          size={24} 
+                          color={isDark ? '#9CA3AF' : '#6B7280'} 
+                        />
+                      </View>
+                      <TextInput
+                        value={searchQuery}
+                        onChangeText={(text) => {
+                          setSearchQuery(text);
+                          searchReplacementItems(text);
+                        }}
+                        className={`${isDark ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'} pl-12 pr-4 py-3 rounded-lg border ${isDark ? 'border-gray-600' : 'border-gray-300'}`}
+                        placeholder="Search for items..."
+                        placeholderTextColor={isDark ? '#9CA3AF' : '#6B7280'}
+                        autoFocus={true}
+                        onSubmitEditing={async () => {
+                          if (searchQuery.length === 0) return;
+
+                          try {
+                            const response = await axios.get(`${backend_url}/products/search?q=${searchQuery}&limit=20`, {
+                              headers: {
+                                Authorization: `Bearer ${session?.access_token}`,
+                              },
+                            });
+                            if (response.status === 200) {
+                              setSearchResults(response.data.results || []);
+                            } else {
+                              console.error('Search failed:', response.statusText);
+                              setSearchResults([]);
+                            }
+                          } catch (error) {
+                            console.error('Error fetching search results:', error);
+                          }
+                        }}
+                      />
+                    </View>
+                  </View>
+
+                  {/* Search Results */}
+                  {searchQuery.length > 0 && (
+                    <View className="mb-4 max-h-48">
+                      <Text
+                        className={`text-sm font-medium mb-2 ${isDark ? 'text-white' : 'text-gray-700'}`}
+                      >
+                        Search Results ({searchResults.length})
+                      </Text>
+                      <ScrollView 
+                        className={`${isDark ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg border ${isDark ? 'border-gray-600' : 'border-gray-300'}`}
+                        nestedScrollEnabled={true}
+                      >
+                        {isSearching ? (
+                          <View className="p-4 items-center">
+                            <Text className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                              Searching...
+                            </Text>
+                          </View>
+                        ) : searchResults.length > 0 ? (
+                          searchResults.map((item, index) => (
+                            <Pressable
+                              key={item.product_id || index}
+                              onPress={() => {
+                                setSelectedReplacement(item);
+                                setSearchQuery(item.name);
+                                setSearchResults([]);
+                              }}
+                              className={`p-3 border-b ${isDark ? 'border-gray-600' : 'border-gray-200'} ${
+                                selectedReplacement?.product_id === item.product_id
+                                  ? isDark ? 'bg-blue-900' : 'bg-blue-100'
+                                  : ''
+                              }`}
+                            >
+                              <View className="flex-row items-center">
+                                <Image
+                                  source={{ uri: item.image_url || '' }}
+                                  alt="Item"
+                                  className="w-10 h-10 rounded-lg bg-gray-300 mr-3"
+                                />
+                                <View className="flex-1">
+                                  <Text className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                    {item.name}
+                                  </Text>
+                                  <Text className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                                    {item.supermarket} • {item.price}
+                                  </Text>
+                                </View>
+                              </View>
+                            </Pressable>
+                          ))
+                        ) : (
+                          <View className="p-4 items-center">
+                            <Text className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                              No items found
+                            </Text>
+                          </View>
+                        )}
+                      </ScrollView>
+                    </View>
+                  )}
+
+                  {/* Amount Input */}
+                  {selectedReplacement && (
+                    <View className="mb-4">
+                      <Text
+                        className={`text-sm font-medium mb-2 ${isDark ? 'text-white' : 'text-gray-700'}`}
+                      >
+                        Amount
+                      </Text>
+                      <TextInput
+                        value={replacementAmount}
+                        onChangeText={setReplacementAmount}
+                        keyboardType="numeric"
+                        className={`${isDark ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'} px-4 py-2 rounded-lg border ${isDark ? 'border-gray-600' : 'border-gray-300'}`}
+                        placeholder="Enter amount"
+                        placeholderTextColor={isDark ? '#9CA3AF' : '#6B7280'}
+                      />
+                    </View>
+                  )}
+
+                  {/* Selected Item Preview */}
+                  {selectedReplacement && (
+                    <View className="mb-4 p-3 bg-green-100 dark:bg-green-900 rounded-lg border border-green-200 dark:border-green-700">
+                      <Text className="text-sm font-medium text-green-800 dark:text-green-200 mb-2">
+                        Selected replacement:
+                      </Text>
+                      <View className="flex-row items-center">
+                        <Image
+                          source={{ uri: selectedReplacement.image_url || '' }}
+                          alt="Selected item"
+                          className="w-12 h-12 rounded-lg bg-gray-300 mr-3"
+                        />
+                        <View className="flex-1">
+                          <Text className="font-semibold text-green-900 dark:text-green-100">
+                            {selectedReplacement.name}
+                          </Text>
+                          <Text className="text-sm text-green-700 dark:text-green-300">
+                            {selectedReplacement.supermarket} • {selectedReplacement.price} • Amount: {replacementAmount}
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                  )}
+
+                  {/* Buttons */}
+                  <View className="flex-row justify-between">
+                    <Pressable
+                      onPress={closeReplacementModal}
+                      className={`flex-1 mr-2 py-3 px-4 rounded-lg ${isDark ? 'bg-gray-600' : 'bg-gray-200'}`}
+                    >
+                      <Text
+                        className={`text-center font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}
+                      >
+                        Cancel
+                      </Text>
+                    </Pressable>
+
+                    <Pressable
+                      onPress={handleItemReplacement}
+                      disabled={!selectedReplacement}
+                      className={`flex-1 ml-2 py-3 px-4 rounded-lg ${
+                        selectedReplacement 
+                          ? 'bg-green-600' 
+                          : isDark ? 'bg-gray-600' : 'bg-gray-300'
+                      }`}
+                    >
+                      <Text 
+                        className={`text-center font-medium ${
+                          selectedReplacement ? 'text-white' : isDark ? 'text-gray-400' : 'text-gray-500'
+                        }`}
+                      >
+                        Replace Item
+                      </Text>
+                    </Pressable>
+                  </View>
+                </>
+              )}
+            </Pressable>
+          </Pressable>
+        </KeyboardAvoidingView>
+        </ScrollView>
+      </Modal>
+
 
       <ScrollView
         className="flex-1"

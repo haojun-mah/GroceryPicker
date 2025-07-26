@@ -19,9 +19,11 @@ import { EyeIcon, EyeOffIcon, MailIcon, LockIcon } from '@/components/ui/icon';
 import { useRouter } from 'expo-router';
 import { useColorScheme } from 'nativewind';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useEffect } from 'react';
+import { backend_url } from '@/lib/api';
 import Logo from '@/assets/images/icon.png';
 
-export default function Login() {
+export default function Login(){
   const router = useRouter();
   const [email, setEmail] = useState({ value: '', error: '' });
   const [password, setPassword] = useState({ value: '', error: '' });
@@ -111,6 +113,7 @@ export default function Login() {
           <Image
             source={Logo}
             className="w-40 h-40 mb-4"
+            alt='GroceryPicker Logo'
           />
         </Box>
 

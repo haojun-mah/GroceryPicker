@@ -54,25 +54,29 @@ export const searchProducts: RequestHandler<
     random?: string;
   }
 > = async (req, res) => {
-  try {
-    const {
-      q: query,
-      supermarket,
-      hasPromotion,
-      limit = '10',
-      offset = '0',
-      sort = 'name',
-      order = 'asc',
-      random,
-    } = req.query;
+  const {
+    q: query,
+    supermarket,
+    hasPromotion,
+    limit = '10',
+    offset = '0',
+    sort = 'name',
+    order = 'asc',
+    random,
+  } = req.query;
 
+  const isSearch = !!(query && typeof query === 'string' && query.trim().length > 0);
+  
+  console.log(`Product ${isSearch ? 'search' : 'catalog'} - Query: "${query || 'none'}" - Supermarket: ${supermarket || 'all'} - Limit: ${limit}`);
+  
+  try {
     let results;
     const offsetNum = parseInt(offset);
     const limitNum = parseInt(limit);
-    const isSearch = !!(query && typeof query === 'string' && query.trim().length > 0);
 
     if (isSearch) {
       // SEARCH MODE: Try semantic search first using the robust RAG embedding function
+      console.log(`Attempting semantic search for: "${query}"`);
       const embedding = await getEmbedding(query, { type: 'query' });
 
       if (!embedding) {
@@ -93,9 +97,10 @@ export const searchProducts: RequestHandler<
           );
           
           if (error) {
-            console.error('Semantic search error:', error.message);
+            console.error(`Semantic search error:`, error.message);
           } else if (data) {
             results = Array.isArray(data) ? (data as ProductCatalog[]) : [];
+            console.log(`Semantic search returned ${results.length} results`);
           }
         } catch (semanticError: any) {
           console.error('Unexpected error during semantic search:', semanticError.message);

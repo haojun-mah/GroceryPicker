@@ -1,9 +1,18 @@
 import { RequestHandler } from 'express';
-import { ControllerError, ControllerSuccess } from '../interfaces';
+import { ControllerError, ControllerSuccess, SavedGroceryList } from '../interfaces';
+import { saveUserGroceryList } from '../models/groceryListModel';
+import { 
+  generateMetadata, 
+  parseProductQuantity, 
+  getProductDetails, 
+  verifyListOwnership,
+  checkAuthentication 
+} from '../utils/groceryUtils';
 import supabase from '../config/supabase';
 
 interface AddItemRequestBody {
-  list_id: string;
+  list_id?: string; // Now optional
+  list_name?: string; // Required when list_id is not provided
   product_id: string;
   name?: string;
   custom_price?: number;
@@ -12,11 +21,13 @@ interface AddItemRequestBody {
 
 /**
  * Add item to grocery list (like "Add to Cart" functionality)
+ * Can either add to existing list or create new list with the item
  * Automatically extracts quantity and unit from product data
  * 
  * Request body:
- *   - list_id: ID of the grocery list
- *   - product_id: ID of the product to add
+ *   - list_id: ID of existing grocery list (optional)
+ *   - list_name: Name for new list (required if list_id not provided)
+ *   - product_id: ID of the product to add (required)
  *   - amount: How many items/packages to purchase (default: 1)
  *   - name: Custom name for the item (optional)
  *   - custom_price: Custom price override (optional)
@@ -24,81 +35,106 @@ interface AddItemRequestBody {
  */
 export const addItemToList: RequestHandler<
   {},
-  ControllerSuccess | ControllerError,
+  ControllerSuccess | SavedGroceryList | ControllerError,
   AddItemRequestBody,
   {}
 > = async (req, res) => {
   try {
     const userId = req.user?.id;
-    if (!userId) {
-      const err = new ControllerError(401, 'User not authenticated');
-      res.status(401).json(err);
+    
+    // Check authentication
+    const authError = checkAuthentication(userId);
+    if (authError) {
+      res.status(authError.statusCode).json(authError);
       return;
     }
 
     const { 
       list_id, 
+      list_name,
       product_id, 
       name, 
       custom_price,
       amount = 1
     } = req.body;
 
-    if (!list_id || !product_id) {
-      const err = new ControllerError(400, 'List ID and Product ID are required');
+    // Validate required fields
+    if (!product_id) {
+      const err = new ControllerError(400, 'Product ID is required');
       res.status(400).json(err);
       return;
     }
 
-    // Verify list ownership
-    const { data: list, error: listError } = await supabase
-      .from('grocery_lists')
-      .select('list_id')
-      .eq('list_id', list_id)
-      .eq('user_id', userId)
-      .single();
-
-    if (listError || !list) {
-      const err = new ControllerError(404, 'List not found or access denied');
-      res.status(404).json(err);
+    // If no list_id provided, list_name is required for creating new list
+    if (!list_id && (!list_name || list_name.trim().length === 0)) {
+      const err = new ControllerError(400, 'List name is required when creating a new list');
+      res.status(400).json(err);
       return;
     }
 
-    // Get product details
-    const { data: product, error: productError } = await supabase
-      .from('products')
-      .select('product_id, name, price, supermarket, quantity, promotion_description, image_url')
-      .eq('product_id', product_id)
-      .single();
+    let targetListId = list_id;
 
-    if (productError || !product) {
-      const err = new ControllerError(404, 'Product not found');
-      res.status(404).json(err);
-      return;
-    }
-
-    // Parse product quantity to extract numeric value and unit
-    // Product quantity might be like "480g (6 per pack)", "320g", "1$", etc.
-    const productQuantityInfo = product.quantity || '';
-    
-    let extractedQuantity = 1; // Default quantity
-    let extractedUnit = 'piece'; // Default unit
-    
-    if (productQuantityInfo) {
-      // Extract number and unit from strings like "480g", "1.2kg", "330ml", "1$"
-      // Handle complex formats like "480g (6 per pack)" by taking the first number/unit pair
-      const quantityMatch = productQuantityInfo.match(/^(\d+(?:\.\d+)?)([a-zA-Z$]+)/);
-      if (quantityMatch) {
-        extractedQuantity = parseFloat(quantityMatch[1]);
-        extractedUnit = quantityMatch[2];
+    // If no list_id provided, create new list
+    if (!list_id) {
+      console.log(`Creating new list "${list_name}" for user ${userId}`);
+      
+      // Get product details using utility function
+      const product = await getProductDetails(product_id);
+      if ('statusCode' in product) {
+        res.status(product.statusCode).json(product);
+        return;
       }
+
+      // Parse product quantity using utility function
+      const { quantity: extractedQuantity, unit: extractedUnit } = parseProductQuantity(product.quantity || '');
+
+      // Create new list with the item
+      const newListResult = await saveUserGroceryList(userId!, {
+        title: list_name!.trim(),
+        metadata: generateMetadata(),
+        items: [{
+          name: name || product.name,
+          quantity: extractedQuantity,
+          unit: extractedUnit,
+          product_id: product_id,
+          amount: amount,
+        }]
+      });
+
+      if ('statusCode' in newListResult) {
+        console.error('Create new list error:', newListResult);
+        const err = new ControllerError(500, 'Failed to create new list with item', newListResult.message);
+        res.status(500).json(err);
+        return;
+      }
+
+      console.log(`New list created successfully with item - List ID: ${newListResult.list_id}`);
+      res.status(201).json(newListResult);
+      return;
     }
 
-    // Check if item already exists in list
+    // Verify existing list ownership using utility function
+    const listVerification = await verifyListOwnership(list_id, userId!);
+    if ('statusCode' in listVerification) {
+      res.status(listVerification.statusCode).json(listVerification);
+      return;
+    }
+
+    // Get product details for adding to existing list
+    const product = await getProductDetails(product_id);
+    if ('statusCode' in product) {
+      res.status(product.statusCode).json(product);
+      return;
+    }
+
+    // Parse product quantity using utility function
+    const { quantity: extractedQuantity, unit: extractedUnit } = parseProductQuantity(product.quantity || '');
+
+    // Check if item already exists in the target list
     const { data: existingItem } = await supabase
       .from('grocery_list_items')
       .select('*')
-      .eq('list_id', list_id)
+      .eq('list_id', targetListId)
       .eq('product_id', product_id)
       .single();
 
@@ -128,11 +164,11 @@ export const addItemToList: RequestHandler<
       );
       res.status(200).json(successResponse);
     } else {
-      // Add new item
+      // Add new item to existing list
       const { data: newItem, error: insertError } = await supabase
         .from('grocery_list_items')
         .insert({
-          list_id,
+          list_id: targetListId,
           product_id,
           name: name || product.name,
           quantity: extractedQuantity,

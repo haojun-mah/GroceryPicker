@@ -314,6 +314,6 @@ describe('getAllUserLists - Product Name Sorting', () => {
     expect(result).toBeInstanceOf(ControllerError);
     const error = result as ControllerError;
     expect(error.statusCode).toBe(500);
-    expect(error.message).toBe('Failed to fetch grocery lists.');
+    expect(error.message).toBe('Failed to fetch all user lists.');
   });
 });
