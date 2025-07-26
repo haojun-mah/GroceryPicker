@@ -69,19 +69,30 @@ class MultiProviderLLM {
       try {
         const result = await this.generateWithGemini(prompt, instruction);
         
-        if (result && result.trim().length > 0 && !result.includes('!@#$%^')) {
+        // Check if result exists and has content
+        if (result && result.trim().length > 0) {
           const duration = Date.now() - startTime;
+          
+          // If Gemini returns the rejection signal, respect it and don't fallback to Groq
+          if (result.includes('!@#$%^')) {
+            console.log(`Gemini rejection signal received - ${duration}ms, not falling back to Groq`);
+            return result; // Return the rejection signal directly
+          }
+          
+          // Valid response from Gemini
           console.log(`Gemini success - ${duration}ms, response: ${result.length} chars`);
           return result;
         }
-        throw new Error('Invalid response from Gemini');
+        
+        // Empty response is a technical failure, fallback to Groq
+        throw new Error('Empty response from Gemini');
       } catch (error) {
         const duration = Date.now() - startTime;
         console.warn(`Gemini failed (${duration}ms), falling back to Groq:`, error instanceof Error ? error.message : 'Unknown error');
       }
     }
 
-    // Fallback to Groq
+    // Fallback to Groq only for technical failures, not content rejections
     if (this.groqClient) {
       try {
         const result = await this.generateWithGroq(prompt, instruction);
